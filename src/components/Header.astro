@@ -3,16 +3,49 @@ import "../styles/global.css";
 import { Image } from "astro:assets";
 import logo from '../assets/logo.svg';
 ---
-<nav class="bg-primary w-full h-40 flex flex-row">
-    <div class="text-white flex flex-1 justify-start content-center h-min">
-        <span class="material-symbols-rounded text-4xl! ml-1">
-            menu
-            </span>
-        <label class="self-center font-light text-sm">MENÜ</label>
+<div class="flex flex-col h-full">
+    <nav class="bg-primary w-full h-40 flex flex-row z-10">
+        <div class="text-white flex flex-1 justify-start content-center h-min mobile-menu">
+            <span class="material-symbols-rounded text-4xl! ml-1">
+                menu
+                </span>
+            <label class="self-center font-light text-sm">MENÜ</label>
+        </div>
+        <div class="flex-1 justify-center flex self-center">    <Image class="w-28 h-28" src={logo} alt="Club Logo."/></div>
+        <div class="flex-1 flex justify-end">        
+            <span class="material-symbols-rounded text-xl! mr-1 mt-1.5 text-white">
+            search
+            </span></div>
+    </nav>
+    <div class="bg-primary flex-1 text-white flex flex-col mobile-sliding-menu overshoot">
+        <div class=" flex-1 flex flex-col text-3xl justify-evenly content-center p-4 font-light">
+            <a class="link">NEWS</a>
+            <a class="link">VOSTAND</a>
+            <a class="link">KONTAKT</a>
+            <a class="link">IMPRESSUM</a>
+        </div>
+        <div class="border-2 flex-1 content-center text-center text-2xl font-light">
+            SPONSORSPACE
+        </div>
     </div>
-    <div class="flex-1 justify-center flex self-center">    <Image class="w-28 h-28" src={logo} alt="Club Logo."/></div>
-    <div class="flex-1 flex justify-end">        
-        <span class="material-symbols-rounded text-xl! mr-1 mt-1.5 text-white">
-        search
-        </span></div>
-</nav>
+</div>
+<script>
+    document.querySelector('.mobile-menu')?.addEventListener('click', () => {
+      document.querySelector('.mobile-sliding-menu')?.classList.toggle('expanded');
+    });
+    document.querySelectorAll('.link').forEach((item) => {
+        item.addEventListener('click', () => {
+            document.querySelector('.mobile-sliding-menu')?.classList.remove('expanded');
+    })
+    });
+  </script>
+  <style>
+    .mobile-sliding-menu {
+        transform: translateY(-100%);
+    }
+
+    .mobile-sliding-menu.expanded {
+        display: flex;
+        transform: translateY(0%);
+    }
+  </style>
