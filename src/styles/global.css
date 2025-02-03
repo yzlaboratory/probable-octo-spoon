@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+.inter-primary {
+    font-family: "Inter", serif;
+    font-optical-sizing: auto;
+    /*font-weight: 400;*/
+    font-style: normal;
+  }
+
 @theme {
-    --color-primary: #011576;
+    --color-primary: #20294E;
 }

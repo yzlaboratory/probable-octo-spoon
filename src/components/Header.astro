@@ -1,8 +1,15 @@
 ---
 import "../styles/global.css";
+import { Image } from "astro:assets";
+import logo from '../assets/logo.svg';
 ---
-<nav class="bg-primary w-full h-40">
-    <div>
-        
+<nav class="bg-primary w-full h-40 flex flex-row">
+    <div class="text-white flex flex-1 justify-start content-center h-min">
+        <span class="material-symbols-outlined text-4xl! ml-1">
+            menu
+            </span>
+        <label class="self-center font-light">MENÜ</label>
     </div>
+    <div class="flex-1 justify-center flex self-center">    <Image class="w-28 h-28" src={logo} alt="Club Logo."/></div>
+    <div class="flex-1"></div>
 </nav>
