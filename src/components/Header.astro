@@ -5,35 +5,35 @@ import logo from "../assets/logo.svg";
 ---
 
 <div class="flex flex-col">
-  <nav class="bg-primary w-full h-40 flex flex-row z-20">
+  <nav class="bg-primary z-20 flex h-40 w-full flex-row">
     <div
-      class="text-white flex flex-1 justify-start content-center h-min mobile-menu"
+      class="mobile-menu flex h-min flex-1 content-center justify-start text-white"
     >
-      <span class="material-symbols-rounded text-4xl! ml-1"> menu </span>
-      <label class="self-center font-light text-sm">MENÜ</label>
+      <span class="material-symbols-rounded ml-1 text-4xl!"> menu </span>
+      <label class="self-center text-sm font-light">MENÜ</label>
     </div>
-    <div class="flex-1 justify-center flex self-center">
-      <Image class="w-28 h-28" src={logo} alt="Club Logo." />
+    <div class="flex flex-1 justify-center self-center">
+      <Image class="h-28 w-28" src={logo} alt="Club Logo." />
     </div>
-    <div class="flex-1 flex justify-end">
-      <span class="material-symbols-rounded text-xl! mr-1 mt-1.5 text-white">
+    <div class="flex flex-1 justify-end">
+      <span class="material-symbols-rounded mt-1.5 mr-1 text-xl! text-white">
         search
       </span>
     </div>
   </nav>
   <div
-    class="bg-primary flex-1 text-white flex flex-col mobile-sliding-menu overshoot absolute w-full h-full z-10"
+    class="bg-primary mobile-sliding-menu overshoot absolute z-10 flex h-full w-full flex-1 flex-col text-white"
   >
     <div class="h-40"></div>
     <div
-      class="flex-1 flex flex-col text-3xl justify-evenly content-center p-4 font-light"
+      class="flex flex-1 flex-col content-center justify-evenly p-4 text-3xl font-light"
     >
       <a href="/" class="link">NEWS</a>
       <a href="/vorstand" class="link">VORSTAND</a>
       <a class="link">KONTAKT</a>
       <a class="link">IMPRESSUM</a>
     </div>
-    <div class="border-2 flex-1 content-center text-center text-2xl font-light">
+    <div class="flex-1 content-center border-2 text-center text-2xl font-light">
       SPONSORSPACE
     </div>
   </div>

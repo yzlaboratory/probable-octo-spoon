@@ -22,9 +22,9 @@ import Header from "../components/Header.astro";
     />
     <title>Astro Basics</title>
   </head>
-  <body class="bg-zinc-200 inter-primary overflow-hidden flex flex-col">
+  <body class="inter-primary flex flex-col overflow-hidden bg-zinc-200">
     <Header />
-    <div class="overflow-scroll flex-1"><slot /></div>
+    <div class="flex-1 overflow-scroll"><slot /></div>
   </body>
 </html>
 
