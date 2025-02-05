@@ -1,0 +1,26 @@
+---
+const { ImageUrl, Caption, Timestamp, Permalink } = Astro.props;
+import { Image } from "astro:assets";
+import iglogo from "../assets/instagram2.svg";
+---
+
+<div class="card text-primary m-3 flex flex-col rounded-sm bg-white">
+  <div class="flex w-full overflow-hidden">
+    <Image
+      src={ImageUrl}
+      inferSize
+      alt="Portrait"
+      class="min-w-full object-cover"
+    />
+  </div>
+
+  <div class="flex flex-1 p-1">
+    <pre class="inter-primary text-center text-xs text-wrap">{Caption}</pre>
+  </div>
+  <div class="smol-header flex flex-row justify-between p-1 text-xs">
+    <label class="self-end font-light text-gray-500"
+      >{new Date(Timestamp).toLocaleDateString()}</label
+    >
+    <a href={Permalink}><Image src={iglogo} alt="" class="w-4" /></a>
+  </div>
+</div>
