@@ -1,12 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import News from "../components/News.astro";
+import DynamicSocial from "../components/DynamicSocial.astro";
 import Decider from "../components/Decider.astro";
+import News from "../components/News.astro";
 
 //TODO access_token in environment, not in git repository
 ---
 
 <Layout>
-  <Decider isNews />
-  <News />
+  <Decider isNews={false} />
+  <DynamicSocial server:defer />
 </Layout>
