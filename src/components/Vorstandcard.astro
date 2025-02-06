@@ -3,7 +3,9 @@ const { Imagesrc, Name, Title, Mail, Phone } = Astro.props;
 import { Image } from "astro:assets";
 ---
 
-<div class="card text-primary m-3 flex flex-row rounded-sm bg-white">
+<div
+  class="card text-primary m-3 flex snap-start scroll-m-3 flex-row rounded-sm bg-white"
+>
   <div class="m-1 flex h-36 w-36 overflow-hidden rounded-full">
     <Image src={Imagesrc} alt="Portrait" class="min-w-full object-cover" />
   </div>

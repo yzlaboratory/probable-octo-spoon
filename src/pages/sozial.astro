@@ -8,6 +8,6 @@ import News from "../components/News.astro";
 ---
 
 <Layout>
-  <Decider isNews={false} />
+  <Decider slot="extranav" isNews={false} />
   <DynamicSocial server:defer />
 </Layout>
