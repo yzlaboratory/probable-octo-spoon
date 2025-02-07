@@ -25,7 +25,9 @@ import Header from "../components/Header.astro";
   <body class="inter-primary flex flex-col overflow-hidden bg-zinc-200">
     <Header />
     <slot name="extranav" />
-    <div class="flex-1 snap-y snap-proximity overflow-scroll">
+    <div
+      class="flex flex-1 snap-y snap-proximity flex-wrap self-center overflow-scroll md:max-w-3/5"
+    >
       <slot />
     </div>
   </body>
