@@ -1,12 +1,50 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import News from "../components/News.astro";
-import Decider from "../components/Decider.astro";
+import DynamicSocial from "../components/DynamicSocial.astro";
 
-//TODO access_token in environment, not in git repository
+//TODO you probably need to farm out this html logik into a proper framework ui component
+//until then you have this
 ---
 
 <Layout>
-  <Decider slot="extranav" isNews />
-  <News />
+  <div
+    slot="extranav"
+    class="text-primary flex h-12 w-full flex-row bg-white text-sm"
+  >
+    <div class:list={["news flex flex-1", "picked"]}>
+      <p class="flex-1 self-center text-center">NEWS</p>
+    </div>
+    <div class:list={["social flex flex-1"]}>
+      <p class="flex-1 self-center text-center">SOZIAL</p>
+    </div>
+  </div>
+  <div class="serverislandcontainer">
+    <DynamicSocial server:defer />
+  </div>
+  <div class="newscontainer"><News /></div>
+  <style>
+    .picked {
+      background: var(--color-primary);
+      color: white;
+    }
+  </style>
+  <script>
+    let newsButton = document.querySelector(".news");
+    let socialButton = document.querySelector(".social");
+    newsButton?.addEventListener("click", (event) => {
+      newsButton?.classList.add("picked");
+      socialButton?.classList.remove("picked");
+      document.querySelector(".serverislandcontainer")?.classList.add("hidden");
+      document.querySelector(".newscontainer")?.classList.remove("hidden");
+    });
+    socialButton?.addEventListener("click", (event) => {
+      newsButton?.classList.remove("picked");
+      socialButton?.classList.add("picked");
+      document
+        .querySelector(".serverislandcontainer")
+        ?.classList.remove("hidden");
+      document.querySelector(".newscontainer")?.classList.add("hidden");
+    });
+  </script>
 </Layout>
