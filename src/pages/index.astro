@@ -22,8 +22,8 @@ import DynamicSocial from "../components/DynamicSocial.astro";
     </div>
   </div>
   <div class="md:flex md:flex-row">
-    <div class="newscontainer md:flex-2"><News /></div>
-    <div class="serverislandcontainer md:flex-1">
+    <div class="newscontainer overflow-auto md:flex-2"><News /></div>
+    <div class="serverislandcontainer overflow-auto md:flex-1">
       <DynamicSocial server:defer />
     </div>
   </div>
