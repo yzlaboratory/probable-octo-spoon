@@ -4,7 +4,7 @@ import { Image } from "astro:assets";
 import logo from "../assets/logo.svg";
 ---
 
-<div class="flex flex-col">
+<div class="flex flex-col md:hidden">
   <nav class="bg-primary z-20 flex h-40 w-full flex-row">
     <div
       class="mobile-menu flex h-min flex-1 content-center justify-start text-white"
@@ -38,6 +38,22 @@ import logo from "../assets/logo.svg";
     </div>
   </div>
 </div>
+<div class="bg-primary z-20 hidden h-14 w-full flex-row text-white md:flex">
+  <div class="ml-3 flex flex-1 flex-col self-center">
+    <div class="mb-[-3px] font-extralight">svalemannia</div>
+    <div class="mt-[-3px] font-black">THALEXWEILER</div>
+  </div>
+  <nav
+    class="mr-3 flex w-full flex-3 flex-row content-center justify-end gap-3 self-center text-xs font-bold"
+  >
+    <a href="/" class="link">NEWS</a>
+    <a href="/vorstand" class="link">VORSTAND</a>
+    <a class="link">KONTAKT</a>
+    <a class="link">IMPRESSUM</a>
+  </nav>
+  <Image class="mr-3" width="38" height="38" src={logo} alt="Club Logo." />
+</div>
+
 <script>
   document.querySelector(".mobile-menu")?.addEventListener("click", () => {
     document
@@ -61,7 +77,3 @@ import logo from "../assets/logo.svg";
     transform: translateY(0%);
   }
 </style>
-<!-- TODO
- VORSTANDPAGE IMAGES
- SOCIAL PAGE WITH BLOGLIKE ENTRIES
-  -->
