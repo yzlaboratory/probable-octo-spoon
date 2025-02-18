@@ -20,15 +20,15 @@ import DynamicSocial from "../components/DynamicSocial.astro";
     </div>
   </div>
   <div
-    class="flex flex-1 flex-col content-start justify-center overflow-hidden md:flex-row md:overflow-auto md:px-[10vw]"
+    class="flex flex-1 flex-col content-start justify-center overflow-hidden md:flex-row md:gap-8 md:overflow-auto md:px-[10vw]"
   >
     <div
-      class="newscontainer snap-y snap-proximity overflow-auto md:flex-2 md:overflow-visible"
+      class="newscontainer snap-y snap-proximity content-start overflow-auto md:flex md:max-w-4xl md:flex-2 md:overflow-visible"
     >
       <News />
     </div>
     <div
-      class="serverislandcontainer snap-y snap-proximity overflow-auto md:flex-1 md:overflow-visible"
+      class="serverislandcontainer flex snap-y snap-proximity flex-col gap-3 overflow-auto p-3 md:flex md:max-w-xs md:flex-1 md:gap-4 md:overflow-visible md:p-8 md:px-0"
     >
       <DynamicSocial server:defer />
     </div>

@@ -3,8 +3,10 @@ import Newscard from "./Newscard.astro";
 import news1 from "../assets/newsimage1.png";
 ---
 
-<div class="flex flex-row flex-wrap">
-  <div class="md:max-w-[50%]">
+<div
+  class="flex flex-row flex-wrap content-start gap-3 p-3 md:gap-4 md:p-8 md:px-0"
+>
+  <div class="md:max-w-[calc(50%-(--spacing(2)))]">
     <Newscard
       Title="Faasend Dreikampf"
       Tag="FESTLICHKEIT"
@@ -13,7 +15,7 @@ import news1 from "../assets/newsimage1.png";
       ImageUrl={news1}
     />
   </div>
-  <div class="md:max-w-[50%]">
+  <div class="md:max-w-[calc(50%-(--spacing(2)))]">
     <Newscard
       Title="Faasend Dreikampf"
       Tag="FESTLICHKEIT"
@@ -22,7 +24,7 @@ import news1 from "../assets/newsimage1.png";
       ImageUrl={news1}
     />
   </div>
-  <div class="md:max-w-[50%]">
+  <div class="md:max-w-[calc(50%-(--spacing(2)))]">
     <Newscard
       Title="Faasend Dreikampf"
       Tag="FESTLICHKEIT"
