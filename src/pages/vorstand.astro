@@ -3,95 +3,101 @@ import Vorstandcard from "../components/Vorstandcard.astro";
 import Layout from "../layouts/Layout.astro";
 import logo from "../assets/logo.svg";
 import holgersaar from "../assets/holgersaar.png";
+import Frontpageheader from "../components/Frontpageheader.astro";
 ---
 
 <Layout>
   <div
-    class="flex flex-1 snap-y snap-proximity flex-wrap content-start justify-center gap-3 self-center overflow-auto p-3 md:max-w-7xl md:gap-4 md:p-8"
+    class="flex flex-1 flex-col gap-3 overflow-auto p-3 md:max-h-full md:w-max md:gap-5 md:self-center md:overflow-visible md:p-10"
   >
-    <Vorstandcard
-      Name="Björn Perius"
-      Title="Präsident"
-      Mail="b.perius@gmx.de"
-      Phone="0177 3448 469"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Christian Schwirz"
-      Title="Präsident"
-      Mail="christian.schwirz@evs.de"
-      Phone="0178 8094 579"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Matthias Heinrich"
-      Title="Geschäftsführer"
-      Mail="matze234@t-online.de"
-      Phone="0151 1560 7391"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Yannik Zeyer"
-      Title="Schatzmeister"
-      Mail="finanzen@svthalexweiler.de"
-      Phone="0151 2222 8048"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Benno Bohliner"
-      Title="Vorsitzender Haushalts- & Finanzausschuss"
-      Mail="bohlinger-bauideen@t-online.de"
-      Phone="0177 6559 401"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Mathias Zöhler"
-      Title="Vorsitzender Spielausschuss"
-      Mail="mathiaszoehler@aol.com"
-      Phone="0163 4337 073"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Pascal Herre"
-      Title="Vorsitzender Jugendausschuss"
-      Mail="pascal.herre86@gmail.com"
-      Phone="0179 5087 849"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Dennis Hurth"
-      Title="Vorsitzender Fest- & Verwaltungsausschuss"
-      Mail="de-hurth@t-online.de"
-      Phone="0151 5258 5535 "
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Markus Leinenbach"
-      Title="Vorsitzender Bau- & Betriebsausschuss"
-      Mail="markusleinenbach@gmx.de"
-      Phone="0151 6511 9495"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Holger Saar"
-      Title="Vorsitzender AH Abteilung"
-      Mail="Holger.Saar@web.de"
-      Phone="0152 2661 7025"
-      Imagesrc={holgersaar}
-    />
-    <Vorstandcard
-      Name="Nicolas Heinrich"
-      Title="Stellvertreter Spielausschuss"
-      Mail="nicolas.heinrich@gmx.de"
-      Phone="0170 9624 109"
-      Imagesrc={logo}
-    />
-    <Vorstandcard
-      Name="Andre Seewald"
-      Title="Stellvertreter AH Abteilung"
-      Mail="andreseewald@gmx.de"
-      Phone="0171 3635 521"
-      Imagesrc={logo}
-    />
+    <Frontpageheader text="Vorstand" />
+    <div
+      class="flex flex-1 flex-col flex-wrap content-start justify-center gap-3 md:max-w-md md:min-w-xs md:flex-row md:gap-5 md:overflow-auto lg:max-w-[calc(--spacing(5)+56rem)]"
+    >
+      <Vorstandcard
+        Name="Björn Perius"
+        Title="Präsident"
+        Mail="b.perius@gmx.de"
+        Phone="0177 3448 469"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Christian Schwirz"
+        Title="Präsident"
+        Mail="christian.schwirz@evs.de"
+        Phone="0178 8094 579"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Matthias Heinrich"
+        Title="Geschäftsführer"
+        Mail="matze234@t-online.de"
+        Phone="0151 1560 7391"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Yannik Zeyer"
+        Title="Schatzmeister"
+        Mail="finanzen@svthalexweiler.de"
+        Phone="0151 2222 8048"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Benno Bohliner"
+        Title="Vorsitzender Haushalts- & Finanzausschuss"
+        Mail="bohlinger-bauideen@t-online.de"
+        Phone="0177 6559 401"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Mathias Zöhler"
+        Title="Vorsitzender Spielausschuss"
+        Mail="mathiaszoehler@aol.com"
+        Phone="0163 4337 073"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Pascal Herre"
+        Title="Vorsitzender Jugendausschuss"
+        Mail="pascal.herre86@gmail.com"
+        Phone="0179 5087 849"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Dennis Hurth"
+        Title="Vorsitzender Fest- & Verwaltungsausschuss"
+        Mail="de-hurth@t-online.de"
+        Phone="0151 5258 5535 "
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Markus Leinenbach"
+        Title="Vorsitzender Bau- & Betriebsausschuss"
+        Mail="markusleinenbach@gmx.de"
+        Phone="0151 6511 9495"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Holger Saar"
+        Title="Vorsitzender AH Abteilung"
+        Mail="Holger.Saar@web.de"
+        Phone="0152 2661 7025"
+        Imagesrc={holgersaar}
+      />
+      <Vorstandcard
+        Name="Nicolas Heinrich"
+        Title="Stellvertreter Spielausschuss"
+        Mail="nicolas.heinrich@gmx.de"
+        Phone="0170 9624 109"
+        Imagesrc={logo}
+      />
+      <Vorstandcard
+        Name="Andre Seewald"
+        Title="Stellvertreter AH Abteilung"
+        Mail="andreseewald@gmx.de"
+        Phone="0171 3635 521"
+        Imagesrc={logo}
+      />
+    </div>
   </div>
 </Layout>
