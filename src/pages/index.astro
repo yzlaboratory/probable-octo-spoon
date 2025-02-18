@@ -5,8 +5,6 @@ import DynamicSocial from "../components/DynamicSocial.astro";
 
 //TODO you probably need to farm out this html logik into a proper framework ui component
 //until then you have this
-
-//TODO IMAGE SIZE AND ASPECT RATIO FIXED
 ---
 
 <Layout>
@@ -21,9 +19,17 @@ import DynamicSocial from "../components/DynamicSocial.astro";
       <p class="flex-1 self-center text-center">SOZIAL</p>
     </div>
   </div>
-  <div class="md:flex md:flex-row">
-    <div class="newscontainer overflow-auto md:flex-2"><News /></div>
-    <div class="serverislandcontainer overflow-auto md:flex-1">
+  <div
+    class="flex flex-1 flex-col content-start justify-center overflow-hidden md:flex-row md:overflow-auto md:px-[10vw]"
+  >
+    <div
+      class="newscontainer snap-y snap-proximity overflow-auto md:flex-2 md:overflow-visible"
+    >
+      <News />
+    </div>
+    <div
+      class="serverislandcontainer snap-y snap-proximity overflow-auto md:flex-1 md:overflow-visible"
+    >
       <DynamicSocial server:defer />
     </div>
   </div>
