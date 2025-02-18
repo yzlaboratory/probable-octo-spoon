@@ -1,4 +1,5 @@
 ---
+import Frontpageheader from "./Frontpageheader.astro";
 import Socialcard from "./Socialcard.astro";
 
 //TODO access_token in environment, not in git repository
@@ -10,24 +11,30 @@ const response1 = await fetch(
 const res = await response1.json();
 ---
 
-{
-  res.data.map(async (item: any) => {
-    const mediaArray: any[] = [];
-    const response2 = await fetch(
-      "https://graph.instagram.com/v22.0/" +
-        item.id +
-        "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username&access_token=" +
-        KEY,
-    );
+<Frontpageheader text="Alemannia Socials" />
+<div
+  class="flex snap-y snap-proximity flex-col gap-3 overflow-auto p-3 md:gap-4 md:p-0"
+>
+  {
+    res.data.map(async (item: any) => {
+      const mediaArray: any[] = [];
+      const response2 = await fetch(
+        "https://graph.instagram.com/v22.0/" +
+          item.id +
+          "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username&access_token=" +
+          KEY,
+      );
 
-    const { media_url, timestamp, caption, permalink } = await response2.json();
-    return (
-      <Socialcard
-        ImageUrl={media_url}
-        Caption={caption}
-        Permalink={permalink}
-        Timestamp={timestamp}
-      />
-    );
-  })
-}
+      const { media_url, timestamp, caption, permalink } =
+        await response2.json();
+      return (
+        <Socialcard
+          ImageUrl={media_url}
+          Caption={caption}
+          Permalink={permalink}
+          Timestamp={timestamp}
+        />
+      );
+    })
+  }
+</div>

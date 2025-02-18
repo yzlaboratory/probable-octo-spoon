@@ -1,0 +1,16 @@
+---
+import Image from "astro/components/Image.astro";
+import logo from "../assets/logo.svg";
+const { text } = Astro.props;
+---
+
+<div
+  class="bg-primary relative hidden h-6 items-center justify-end overflow-hidden pr-2 text-sm font-medium text-white md:flex"
+>
+  <label class="frontpageheader relative mr-12 h-full content-center"
+    >{text.toUpperCase()}</label
+  >
+  <div class="absolute bg-white">
+    <Image class="h-6 w-6" src={logo} alt="Club Logo." />
+  </div>
+</div>
