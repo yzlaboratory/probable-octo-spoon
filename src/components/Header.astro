@@ -63,20 +63,40 @@ import mwkonzept from "../assets/mwkonzept.png";
     </div>
   </div>
 </div>
-<div class="bg-primary z-20 hidden h-14 w-full flex-row text-white md:flex">
-  <div class="ml-3 flex flex-1 flex-col self-center">
-    <div class="mb-[-3px] font-extralight">svalemannia</div>
-    <div class="mt-[-3px] font-black">THALEXWEILER</div>
-  </div>
-  <nav
-    class="mr-3 flex w-full flex-3 flex-row content-center justify-end gap-3 self-center text-xs font-bold"
+<div
+  class="bg-primary z-20 hidden w-full flex-col justify-end text-white md:flex"
+>
+  <div
+    class="sponsorcontainer hidescrollbar mr-3 flex h-33 w-42 snap-x snap-mandatory self-end overflow-auto scroll-smooth"
   >
-    <a href="/" class="link">NEWS</a>
-    <a href="/vorstand" class="link">VORSTAND</a>
-    <a class="link">KONTAKT</a>
-    <a class="link">IMPRESSUM</a>
-  </nav>
-  <Image class="mr-3" width="38" height="38" src={logo} alt="Club Logo." />
+    <div class="flex max-h-full max-w-full min-w-full snap-center">
+      <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+    </div>
+    <div class="flex max-h-full max-w-full min-w-full snap-center">
+      <Image class="flex-1 object-contain" src={mwkonzept} alt="Club Logo." />
+    </div>
+    <div class="flex max-h-full max-w-full min-w-full snap-center">
+      <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+    </div>
+    <div class="flex max-h-full max-w-full min-w-full snap-center">
+      <Image class="flex-1 object-contain" src={bruno} alt="Club Logo." />
+    </div>
+  </div>
+  <div class="mb-3 flex w-full flex-row self-end">
+    <div class="ml-3 flex flex-1 flex-col self-center">
+      <div class="mb-[-3px] font-extralight">svalemannia</div>
+      <div class="mt-[-3px] font-black">THALEXWEILER</div>
+    </div>
+    <nav
+      class="mr-3 flex w-full flex-3 flex-row content-center justify-end gap-3 self-center text-xs font-bold"
+    >
+      <a href="/" class="link">NEWS</a>
+      <a href="/vorstand" class="link">VORSTAND</a>
+      <a class="link">KONTAKT</a>
+      <a class="link">IMPRESSUM</a>
+    </nav>
+    <Image class="mr-3" width="38" height="38" src={logo} alt="Club Logo." />
+  </div>
 </div>
 
 <script>
@@ -104,6 +124,17 @@ import mwkonzept from "../assets/mwkonzept.png";
           scroller.scrollLeft = 0;
         } else
           scroller.scrollLeft = current_scroll + scroller.clientWidth * 0.51;
+      }
+    }, 2500);
+    const scroller2 = document.querySelector(".sponsorcontainer");
+    scrollHandler = setInterval(function () {
+      if (scroller2) {
+        let max_scroll = scroller2.scrollWidth - scroller2.clientWidth;
+        let current_scroll = scroller2.scrollLeft;
+        if (scroller2.scrollLeft + scroller2.clientWidth * 0.51 > max_scroll) {
+          scroller2.scrollLeft = 0;
+        } else
+          scroller2.scrollLeft = current_scroll + scroller2.clientWidth * 0.51;
       }
     }, 2500);
   };
