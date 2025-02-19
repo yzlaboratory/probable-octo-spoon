@@ -1,0 +1,30 @@
+---
+const { ImageUrl, Title, Tag, Description, Date } = Astro.props;
+import { Image } from "astro:assets";
+import iglogo from "../assets/instagram2.svg";
+---
+
+<div
+  class="card text-primary flex snap-start scroll-m-5 flex-col rounded-b-sm bg-white"
+>
+  <div class="flex w-full overflow-hidden">
+    <Image
+      src={ImageUrl}
+      inferSize
+      alt="Portrait"
+      class="min-w-full object-cover"
+    />
+  </div>
+  <h3 class="bg-primary m-4 w-min px-4 py-[4px] text-xs font-light text-white">
+    {Tag}
+  </h3>
+  <div class="m-4 my-0 flex flex-1">
+    <h1 class="inter-primary font-bold">{Title.toUpperCase()}</h1>
+  </div>
+  <div class="m-4 mt-0 flex flex-1 text-xs" <p class="inter-primary">
+    {Description}
+  </div>
+  <div class="smol-header m-4 mt-0 flex flex-row justify-between text-xs">
+    <label class="self-end font-light text-gray-500">{Date}</label>
+  </div>
+</div>
