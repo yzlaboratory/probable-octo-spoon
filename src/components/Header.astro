@@ -114,7 +114,8 @@ import mwkonzept from "../assets/mwkonzept.png";
   });
 
   var scrollHandler: number = 0;
-  window.onload = function () {
+  window.addEventListener("load", scrollBigSponsors, true);
+  function scrollBigSponsors() {
     const scroller = document.querySelector(".bigsponsorscroller");
     scrollHandler = setInterval(function () {
       if (scroller) {
@@ -137,7 +138,7 @@ import mwkonzept from "../assets/mwkonzept.png";
           scroller2.scrollLeft = current_scroll + scroller2.clientWidth * 0.51;
       }
     }, 2500);
-  };
+  }
 </script>
 <style>
   .mobile-sliding-menu {

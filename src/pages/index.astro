@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import News from "../components/News.astro";
 import DynamicSocial from "../components/DynamicSocial.astro";
+import SmallSponsors from "../components/SmallSponsors.astro";
 
 //TODO you probably need to farm out this html logik into a proper framework ui component
 //until then you have this
@@ -26,6 +27,7 @@ import DynamicSocial from "../components/DynamicSocial.astro";
       class="newscontainer flex-col content-start overflow-auto md:flex md:max-w-4xl md:flex-2 md:overflow-visible"
     >
       <News />
+      <SmallSponsors />
     </div>
     <div
       class="serverislandcontainer flex flex-col overflow-hidden md:flex md:h-max md:max-w-xs md:flex-1 md:gap-3 md:overflow-visible md:p-10 md:px-0"

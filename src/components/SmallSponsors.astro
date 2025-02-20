@@ -1,0 +1,98 @@
+---
+import allianz from "../assets/allianz.svg";
+import Frontpageheader from "./Frontpageheader.astro";
+import Sponsorcard from "./Sponsorcard.astro";
+---
+
+<div class="flex flex-col md:gap-3 md:p-10 md:px-0">
+  <Frontpageheader text="alemannia echo sponsoren" />
+  <div
+    class="hidescrollbar smallsponsorscroller flex max-h-61 flex-col flex-wrap content-start gap-3 overflow-auto scroll-smooth p-3 md:gap-5 md:p-0"
+  >
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+    <div class="snap-start md:max-w-[calc(50%-(--spacing(2.5)))]">
+      <Sponsorcard
+        Name="Udo Andres"
+        Title="ALLIANZ Generalvertretung"
+        ImageUrl={allianz}
+        Link="https://vertretung.allianz.de/udo.andres/"
+      />
+    </div>
+  </div>
+</div>
+<script>
+  var smallscrollHandler: number = 0;
+  window.addEventListener("load", scrollSmallSponsors, true);
+  function scrollSmallSponsors() {
+    const smallscroller = document.querySelector(".smallsponsorscroller");
+    smallscrollHandler = setInterval(function () {
+      if (smallscroller) {
+        let max_scroll = smallscroller.scrollWidth - smallscroller.clientWidth;
+        let current_scroll = smallscroller.scrollLeft;
+        if (
+          smallscroller.scrollLeft + smallscroller.clientWidth * 0.51 >
+          max_scroll
+        ) {
+          smallscroller.scrollLeft = 0;
+        } else
+          smallscroller.scrollLeft =
+            current_scroll + smallscroller.clientWidth * 0.51;
+      }
+    }, 5000);
+  }
+</script>
