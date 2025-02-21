@@ -15,16 +15,22 @@ import iglogo from "../assets/instagram2.svg";
       class="min-w-full object-fill"
     />
   </div>
-  <h3 class="bg-primary m-4 w-min px-4 py-[4px] text-xs font-light text-white">
+  <h3
+    class="bg-primary m-4 mb-1 w-min px-2 py-[3px] text-xs font-light text-white"
+  >
     {Tag}
   </h3>
-  <div class="m-4 my-0 flex flex-1">
-    <h1 class="inter-primary font-bold">{Title.toUpperCase()}</h1>
+  <div class="m-4 my-0 flex h-max">
+    <h1 class="inter-primary h-max text-2xl font-extrabold">
+      {Title.toUpperCase()}
+    </h1>
   </div>
-  <div class="m-4 mt-0 flex flex-1 text-xs">
+  <div class="m-4 mt-0 mb-2 flex h-max text-xs">
     <pre class="inter-primary text-wrap">{Description}</pre>
   </div>
-  <div class="smol-header m-4 mt-0 flex flex-row justify-between text-xs">
-    <label class="self-end font-light text-gray-500">{Date}</label>
+  <div
+    class="smol-header self-end> <label class= m-4 mt-0 flex flex-1 flex-col justify-end self-end text-xs font-light text-gray-500"
+  >
+    {Date}
   </div>
 </div>
