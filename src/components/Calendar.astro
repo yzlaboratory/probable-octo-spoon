@@ -1,10 +1,33 @@
 ---
+import CalendarCard from "./CalendarCard.astro";
 import Frontpageheader from "./Frontpageheader.astro";
+import holz from "../assets/holz_128x128.png";
 ---
 
 <div class="flex flex-col md:gap-3 md:p-10 md:px-0">
   <Frontpageheader text="alemannia kalender" />
   <div class="flex flex-row flex-wrap content-start gap-3 p-3 md:gap-5 md:p-0">
-    <div class="md:max-w-[calc(50%-(--spacing(2.5)))]"></div>
+    <CalendarCard
+      League="Landesliga"
+      GameDayNumber="19"
+      Weekday="Sonntag"
+      Date="09.03.2024"
+      Time="15:00"
+      EnemyLogo={holz}
+      Enemyteamname="Holz-Wahlschied I"
+      Hometeamname="SG Thalexweiler-Aschbach I"
+      Stadiumname="Nachtweide Thalexweiler"
+    />
+    <CalendarCard
+      League="Kreisliga"
+      GameDayNumber="22"
+      Weekday="Sonntag"
+      Date="09.03.2024"
+      Time="12:45"
+      EnemyLogo={holz}
+      Enemyteamname="Holz-Wahlschied II"
+      Hometeamname="SG Thalexweiler-Aschbach II"
+      Stadiumname="Nachtweide Thalexweiler"
+    />
   </div>
 </div>

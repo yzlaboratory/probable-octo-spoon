@@ -1,0 +1,46 @@
+---
+import Image from "astro/components/Image.astro";
+import ourLogo from "../assets/sglogo_128x128.png";
+const {
+  League,
+  GameDayNumber,
+  Weekday,
+  Date,
+  Time,
+  EnemyLogo,
+  Hometeamname,
+  Enemyteamname,
+  Stadiumname,
+} = Astro.props;
+
+//
+---
+
+<div class="card text-primary flex flex-col rounded-b-sm bg-white">
+  <div class="uppertextcontainer m-8 flex flex-col items-center justify-center">
+    <div class="text-xs font-light">
+      {League.toUpperCase()} - {GameDayNumber}. SPIELTAG
+    </div>
+    <div class="text-3xl/[0.9] font-extrabold">{Weekday.toUpperCase()}</div>
+    <div class="text-sm font-light">{Date} // {Time}</div>
+  </div>
+  <div class="mx-8 mb-6 flex flex-row items-center justify-center">
+    <div class="mx-2 flex h-18">
+      <Image src={ourLogo} alt="Logo" class="w-max object-contain" />
+    </div>
+    <p class="text-2xl font-extrabold">VS</p>
+    <div class="mx-2 flex h-18 w-max">
+      <Image src={EnemyLogo} alt="Logo" class="w-max object-contain" />
+    </div>
+  </div>
+  <div class="teamnames mb-8 flex flex-col items-center justify-center">
+    <label class="text-sm/[0.9] font-extrabold"
+      >{Hometeamname.toUpperCase()}</label
+    >
+    <label class="text-md/[0.9] font-extrabold text-gray-500">VS</label>
+    <label class="text-sm/[0.9] font-extrabold"
+      >{Enemyteamname.toUpperCase()}</label
+    >
+    <label class="mt-1 text-xs font-light">{Stadiumname}</label>
+  </div>
+</div>
