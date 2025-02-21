@@ -22,9 +22,9 @@ import iglogo from "../assets/instagram2.svg";
     <pre class="inter-primary text-xs text-wrap">{Caption}</pre>
   </div>
   <div class="smol-header m-4 mt-0 flex flex-row justify-between text-xs">
+    <a href={Permalink}><Image src={iglogo} alt="" class="w-4" /></a>
     <label class="self-end font-light text-gray-500"
       >{new Date(Timestamp).toLocaleDateString()}</label
     >
-    <a href={Permalink}><Image src={iglogo} alt="" class="w-4" /></a>
   </div>
 </div>
