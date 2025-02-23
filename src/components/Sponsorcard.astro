@@ -1,5 +1,5 @@
 ---
-const { ImageUrl, Title, Name, Link } = Astro.props;
+const { ImageUrl, Title, Name, Link, Color } = Astro.props;
 import { Image } from "astro:assets";
 import iglogo from "../assets/instagram2.svg";
 ---
@@ -7,12 +7,20 @@ import iglogo from "../assets/instagram2.svg";
 <div
   class="card text-primary flex h-28 w-full flex-1 flex-row rounded-sm bg-white"
 >
-  <div class="m-1 flex h-full flex-1 overflow-hidden rounded-full">
-    <Image
-      src={ImageUrl}
-      alt="Portrait"
-      class="min-w-full object-contain p-2"
-    />
+  <div class="flex h-full flex-1 justify-center overflow-hidden p-1">
+    {
+      ImageUrl ? (
+        <Image
+          src={ImageUrl}
+          alt="Portrait"
+          class:list={["min-w-full", "object-contain", "p-2", Color]}
+        />
+      ) : (
+        <h1 class="max-w-full self-center text-center font-extrabold break-words lg:text-xl">
+          {Title}
+        </h1>
+      )
+    }
   </div>
   <div class="flex flex-1 flex-col justify-between overflow-hidden p-2 pl-0">
     <div class="relative bottom-[4px] flex w-full flex-col">
