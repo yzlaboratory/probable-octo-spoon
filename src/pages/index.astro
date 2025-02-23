@@ -4,6 +4,8 @@ import News from "../components/News.astro";
 import DynamicSocial from "../components/DynamicSocial.astro";
 import SmallSponsors from "../components/SmallSponsors.astro";
 import Calendar from "../components/Calendar.astro";
+import Frontpageheader from "../components/Frontpageheader.astro";
+import SocialcardFallback from "../components/SocialcardFallback.astro";
 
 //TODO you probably need to farm out this html logik into a proper framework ui component
 //until then you have this
@@ -34,33 +36,37 @@ import Calendar from "../components/Calendar.astro";
     <div
       class="serverislandcontainer flex flex-col overflow-hidden md:my-10 md:flex md:h-max md:max-w-xs md:flex-1 md:gap-3 md:overflow-visible"
     >
-      <DynamicSocial server:defer />
+      <DynamicSocial server:defer>
+        <SocialcardFallback slot="fallback" />
+      </DynamicSocial>
     </div>
+    <style>
+      .picked {
+        background: var(--color-primary);
+        color: white;
+      }
+    </style>
+    <script>
+      let newsButton = document.querySelector(".news");
+      let socialButton = document.querySelector(".social");
+      newsButton?.addEventListener("click", (event) => {
+        newsButton?.classList.add("picked");
+        socialButton?.classList.remove("picked");
+        document
+          .querySelector(".serverislandcontainer")
+          ?.classList.add("hidden");
+        document.querySelector(".newscontainer")?.classList.remove("hidden");
+      });
+      socialButton?.addEventListener("click", (event) => {
+        newsButton?.classList.remove("picked");
+        socialButton?.classList.add("picked");
+        document
+          .querySelector(".serverislandcontainer")
+          ?.classList.remove("hidden");
+        document.querySelector(".newscontainer")?.classList.add("hidden");
+      });
+      (newsButton as HTMLElement).click();
+      //comment
+    </script>
   </div>
-  <style>
-    .picked {
-      background: var(--color-primary);
-      color: white;
-    }
-  </style>
-  <script>
-    let newsButton = document.querySelector(".news");
-    let socialButton = document.querySelector(".social");
-    newsButton?.addEventListener("click", (event) => {
-      newsButton?.classList.add("picked");
-      socialButton?.classList.remove("picked");
-      document.querySelector(".serverislandcontainer")?.classList.add("hidden");
-      document.querySelector(".newscontainer")?.classList.remove("hidden");
-    });
-    socialButton?.addEventListener("click", (event) => {
-      newsButton?.classList.remove("picked");
-      socialButton?.classList.add("picked");
-      document
-        .querySelector(".serverislandcontainer")
-        ?.classList.remove("hidden");
-      document.querySelector(".newscontainer")?.classList.add("hidden");
-    });
-    (newsButton as HTMLElement).click();
-    //comment
-  </script>
 </Layout>

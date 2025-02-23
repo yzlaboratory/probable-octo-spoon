@@ -22,17 +22,18 @@ const res = await response1.json();
           "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username&access_token=" +
           KEY,
       );
-
-      const { media_url, timestamp, caption, permalink } =
-        await response2.json();
-      return (
-        <Socialcard
-          ImageUrl={media_url}
-          Caption={caption}
-          Permalink={permalink}
-          Timestamp={timestamp}
-        />
-      );
+      if (response2.ok) {
+        const { media_url, timestamp, caption, permalink } =
+          await response2.json();
+        return (
+          <Socialcard
+            ImageUrl={media_url}
+            Caption={caption}
+            Permalink={permalink}
+            Timestamp={timestamp}
+          />
+        );
+      } else return;
     })
   }
 </div>
