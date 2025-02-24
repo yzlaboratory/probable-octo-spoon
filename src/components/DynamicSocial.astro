@@ -12,7 +12,9 @@ const res = await response1.json();
 ---
 
 <Frontpageheader text="Alemannia Socials" />
-<div class="flex flex-col gap-3 overflow-auto p-3 md:gap-5 md:p-0">
+<div
+  class="hidescrollbar flex flex-col gap-3 overflow-auto p-3 md:snap-y md:snap-mandatory md:gap-5 md:p-0"
+>
   {
     res.data.map(async (item: any) => {
       const mediaArray: any[] = [];
