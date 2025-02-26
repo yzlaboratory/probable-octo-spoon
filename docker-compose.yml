@@ -8,4 +8,5 @@ services:
       - traefik.http.routers.clubsoft.tls=true
       - traefik.http.routers.clubsoft.tls.certresolver=myresolver
       - traefik.enable=true
-    ports: 4321:4321
+    ports:
+      - "4321:4321"
