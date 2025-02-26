@@ -54,3 +54,5 @@ services:
       - traefik.enable=true
     ports:
       - "4321:4321"
+    env_file:
+      - ".env"
