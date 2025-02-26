@@ -1,0 +1,11 @@
+version: "3"
+services:
+  clubsoft:
+    # ...
+    build: .
+    labels:
+      - traefik.http.routers.clubsoft.rule=Host(`yzlaboratory.dev`)
+      - traefik.http.routers.clubsoft.tls=true
+      - traefik.http.routers.clubsoft.tls.certresolver=myresolver
+      - traefik.enable=true
+    ports: 4321:4321
