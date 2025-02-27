@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "export $(cat .env.runtime) && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "serve": "node --env-file=.runtime.env ./dist/server/entry.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.0.2",
