@@ -6,7 +6,9 @@ import { getSecret } from "astro:env/server";
 const KEY = getSecret("IG_ACCESS_TOKEN");
 console.log(process.env.IG_ACCESS_TOKEN);
 console.log(import.meta.env.IG_ACCESS_TOKEN);
-
+console.log("teasd");
+console.log(KEY);
+console.log("test");
 //const KEY = process.env.IG_ACCESS_TOKEN ?? import.meta.env.IG_ACCESS_TOKEN;
 const response1 = await fetch(
   "https://graph.instagram.com/v22.0/17841429201354204/media?access_token=" +
