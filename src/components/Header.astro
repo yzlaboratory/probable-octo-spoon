@@ -113,7 +113,7 @@ import mwkonzept from "../assets/mwkonzept.png";
     });
   });
 
-  var scrollHandler: number = 0;
+  var scrollHandler: NodeJS.Timeout;
   window.addEventListener("load", scrollBigSponsors, true);
   function scrollBigSponsors() {
     const scroller = document.querySelector(".bigsponsorscroller");
