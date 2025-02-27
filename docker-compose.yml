@@ -55,4 +55,4 @@ services:
     ports:
       - "4321:4321"
     env_file:
-      - ".env.runtime"
+      - ".runtime.env"
