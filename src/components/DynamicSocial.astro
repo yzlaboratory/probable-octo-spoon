@@ -2,7 +2,8 @@
 import Frontpageheader from "./Frontpageheader.astro";
 import Socialcard from "./Socialcard.astro";
 
-//TODO access_token in environment, not in git repository
+console.log(process.env.IG_ACCESS_TOKEN);
+console.log(import.meta.env.IG_ACCESS_TOKEN);
 const KEY = process.env.IG_ACCESS_TOKEN ?? import.meta.env.IG_ACCESS_TOKEN;
 const response1 = await fetch(
   "https://graph.instagram.com/v22.0/17841429201354204/media?access_token=" +
