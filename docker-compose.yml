@@ -48,7 +48,7 @@ services:
     # ...
     build: .
     labels:
-      - traefik.http.routers.clubsoft.rule=Host(`svthalexweiler.de`)
+      - traefik.http.routers.clubsoft.rule=Host(`svthalexweiler.de`) && Host(`www.svthalexweiler.de`)
       - traefik.http.routers.clubsoft.tls=true
       - traefik.http.routers.clubsoft.tls.certresolver=myresolver
       - traefik.enable=true
