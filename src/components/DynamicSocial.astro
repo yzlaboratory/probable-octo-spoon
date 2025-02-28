@@ -14,7 +14,7 @@ const response1 = await fetch(
   "https://graph.instagram.com/v22.0/17841429201354204/media?access_token=" +
     KEY,
 );
-const res = await response1.json();
+//const res = await response1.json();
 ---
 
 <Frontpageheader text="Alemannia Socials" />
@@ -22,26 +22,31 @@ const res = await response1.json();
   class="hidescrollbar flex flex-col gap-3 overflow-auto p-3 md:snap-y md:snap-mandatory md:gap-5 md:p-0"
 >
   {
-    res.data.map(async (item: any) => {
-      const mediaArray: any[] = [];
-      const response2 = await fetch(
-        "https://graph.instagram.com/v22.0/" +
-          item.id +
-          "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username&access_token=" +
-          KEY,
-      );
-      if (response2.ok) {
-        const { media_url, timestamp, caption, permalink } =
-          await response2.json();
-        return (
-          <Socialcard
-            ImageUrl={media_url}
-            Caption={caption}
-            Permalink={permalink}
-            Timestamp={timestamp}
-          />
-        );
-      } else return;
-    })
+    <p>{KEY}</p>
+    <p>{import.meta.env.IG_ACCESS_TOKEN}</p>
+    <p>{process.env.IG_ACCESS_TOKEN}</p>
+    <p>{IG_ACCESS_TOKEN}</p>
+    
+    //res.data.map(async (item: any) => {
+    //  const mediaArray: any[] = [];
+    //  const response2 = await fetch(
+    //    "https://graph.instagram.com/v22.0/" +
+    //      item.id +
+    //      "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username&access_token=" +
+    //      KEY,
+    //  );
+    //  if (response2.ok) {
+    //    const { media_url, timestamp, caption, permalink } =
+    //      await response2.json();
+    //    return (
+    //      <Socialcard
+    //        ImageUrl={media_url}
+    //        Caption={caption}
+    //        Permalink={permalink}
+     //       Timestamp={timestamp}
+     //     />
+       // );
+     // } else return;
+    //})
   }
 </div>
