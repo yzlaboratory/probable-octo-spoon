@@ -34,9 +34,9 @@ services:
       - /var/log/traefik/access.log:/traefik/logs/access.log
     restart: unless-stopped
     labels:
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.yzlaboratory.dev`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.svthalexweiler.de`)"
       - "traefik.http.routers.dashboard.service=dashboard@internal"
-      - "traefik.http.routers.api.rule=Host(`traefik.yzlaboratory.dev`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api.rule=Host(`traefik.svthalexweiler.de`) && PathPrefix(`/api`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
@@ -48,10 +48,9 @@ services:
     # ...
     build: .
     labels:
-      - traefik.http.routers.clubsoft.rule=Host(`yzlaboratory.dev`)
+      - traefik.http.routers.clubsoft.rule=Host(`svthalexweiler.de`)
       - traefik.http.routers.clubsoft.tls=true
       - traefik.http.routers.clubsoft.tls.certresolver=myresolver
       - traefik.enable=true
     ports:
       - "4321:4321"
-      
