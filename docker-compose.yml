@@ -51,6 +51,8 @@ services:
       - traefik.http.routers.clubsoft.rule=Host(`svthalexweiler.de`) || Host(`www.svthalexweiler.de`)
       - traefik.http.routers.clubsoft.tls=true
       - traefik.http.routers.clubsoft.tls.certresolver=myresolver
+      - "traefik.http.middlewares.clubsoft-redirectscheme.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.clubsoft-redirectscheme.redirectscheme.permanent=true"
       - traefik.enable=true
     ports:
       - "4321:4321"
