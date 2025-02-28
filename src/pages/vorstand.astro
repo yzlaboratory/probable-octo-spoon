@@ -8,13 +8,15 @@ import zoehler from "../assets/zoehler.png";
 import matzeheinrich from "../assets/matzeheinrich.png";
 import hurthi from "../assets/hurthi.png";
 import Frontpageheader from "../components/Frontpageheader.astro";
+
+export const prerender = true;
 ---
 
 <Layout>
   <div
     class="flex flex-1 flex-col gap-3 overflow-auto p-3 md:max-h-full md:w-max md:self-center md:overflow-hidden md:p-10"
   >
-    <Frontpageheader text="Vorstand" />
+    <Frontpageheader text="Alemannia Vorstand" />
     <div
       class="hidescrollbar flex flex-1 flex-col flex-wrap content-start justify-center gap-3 md:max-w-md md:min-w-xs md:flex-row md:gap-5 md:overflow-auto lg:max-w-[calc(--spacing(5)+56rem)]"
     >

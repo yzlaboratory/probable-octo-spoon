@@ -3,6 +3,7 @@ import Frontpageheader from "./Frontpageheader.astro";
 import Socialcard from "./Socialcard.astro";
 
 import { IG_ACCESS_TOKEN, getSecret } from "astro:env/server";
+
 const KEY = getSecret("IG_ACCESS_TOKEN");
 const response1 = await fetch(
   "https://graph.instagram.com/v22.0/17841429201354204/media?access_token=" +
@@ -12,6 +13,7 @@ const res = await response1.json();
 ---
 
 <Frontpageheader text="Alemannia Socials" />
+
 <div
   class="hidescrollbar flex flex-col gap-3 overflow-auto p-3 md:snap-y md:snap-mandatory md:gap-5 md:p-0"
 >
