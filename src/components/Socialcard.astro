@@ -1,17 +1,39 @@
 ---
-const { ImageUrl, Caption, Timestamp, Permalink } = Astro.props;
+const { ImageUrl, Caption, Timestamp, Permalink, Type, ProductType, Children } =
+  Astro.props;
 import { Image } from "astro:assets";
 import iglogo from "../assets/instagram2.svg";
 ---
 
 <div class="card text-primary flex snap-start flex-col rounded-b-sm bg-white">
   <div class="flex w-full overflow-hidden">
-    <Image
-      src={ImageUrl}
-      inferSize
-      alt="Portrait"
-      class="min-w-full object-cover"
-    />
+    {
+      Type == "IMAGE" ? (
+        <Image
+          src={ImageUrl}
+          inferSize
+          alt="Portrait"
+          class="min-w-full object-cover"
+        />
+      ) : Type == "VIDEO" ? (
+        <video class="min-w-full object-cover" muted autoplay>
+          <source src={ImageUrl} />
+        </video>
+      ) : Type == "CAROUSEL_ALBUM" ? (
+        <div class="ig_gallery hidescrollbar flex snap-x snap-mandatory flex-row overflow-auto scroll-smooth">
+          {Children.data.map((item: any) => (
+            <Image
+              src={item.media_url}
+              inferSize
+              alt="Portrait"
+              class="min-w-full snap-start object-cover"
+            />
+          ))}
+        </div>
+      ) : (
+        ""
+      )
+    }
   </div>
   <h1 class="bg-primary m-4 w-min px-4 py-[4px] text-xs font-light text-white">
     SGTHALEXWEILERASCHBACH

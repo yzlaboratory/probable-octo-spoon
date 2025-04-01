@@ -67,6 +67,30 @@ export const prerender = true;
       document.querySelector(".newscontainer")?.classList.add("hidden");
     });
     (newsButton as HTMLElement).click();
-    //comment
+    //ig gallery scrolling
+    window.addEventListener(
+      "load",
+      () => {
+        setInterval(function () {
+          let galleries = document.querySelectorAll(".ig_gallery");
+          console.log(galleries.length);
+          galleries.forEach((gallery) => {
+            if (gallery) {
+              let max_scroll = gallery.scrollWidth - gallery.clientWidth;
+              let current_scroll = gallery.scrollLeft;
+              if (
+                gallery.scrollLeft + gallery.clientWidth * 0.51 >
+                max_scroll
+              ) {
+                gallery.scrollLeft = 0;
+              } else
+                gallery.scrollLeft =
+                  current_scroll + gallery.clientWidth * 0.51;
+            }
+          });
+        }, 5000);
+      },
+      true,
+    );
   </script>
 </Layout>

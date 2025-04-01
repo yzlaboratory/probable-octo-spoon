@@ -46,3 +46,6 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/#einschr-nkungen
+https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/get-started

@@ -247,6 +247,7 @@ const sponsorJSON = {
   var smallscrollHandler: NodeJS.Timeout;
   window.addEventListener("load", scrollSmallSponsors, true);
   function scrollSmallSponsors() {
+    console.log("event1");
     const smallscroller = document.querySelector(".smallsponsorscroller");
     smallscrollHandler = setInterval(function () {
       if (smallscroller) {
