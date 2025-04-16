@@ -6,6 +6,7 @@ import SmallSponsors from "../components/SmallSponsors.astro";
 import Calendar from "../components/Calendar.astro";
 import Frontpageheader from "../components/Frontpageheader.astro";
 import SocialcardFallback from "../components/SocialcardFallback.astro";
+import Hero2 from "../components/Hero2.astro";
 export const prerender = true;
 //TODO you probably need to farm out this html logik into a proper framework ui component
 //until then you have this
@@ -24,6 +25,7 @@ export const prerender = true;
     </div>
   </div>
   <div class="flex flex-1 flex-col justify-start overflow-auto md:px-[10vw]">
+    <Hero2 />
     <div
       class="flex flex-1 flex-col justify-start md:flex-row md:content-start md:justify-center md:gap-10 md:px-[10vw]"
     >
