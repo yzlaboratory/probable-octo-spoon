@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import { Image } from "astro:assets";
 import logo from "../assets/logo.svg";
-import bruno from "../assets/bruno.jpg";
+import bruno from "../assets/bruno.png";
 import britz from "../assets/britz.png";
 import obbo from "../assets/obbo.svg";
 import mwkonzept from "../assets/mwkonzept.png";
@@ -70,16 +70,24 @@ import mwkonzept from "../assets/mwkonzept.png";
     class="sponsorcontainer hidescrollbar mr-3 flex h-33 w-42 snap-x snap-mandatory self-end overflow-auto scroll-smooth"
   >
     <div class="flex max-h-full max-w-full min-w-full snap-center">
-      <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+      <Image class="flex-1 object-contain grayscale" src={obbo} alt="obbo" />
     </div>
     <div class="flex max-h-full max-w-full min-w-full snap-center">
-      <Image class="flex-1 object-contain" src={mwkonzept} alt="Club Logo." />
+      <Image
+        class="flex-1 object-contain grayscale"
+        src={mwkonzept}
+        alt="mwkonzept"
+      />
     </div>
     <div class="flex max-h-full max-w-full min-w-full snap-center">
-      <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+      <Image class="flex-1 object-contain grayscale" src={britz} alt="britz" />
     </div>
     <div class="flex max-h-full max-w-full min-w-full snap-center">
-      <Image class="flex-1 object-contain" src={bruno} alt="Club Logo." />
+      <Image
+        class="flex-1 object-contain grayscale"
+        src={bruno}
+        alt="da bruno"
+      />
     </div>
   </div>
   <div class="mb-3 flex w-full flex-row self-end">
