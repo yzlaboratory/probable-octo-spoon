@@ -1,42 +1,173 @@
 ---
-
+import "../styles/global.css";
+import { Image } from "astro:assets";
+import bruno from "../assets/bruno.png";
+import britz from "../assets/britz.png";
+import obbo from "../assets/obbo.svg";
+import mwkonzept from "../assets/mwkonzept.png";
 ---
 
 <div
-  class="bg-primary flex min-h-[1000px] w-full justify-center shadow-xl shadow-white perspective-normal perspective-origin-[55%_35%]"
+  class="bg-primary flex min-h-svh w-lvw justify-center shadow-xl shadow-white perspective-distant perspective-origin-top"
 >
-  <div
-    class="relative m-10 flex aspect-100/64 w-xl rotate-x-45 rotate-z-45 self-start rounded-sm border-4 border-solid border-white bg-green-500 shadow-[0_0_20px_white]"
-  >
+  <div class="rotationcontainer h-max w-max rotate-x-66 rotate-z-45">
     <div
-      id="lefthalf"
-      class="flex flex-1 flex-col justify-center border-r-2 border-solid border-white bg-transparent"
+      class="sponsorbanner relative flex h-24 w-xl perspective-distant perspective-origin-top"
     >
       <div
-        class="16er absolute flex aspect-16/40 h-40/64 flex-col justify-center border-4 border-l-0 border-solid border-white bg-transparent"
+        class="flat absolute h-3 w-full rotate-x-45 self-end rounded-sm border-4 border-solid border-transparent bg-white/10 bg-clip-padding"
+      >
+      </div>
+      <div
+        class="upright absolute h-24 w-full origin-bottom rotate-x-45 rounded-sm border-4 border-solid border-transparent bg-white/20 bg-clip-padding text-center text-xl font-black text-white"
       >
         <div
-          class="5er absolute aspect-55/183 h-18/40 border-4 border-l-0 border-solid border-white bg-transparent"
+          class="largefieldscroller hidescrollbar flex max-h-full w-full flex-1 snap-x snap-mandatory overflow-auto scroll-smooth grayscale"
         >
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+            <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+          </div>
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image
+              class="flex-1 object-contain"
+              src={mwkonzept}
+              alt="Club Logo."
+            />
+          </div>
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+            <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+            <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+          </div>
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image
+              class="flex-1 object-contain"
+              src={bruno}
+              alt="Club Logo."
+            /><Image
+              class="flex-1 object-contain"
+              src={bruno}
+              alt="Club Logo."
+            /><Image
+              class="flex-1 object-contain"
+              src={bruno}
+              alt="Club Logo."
+            />
+          </div>
         </div>
       </div>
     </div>
     <div
-      id="right"
-      class="flex flex-1 flex-col items-end justify-center border-l-2 border-solid border-white bg-transparent"
+      class="sponsorbannersmall absolute bottom-0 left-0 z-50 flex h-24 w-[calc(var(--container-xl)*(64/100))] origin-bottom-left rotate-z-270 perspective-distant perspective-origin-top-left"
     >
       <div
-        class="16er absolute flex aspect-16/40 h-40/64 flex-col items-end justify-center border-4 border-r-0 border-solid border-white bg-transparent"
+        class="flat absolute h-3 w-full self-end rounded-sm border-4 border-solid border-transparent bg-white/10 bg-clip-padding"
+      >
+      </div>
+      <div
+        class="upright absolute h-24 w-full origin-bottom rotate-x-45 rounded-sm border-4 border-solid border-transparent bg-white/20 bg-clip-padding text-center text-xl font-black text-white"
       >
         <div
-          class="5er absolute aspect-55/183 h-18/40 border-4 border-r-0 border-solid border-white bg-transparent"
+          class="smallfieldscroller hidescrollbar flex max-h-full w-full flex-1 snap-x snap-mandatory overflow-auto scroll-smooth grayscale"
         >
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+          </div>
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image
+              class="flex-1 object-contain"
+              src={mwkonzept}
+              alt="Club Logo."
+            />
+          </div>
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+            <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+          </div>
+          <div
+            class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4"
+          >
+            <Image class="flex-1 object-contain" src={bruno} alt="Club Logo." />
+          </div>
         </div>
       </div>
     </div>
     <div
-      class="mittelkreis absolute inset-1/2 aspect-square h-[25%] -translate-1/2 transform rounded-full border-4 border-solid border-white bg-transparent"
+      class="soccerfield relative flex aspect-100/64 w-xl self-start rounded-sm border-4 border-solid border-white bg-transparent shadow-[0_0_20px_white]"
     >
+      <div
+        id="lefthalf"
+        class="flex flex-1 flex-col justify-center border-r-2 border-solid border-white bg-transparent"
+      >
+        <div
+          class="16er absolute flex aspect-16/40 h-40/64 flex-col justify-center border-4 border-l-0 border-solid border-white bg-transparent"
+        >
+          <div
+            class="5er absolute aspect-55/183 h-18/40 border-4 border-l-0 border-solid border-white bg-transparent"
+          >
+          </div>
+        </div>
+      </div>
+      <div
+        id="right"
+        class="flex flex-1 flex-col items-end justify-center border-l-2 border-solid border-white bg-transparent"
+      >
+        <div
+          class="16er absolute flex aspect-16/40 h-40/64 flex-col items-end justify-center border-4 border-r-0 border-solid border-white bg-transparent"
+        >
+          <div
+            class="5er absolute aspect-55/183 h-18/40 border-4 border-r-0 border-solid border-white bg-transparent"
+          >
+          </div>
+        </div>
+      </div>
+      <div
+        class="mittelkreis absolute inset-1/2 aspect-square h-[25%] -translate-1/2 transform rounded-full border-4 border-solid border-white bg-transparent"
+      >
+      </div>
     </div>
   </div>
 </div>
+<script>
+  var scrollHandler: NodeJS.Timeout;
+  window.addEventListener("load", scrollBigSponsors, true);
+  function scrollBigSponsors() {
+    const scroller = document.querySelector(".smallfieldscroller");
+    scrollHandler = setInterval(function () {
+      if (scroller) {
+        let max_scroll = scroller.scrollWidth - scroller.clientWidth;
+        let current_scroll = scroller.scrollLeft;
+        if (scroller.scrollLeft + scroller.clientWidth * 0.51 > max_scroll) {
+          scroller.scrollLeft = 0;
+        } else
+          scroller.scrollLeft = current_scroll + scroller.clientWidth * 0.51;
+      }
+    }, 5000);
+    const scroller2 = document.querySelector(".largefieldscroller");
+    scrollHandler = setInterval(function () {
+      if (scroller2) {
+        let max_scroll = scroller2.scrollWidth - scroller2.clientWidth;
+        let current_scroll = scroller2.scrollLeft;
+        if (scroller2.scrollLeft + scroller2.clientWidth * 0.51 > max_scroll) {
+          scroller2.scrollLeft = 0;
+        } else
+          scroller2.scrollLeft = current_scroll + scroller2.clientWidth * 0.51;
+      }
+    }, 5000);
+  }
+</script>
