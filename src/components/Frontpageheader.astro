@@ -4,13 +4,6 @@ import logo from "../assets/logo.svg";
 const { text } = Astro.props;
 ---
 
-<div
-  class="bg-primary relative hidden h-6 min-h-6 items-center justify-end overflow-x-hidden pr-2 text-sm font-medium text-white md:flex"
->
-  <label class="frontpageheader relative mr-12 h-full content-center"
-    >{text.toUpperCase()}</label
-  >
-  <div class="absolute bg-white">
-    <Image class="h-6 w-6" src={logo} alt="Club Logo." />
-  </div>
+<div class="mb-8 flex w-full justify-center">
+  <h1 class="min-w-6xl text-4xl font-black text-white italic">{text}</h1>
 </div>

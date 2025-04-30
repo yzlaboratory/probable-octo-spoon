@@ -13,62 +13,18 @@ export const prerender = true;
 ---
 
 <Layout>
-  <div
-    slot="extranav"
-    class="text-primary flex h-12 w-full flex-row bg-white text-sm md:hidden"
-  >
-    <div class:list={["news flex flex-1", "picked"]}>
-      <p class="flex-1 self-center text-center">NEWS</p>
-    </div>
-    <div class:list={["social flex flex-1"]}>
-      <p class="flex-1 self-center text-center">SOZIAL</p>
-    </div>
-  </div>
-  <div class="flex flex-1 flex-col justify-start overflow-auto md:px-[10vw]">
-    <Hero2 />
-    <div
-      class="flex flex-1 flex-col justify-start md:flex-row md:content-start md:justify-center md:gap-10 md:px-[10vw]"
-    >
-      <div
-        class="newscontainer flex-col content-start overflow-auto md:my-10 md:flex md:max-h-max md:max-w-4xl md:flex-2 md:gap-10"
-      >
-        <News />
-        <SmallSponsors />
-        <Calendar />
-      </div>
-      <div
-        class="serverislandcontainer flex flex-col overflow-hidden md:my-10 md:flex md:h-0 md:min-h-[calc(100%-(--spacing(10)*2))] md:max-w-xs md:flex-1 md:gap-3"
-      >
-        <DynamicSocial server:defer>
-          <SocialcardFallback slot="fallback" />
-        </DynamicSocial>
-      </div>
+  <div class="flex flex-1 flex-col justify-start overflow-auto">
+    <div class="mt-20 flex w-full flex-col gap-10">
+      <News />
+      <SmallSponsors />
+      <Calendar />
+
+      <DynamicSocial server:defer>
+        <SocialcardFallback slot="fallback" />
+      </DynamicSocial>
     </div>
   </div>
-  <style>
-    .picked {
-      background: var(--color-primary);
-      color: white;
-    }
-  </style>
   <script>
-    let newsButton = document.querySelector(".news");
-    let socialButton = document.querySelector(".social");
-    newsButton?.addEventListener("click", (event) => {
-      newsButton?.classList.add("picked");
-      socialButton?.classList.remove("picked");
-      document.querySelector(".serverislandcontainer")?.classList.add("hidden");
-      document.querySelector(".newscontainer")?.classList.remove("hidden");
-    });
-    socialButton?.addEventListener("click", (event) => {
-      newsButton?.classList.remove("picked");
-      socialButton?.classList.add("picked");
-      document
-        .querySelector(".serverislandcontainer")
-        ?.classList.remove("hidden");
-      document.querySelector(".newscontainer")?.classList.add("hidden");
-    });
-    (newsButton as HTMLElement).click();
     //ig gallery scrolling
     window.addEventListener(
       "load",

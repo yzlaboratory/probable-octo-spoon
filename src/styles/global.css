@@ -2,8 +2,16 @@
 
 .material-symbols-rounded {
   font-variation-settings:
-    "FILL" 0,
-    "wght" 400,
+    "FILL" 1,
+    "wght" 350,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.material-symbols-rounded-light {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 100,
     "GRAD" 0,
     "opsz" 24;
 }
@@ -16,7 +24,9 @@
 }
 
 @theme {
-  --color-primary: #20294e;
+  --color-primary: oklch(54.6% 0.245 262.881);
+  --color-background: #121212;
+  
 }
 
 .springy {

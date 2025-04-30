@@ -1,0 +1,77 @@
+---
+import "../styles/global.css";
+import { Image } from "astro:assets";
+import bruno from "../assets/bruno.png";
+import britz from "../assets/britz.png";
+import obbo from "../assets/obbo.svg";
+import mwkonzept from "../assets/mwkonzept.png";
+---
+
+<div
+  class="sponsorbanner relative flex h-24 w-full rotate-x-66 rotate-z-45 perspective-distant perspective-origin-top"
+>
+  <div
+    class="flat absolute h-3 w-full rotate-x-45 self-end rounded-sm border-4 border-solid border-transparent bg-white/10 bg-clip-padding"
+  >
+  </div>
+  <div
+    class="upright absolute h-24 w-full origin-bottom rotate-x-45 rounded-sm border-4 border-solid border-transparent bg-white/20 bg-clip-padding text-center text-xl font-black text-white"
+  >
+    <div
+      class="largefieldscroller hidescrollbar flex max-h-full w-full flex-1 snap-x snap-mandatory overflow-auto scroll-smooth grayscale"
+    >
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+        <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+      </div>
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={mwkonzept} alt="Club Logo." />
+      </div>
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+        <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+        <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+      </div>
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image
+          class="flex-1 object-contain"
+          src={bruno}
+          alt="Club Logo."
+        /><Image
+          class="flex-1 object-contain"
+          src={bruno}
+          alt="Club Logo."
+        /><Image class="flex-1 object-contain" src={bruno} alt="Club Logo." />
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="sponsorbannersmall absolute bottom-0 left-0 z-50 flex h-24 w-[calc(var(--container-xl)*(64/100))] origin-bottom-left rotate-z-270 perspective-distant perspective-origin-top-left"
+>
+  <div
+    class="flat absolute h-3 w-full self-end rounded-sm border-4 border-solid border-transparent bg-white/10 bg-clip-padding"
+  >
+  </div>
+  <div
+    class="upright absolute h-24 w-full origin-bottom rotate-x-45 rounded-sm border-4 border-solid border-transparent bg-white/20 bg-clip-padding text-center text-xl font-black text-white"
+  >
+    <div
+      class="smallfieldscroller hidescrollbar flex max-h-full w-full flex-1 snap-x snap-mandatory overflow-auto scroll-smooth grayscale"
+    >
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={obbo} alt="Club Logo." />
+      </div>
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={mwkonzept} alt="Club Logo." />
+      </div>
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+        <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
+      </div>
+      <div class="flex max-h-full max-w-full min-w-full snap-center gap-2 p-4">
+        <Image class="flex-1 object-contain" src={bruno} alt="Club Logo." />
+      </div>
+    </div>
+  </div>
+</div>
