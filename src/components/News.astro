@@ -7,6 +7,7 @@ import Frontpageheader from "./Frontpageheader.astro";
 
 <div class="relative flex w-full flex-col">
   <Frontpageheader text="AKTUELLE NEWS" />
+
   <div
     class="newsContainer relative flex max-w-full flex-row flex-nowrap content-start overflow-hidden scroll-smooth px-20"
   >
@@ -32,7 +33,6 @@ import Frontpageheader from "./Frontpageheader.astro";
       Date="20.02.2025"
       ImageUrl={code}
     />
-
     <Newscard
       Title="Faasend Dreikampf"
       Tag="FESTLICHKEIT"
@@ -261,33 +261,67 @@ import Frontpageheader from "./Frontpageheader.astro";
   </div>
 </div>
 <script>
+  window.addEventListener(
+    "load",
+    () => {
+      checkButtons();
+    },
+    true,
+  );
   const prevButton = document.querySelector(".newsPrevButton");
   const nextButton = document.querySelector(".newsNextButton");
+  const scrollContainer = document.querySelector(".newsContainer");
+  const newsCardContainer = document.querySelector(".newscardcontainer");
   nextButton?.addEventListener("click", () => {
-    if (prevButton?.classList.contains("hidden"))
-      prevButton.classList.remove("hidden");
-    let container = document.querySelector(".newsContainer");
-    if (container) {
-      if (
-        container.scrollLeft + container.clientWidth + container.clientWidth >=
-        container.scrollWidth
-      ) {
-        nextButton.classList.add("hidden");
-      }
-      container.scrollLeft = container.scrollLeft + container.clientWidth;
+    if (scrollContainer && newsCardContainer) {
+      scrollContainer.scrollLeft =
+        scrollContainer.scrollLeft +
+        newsCardContainer.getBoundingClientRect().width * 4;
     }
+    checkButtons();
   });
   prevButton?.addEventListener("click", () => {
-    if (nextButton?.classList.contains("hidden"))
-      nextButton.classList.remove("hidden");
-    let container = document.querySelector(".newsContainer");
-    if (container) {
-      if (container.scrollLeft - container.clientWidth < 0) {
-        prevButton.classList.add("hidden");
-      }
-      container.scrollLeft = container.scrollLeft - container.clientWidth;
+    if (scrollContainer && newsCardContainer) {
+      scrollContainer.scrollLeft =
+        scrollContainer.scrollLeft -
+        newsCardContainer.getBoundingClientRect().width * 4;
     }
+    checkButtons();
   });
+
+  function checkButtons() {
+    checkForwardButton();
+    checkBackButton();
+  }
+
+  function checkForwardButton() {
+    if (scrollContainer && newsCardContainer && nextButton) {
+      if (
+        scrollContainer.scrollLeft +
+          newsCardContainer.getBoundingClientRect().width * 4 >=
+        scrollContainer.scrollWidth -
+          newsCardContainer.getBoundingClientRect().width * 4
+      ) {
+        nextButton.classList.add("hidden");
+      } else {
+        nextButton.classList.remove("hidden");
+      }
+    }
+  }
+
+  function checkBackButton() {
+    if (scrollContainer && newsCardContainer && prevButton) {
+      if (
+        scrollContainer.scrollLeft -
+          newsCardContainer.getBoundingClientRect().width * 4 <=
+        0
+      ) {
+        prevButton.classList.add("hidden");
+      } else {
+        prevButton.classList.remove("hidden");
+      }
+    }
+  }
 </script>
 <style>
   .hidden {
