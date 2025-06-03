@@ -1,0 +1,122 @@
+---
+import Frontpageheader from "./Frontpageheader.astro";
+
+const { childrenClassName, headerTitle, classPrefix } = Astro.props;
+---
+
+<div class="relative flex w-full flex-col">
+  <Frontpageheader text={headerTitle} />
+
+  <div
+    data-childrenclassname={childrenClassName}
+    data-prefix={classPrefix}
+    class="galleryContainer relative flex max-w-full flex-row flex-nowrap content-start overflow-hidden scroll-smooth px-20"
+  >
+    <slot />
+  </div>
+  <div
+    class={classPrefix +
+      "NextButton " +
+      "bg-background/50 absolute right-0 z-1 flex h-full w-20 items-center justify-center"}
+  >
+    <span
+      class="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl! text-white hover:cursor-pointer"
+      >arrow_forward_ios</span
+    >
+  </div>
+  <div
+    class={classPrefix +
+      "PrevButton bg-background/50 absolute left-0 z-1 flex hidden h-full w-20 items-center justify-center"}
+  >
+    <span
+      class="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl! text-white hover:cursor-pointer"
+      >arrow_back_ios_new</span
+    >
+  </div>
+</div>
+<script>
+  const galleries = document.querySelectorAll(".galleryContainer");
+  galleries.forEach((gallery) => {
+    let prefixString = gallery.getAttribute("data-prefix");
+    let galleryPrevButton = document.querySelector(
+      "." + prefixString + "PrevButton",
+    );
+    let galleryNextButton = document.querySelector(
+      "." + prefixString + "NextButton",
+    );
+    let scrollContainer = gallery;
+    let newsCardContainer = document.querySelector(
+      "." + scrollContainer.getAttribute("data-childrenclassname")?.toString()!,
+    );
+    scrollContainer.setAttribute(
+      "finalscrollvalue",
+      scrollContainer.scrollLeft.toString(),
+    );
+
+    let checkForwardButton = function (finalscrollvalue: number) {
+      if (scrollContainer && galleryNextButton) {
+        if (
+          finalscrollvalue >=
+          scrollContainer.scrollWidth - scrollContainer.clientWidth
+        ) {
+          galleryNextButton.classList.add("hidden");
+        } else {
+          galleryNextButton.classList.remove("hidden");
+        }
+      }
+    };
+    let checkBackButton = function (finalscrollvalue: number) {
+      if (galleryPrevButton) {
+        if (finalscrollvalue <= 0) {
+          galleryPrevButton.classList.add("hidden");
+        } else {
+          galleryPrevButton.classList.remove("hidden");
+        }
+      }
+    };
+    let checkButtons = function (finalscrollvalue: number) {
+      checkForwardButton(finalscrollvalue);
+      checkBackButton(finalscrollvalue);
+    };
+
+    galleryNextButton?.addEventListener("click", () => {
+      if (scrollContainer && newsCardContainer) {
+        let finalScrollValue =
+          +scrollContainer.getAttribute("finalscrollvalue")!;
+        finalScrollValue =
+          finalScrollValue +
+          newsCardContainer.getBoundingClientRect().width * 4;
+
+        scrollContainer.scrollLeft = finalScrollValue;
+        scrollContainer.setAttribute(
+          "finalscrollvalue",
+          finalScrollValue.toString(),
+        );
+        checkButtons(finalScrollValue);
+      }
+    });
+    galleryPrevButton?.addEventListener("click", () => {
+      if (scrollContainer && newsCardContainer) {
+        let finalScrollValue =
+          +scrollContainer.getAttribute("finalscrollvalue")!;
+
+        finalScrollValue =
+          finalScrollValue -
+          newsCardContainer.getBoundingClientRect().width * 4;
+        scrollContainer.scrollLeft = finalScrollValue;
+        scrollContainer.setAttribute(
+          "finalscrollvalue",
+          finalScrollValue.toString(),
+        );
+        checkButtons(finalScrollValue);
+      }
+    });
+    checkButtons(scrollContainer.scrollLeft);
+    //TODO checkbuttons gets wrong info that isnt update, thats why it does not work
+  });
+</script>
+<style>
+  .hidden {
+    display: none;
+  }
+</style>

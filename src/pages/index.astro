@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import News from "../components/News.astro";
+import News2 from "../components/News2.astro";
 import DynamicSocial from "../components/DynamicSocial.astro";
 import SmallSponsors from "../components/SmallSponsors.astro";
 import Calendar from "../components/Calendar.astro";
@@ -16,7 +17,7 @@ export const prerender = true;
   <div class="flex flex-1 flex-col justify-start overflow-auto">
     <div class="mt-20 flex w-full flex-col gap-10">
       <News />
-
+      <News2 />
       <!-- 
             <Calendar />
       <SmallSponsors />
@@ -33,7 +34,6 @@ export const prerender = true;
       () => {
         setInterval(function () {
           let galleries = document.querySelectorAll(".ig_gallery");
-          console.log(galleries.length);
           galleries.forEach((gallery) => {
             if (gallery) {
               let max_scroll = gallery.scrollWidth - gallery.clientWidth;
