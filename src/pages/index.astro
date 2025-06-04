@@ -9,12 +9,14 @@ import SocialcardFallback from "../components/SocialcardFallback.astro";
 import Hero2 from "../components/Hero2.astro";
 import DynamicSocial from "../components/DynamicSocial.astro";
 import Gallery from "../components/Gallery.astro";
+import Vorstand from "../components/Vorstand.astro";
+
 export const prerender = true;
 ---
 
 <Layout>
   <div class="flex flex-1 flex-col justify-start overflow-auto">
-    <div class="mt-20 flex w-full flex-col gap-10">
+    <div class="my-30 flex w-full flex-col gap-30">
       <News />
       <!-- 
             <Calendar />
@@ -23,10 +25,19 @@ export const prerender = true;
         headerTitle="SOCIALS"
         childrenClassName="socialcard"
         classPrefix="socials"
+        numberOfItemsInViewport="5"
       >
         <DynamicSocial server:defer>
           <SocialcardFallback slot="fallback" />
         </DynamicSocial>
+      </Gallery>
+      <Gallery
+        headerTitle="VORSTAND"
+        childrenClassName="vorstandcard"
+        classPrefix="vorstand"
+        numberOfItemsInViewport="5"
+      >
+        <Vorstand />
       </Gallery>
     </div>
   </div>
