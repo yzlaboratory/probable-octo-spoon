@@ -2,49 +2,56 @@
 const { ImageUrl, Caption, Timestamp, Permalink, Type, ProductType, Children } =
   Astro.props;
 import { Image } from "astro:assets";
-import iglogo from "../assets/instagram2.svg";
+
+import iglogo from "../assets/instagramwhite.svg";
 ---
 
-<div class="card text-primary flex snap-start flex-col rounded-b-sm bg-white">
-  <div class="flex w-full overflow-hidden">
-    {
-      Type == "IMAGE" ? (
-        <Image
-          src={ImageUrl}
-          inferSize
-          alt="Portrait"
-          class="min-w-full object-cover"
-        />
-      ) : Type == "VIDEO" ? (
-        <video class="min-w-full object-cover" muted autoplay>
-          <source src={ImageUrl} />
-        </video>
-      ) : Type == "CAROUSEL_ALBUM" ? (
-        <div class="ig_gallery hidescrollbar flex snap-x snap-mandatory flex-row overflow-auto scroll-smooth">
-          {Children.data.map((item: any) => (
-            <Image
-              src={item.media_url}
-              inferSize
-              alt="Portrait"
-              class="min-w-full snap-start object-cover"
-            />
-          ))}
-        </div>
-      ) : (
-        ""
-      )
-    }
-  </div>
-  <h1 class="bg-primary m-4 w-min px-4 py-[4px] text-xs font-light text-white">
-    SGTHALEXWEILERASCHBACH
-  </h1>
-  <div class="m-4 mt-0 flex flex-1">
-    <pre class="inter-primary text-xs text-wrap">{Caption}</pre>
-  </div>
-  <div class="smol-header m-4 mt-0 flex flex-row justify-between text-xs">
-    <a href={Permalink}><Image src={iglogo} alt="" class="w-4" /></a>
-    <label class="self-end font-light text-gray-500"
-      >{new Date(Timestamp).toLocaleDateString()}</label
-    >
+<div class="socialcard bg-background flex h-max w-1/4 shrink-0 px-2">
+  <div
+    class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col gap-4 pb-16 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-300 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full"
+  >
+    <div class="flex aspect-[100/56] w-full overflow-hidden">
+      {
+        Type == "IMAGE" ? (
+          <Image
+            src={ImageUrl}
+            inferSize
+            alt="Portrait"
+            class="min-w-full object-cover"
+          />
+        ) : Type == "VIDEO" ? (
+          <video class="min-w-full object-cover" muted autoplay>
+            <source src={ImageUrl} />
+          </video>
+        ) : Type == "CAROUSEL_ALBUM" ? (
+          <div class="ig_gallery hidescrollbar flex snap-x snap-mandatory flex-row overflow-auto scroll-smooth">
+            {Children.data.map((item: any) => (
+              <Image
+                src={item.media_url}
+                inferSize
+                alt="Portrait"
+                class="min-w-full snap-start object-cover"
+              />
+            ))}
+          </div>
+        ) : (
+          ""
+        )
+      }
+    </div>
+
+    <div class="flex w-full flex-row items-center gap-3">
+      <div class="bg-primary h-3 w-10"></div>
+      <h3 class="text-md font-medium text-white">
+        {new Date(Timestamp).toLocaleDateString()} / SOCIAL
+      </h3>
+
+      <a class="h-max py-1 text-white" href={Permalink}
+        ><Image src={iglogo} alt="" class="w-4" /></a
+      >
+    </div>
+    <div class="text-md h-max font-light overflow-ellipsis text-gray-300">
+      <p class="inter-primary line-clamp-4 text-wrap">{Caption}</p>
+    </div>
   </div>
 </div>

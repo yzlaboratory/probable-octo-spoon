@@ -1,16 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import News from "../components/News.astro";
-import News2 from "../components/News2.astro";
-import DynamicSocial from "../components/DynamicSocial.astro";
+
 import SmallSponsors from "../components/SmallSponsors.astro";
 import Calendar from "../components/Calendar.astro";
 import Frontpageheader from "../components/Frontpageheader.astro";
 import SocialcardFallback from "../components/SocialcardFallback.astro";
 import Hero2 from "../components/Hero2.astro";
+import DynamicSocial from "../components/DynamicSocial.astro";
+import Gallery from "../components/Gallery.astro";
 export const prerender = true;
-//TODO you probably need to farm out this html logik into a proper framework ui component
-//until then you have this
 ---
 
 <Layout>
@@ -19,37 +18,38 @@ export const prerender = true;
       <News />
       <!-- 
             <Calendar />
-      <SmallSponsors />
-      <DynamicSocial server:defer>
-        <SocialcardFallback slot="fallback" />
-      </DynamicSocial>
-      -->
+      <SmallSponsors />   -->
+      <Gallery
+        headerTitle="SOCIALS"
+        childrenClassName="socialcard"
+        classPrefix="socials"
+      >
+        <DynamicSocial server:defer>
+          <SocialcardFallback slot="fallback" />
+        </DynamicSocial>
+      </Gallery>
     </div>
   </div>
-  <script>
-    //ig gallery scrolling
-    window.addEventListener(
-      "load",
-      () => {
-        setInterval(function () {
-          let galleries = document.querySelectorAll(".ig_gallery");
-          galleries.forEach((gallery) => {
-            if (gallery) {
-              let max_scroll = gallery.scrollWidth - gallery.clientWidth;
-              let current_scroll = gallery.scrollLeft;
-              if (
-                gallery.scrollLeft + gallery.clientWidth * 0.51 >
-                max_scroll
-              ) {
-                gallery.scrollLeft = 0;
-              } else
-                gallery.scrollLeft =
-                  current_scroll + gallery.clientWidth * 0.51;
-            }
-          });
-        }, 5000);
-      },
-      true,
-    );
-  </script>
 </Layout>
+<script>
+  //ig gallery scrolling
+  window.addEventListener(
+    "load",
+    () => {
+      setInterval(function () {
+        let galleries = document.querySelectorAll(".ig_gallery");
+        galleries.forEach((gallery) => {
+          if (gallery) {
+            let max_scroll = gallery.scrollWidth - gallery.clientWidth;
+            let current_scroll = gallery.scrollLeft;
+            if (gallery.scrollLeft + gallery.clientWidth * 0.51 > max_scroll) {
+              gallery.scrollLeft = 0;
+            } else
+              gallery.scrollLeft = current_scroll + gallery.clientWidth * 0.51;
+          }
+        });
+      }, 5000);
+    },
+    true,
+  );
+</script>

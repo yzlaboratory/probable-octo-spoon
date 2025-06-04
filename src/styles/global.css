@@ -25,8 +25,17 @@
 
 @theme {
   --color-primary: oklch(54.6% 0.245 262.881);
-  --color-background: #121212;
-  
+  --color-background: var(--color-dark-gray-800);
+  --color-loading: var(--color-dark-gray-750);
+  --color-dark-gray-100: #656565;
+  --color-dark-gray-200: #595959;
+  --color-dark-gray-300: #4d4d4d;
+  --color-dark-gray-400: #717171;
+  --color-dark-gray-500: #595959;
+  --color-dark-gray-600: #414141;
+  --color-dark-gray-700: #2a2a2a;
+  --color-dark-gray-750: #1e1e1e;
+  --color-dark-gray-800: #121212;
 }
 
 .springy {

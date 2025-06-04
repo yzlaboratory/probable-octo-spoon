@@ -37,6 +37,7 @@ const { childrenClassName, headerTitle, classPrefix } = Astro.props;
 <script>
   const galleries = document.querySelectorAll(".galleryContainer");
   galleries.forEach((gallery) => {
+    console.log(gallery);
     let prefixString = gallery.getAttribute("data-prefix");
     let galleryPrevButton = document.querySelector(
       "." + prefixString + "PrevButton",
@@ -45,13 +46,18 @@ const { childrenClassName, headerTitle, classPrefix } = Astro.props;
       "." + prefixString + "NextButton",
     );
     let scrollContainer = gallery;
-    let newsCardContainer = document.querySelector(
-      "." + scrollContainer.getAttribute("data-childrenclassname")?.toString()!,
-    );
+    let scrollValue =
+      document
+        .querySelector(
+          "." +
+            scrollContainer.getAttribute("data-childrenclassname")?.toString()!,
+        )
+        ?.getBoundingClientRect().width! * 4;
     scrollContainer.setAttribute(
       "finalscrollvalue",
       scrollContainer.scrollLeft.toString(),
     );
+    console.log(prefixString);
 
     let checkForwardButton = function (finalscrollvalue: number) {
       if (scrollContainer && galleryNextButton) {
@@ -80,12 +86,10 @@ const { childrenClassName, headerTitle, classPrefix } = Astro.props;
     };
 
     galleryNextButton?.addEventListener("click", () => {
-      if (scrollContainer && newsCardContainer) {
+      if (scrollContainer) {
         let finalScrollValue =
           +scrollContainer.getAttribute("finalscrollvalue")!;
-        finalScrollValue =
-          finalScrollValue +
-          newsCardContainer.getBoundingClientRect().width * 4;
+        finalScrollValue = finalScrollValue + scrollValue;
 
         scrollContainer.scrollLeft = finalScrollValue;
         scrollContainer.setAttribute(
@@ -96,13 +100,11 @@ const { childrenClassName, headerTitle, classPrefix } = Astro.props;
       }
     });
     galleryPrevButton?.addEventListener("click", () => {
-      if (scrollContainer && newsCardContainer) {
+      if (scrollContainer) {
         let finalScrollValue =
           +scrollContainer.getAttribute("finalscrollvalue")!;
 
-        finalScrollValue =
-          finalScrollValue -
-          newsCardContainer.getBoundingClientRect().width * 4;
+        finalScrollValue = finalScrollValue - scrollValue;
         scrollContainer.scrollLeft = finalScrollValue;
         scrollContainer.setAttribute(
           "finalscrollvalue",

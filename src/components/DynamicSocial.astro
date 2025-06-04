@@ -1,5 +1,7 @@
 ---
+import { setMaxIdleHTTPParsers } from "http";
 import Frontpageheader from "./Frontpageheader.astro";
+import Gallery from "./Gallery.astro";
 import Socialcard from "./Socialcard.astro";
 
 import { IG_ACCESS_TOKEN, getSecret } from "astro:env/server";
@@ -12,42 +14,36 @@ const response1 = await fetch(
 const res = await response1.json();
 ---
 
-<Frontpageheader text="Alemannia Socials" />
-
-<div
-  class="hidescrollbar flex flex-col gap-3 overflow-auto p-3 md:snap-y md:snap-mandatory md:gap-5 md:p-0"
->
-  {
-    res.data.map(async (item: any) => {
-      const mediaArray: any[] = [];
-      const response2 = await fetch(
-        "https://graph.instagram.com/v22.0/" +
-          item.id +
-          "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username,media_type,media_product_type,children{media_url}&access_token=" +
-          KEY,
+{
+  res.data.map(async (item: any) => {
+    const mediaArray: any[] = [];
+    const response2 = await fetch(
+      "https://graph.instagram.com/v22.0/" +
+        item.id +
+        "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username,media_type,media_product_type,children{media_url}&access_token=" +
+        KEY,
+    );
+    if (response2.ok) {
+      const {
+        media_url,
+        timestamp,
+        caption,
+        permalink,
+        media_type,
+        media_product_type,
+        children,
+      } = await response2.json();
+      return (
+        <Socialcard
+          ImageUrl={media_url}
+          Caption={caption}
+          Permalink={permalink}
+          Timestamp={timestamp}
+          Type={media_type}
+          ProductType={media_product_type}
+          Children={children}
+        />
       );
-      if (response2.ok) {
-        const {
-          media_url,
-          timestamp,
-          caption,
-          permalink,
-          media_type,
-          media_product_type,
-          children,
-        } = await response2.json();
-        return (
-          <Socialcard
-            ImageUrl={media_url}
-            Caption={caption}
-            Permalink={permalink}
-            Timestamp={timestamp}
-            Type={media_type}
-            ProductType={media_product_type}
-            Children={children}
-          />
-        );
-      } else return;
-    })
-  }
-</div>
+    } else return;
+  })
+}

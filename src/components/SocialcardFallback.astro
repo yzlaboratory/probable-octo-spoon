@@ -1,40 +1,38 @@
 ---
-const { ImageUrl, Caption, Timestamp, Permalink } = Astro.props;
 import { Image } from "astro:assets";
 import iglogo from "../assets/instagram2.svg";
-import Frontpageheader from "./Frontpageheader.astro";
+
+const utility = new Array<number>(25);
+utility.fill(1);
 ---
 
-<Frontpageheader text="Alemannia Socials" />
-<div class="flex flex-col gap-3 overflow-auto p-3 md:gap-5 md:p-0">
-  <div
-    class="card text-primary flex snap-start flex-col rounded-b-sm bg-white md:scroll-m-5"
-  >
-    <div
-      class="bg-primary/50 fakeimage flex h-[var(--container-xs)] w-full animate-pulse"
-    >
-    </div>
-    <div
-      class="bg-primary/50 m-4 h-6 w-52 animate-pulse rounded-xs px-4 py-[4px]"
-    >
-    </div>
-    <div class="m-4 mt-0 flex flex-1 flex-col gap-1">
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="h-2 w-full bg-white"></div>
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="h-2 w-full bg-white"></div>
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="bg-primary/50 h-4 w-full animate-pulse rounded-xs"></div>
-      <div class="h-2 w-full bg-white"></div>
-      <div class="bg-primary/50 h-4 w-40 animate-pulse rounded-xs"></div>
-    </div>
-    <div class="smol-header m-4 mt-0 flex flex-row justify-between text-xs">
-      <div class="animate-pulse"><Image src={iglogo} alt="" class="w-4" /></div>
-      <div class="bg-primary/50 h-4 w-14 animate-pulse self-end rounded-xs">
+{
+  utility.map(() => {
+    return (
+      <div class="socialcard bg-background flex h-max w-1/4 shrink-0 px-2">
+        <div class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col gap-4 pb-16 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-300 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full">
+          <div class="bg-loading flex aspect-[100/56] w-full animate-pulse" />
+
+          <div class="flex w-full flex-row items-center gap-3">
+            <div class="bg-primary h-3 w-10" />
+            <div class="headerfallback bg-loading h-5 w-34 animate-pulse rounded-xs" />
+            <div class="socialicon bg-loading h-5 w-5 animate-pulse rounded-xs" />
+          </div>
+
+          <div class="flex h-max flex-col gap-2">
+            <>
+              <div class="textfallback bg-loading mt-3 h-4 w-full animate-pulse rounded-xs" />
+              <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
+              <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
+              <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
+            </>
+          </div>
+
+          <div class="smol-header m-4 mt-0 flex flex-row justify-between text-xs">
+            <div class="permalinkfallback" />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
+    );
+  })
+}
