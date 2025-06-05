@@ -4,34 +4,38 @@ import { Image } from "astro:assets";
 ---
 
 <div
-  class="vorstandcard text-primary flex h-max w-full flex-1 flex-row rounded-sm bg-white md:max-w-md md:min-w-md"
+  class="vorstandcard bg-background flex aspect-[1/1] w-1/8 shrink-0 px-2 text-white"
 >
-  <div class="m-1 flex h-36 w-36 overflow-hidden rounded-full">
-    <Image src={Imagesrc} alt="Portrait" class="min-w-full object-cover" />
-  </div>
-  <div class="flex flex-1 flex-col justify-between overflow-hidden p-2 pl-0">
-    <div class="relative bottom-[4px] flex w-full flex-col">
-      <h1 class="text-end font-bold">{Name}</h1>
-      <h3 class="text-end text-sm">{Title}</h3>
+  <div
+    class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-300 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full"
+  >
+    <div class="flex aspect-[1/1] w-full overflow-hidden">
+      <Image src={Imagesrc} alt="Portrait" class="min-w-full object-cover" />
     </div>
-    <div class="relative top-[5px] flex flex-col text-xs">
-      <div class="flex self-end">
-        <span
-          class="relative bottom-[1px] self-center text-end font-extralight text-gray-500"
-          >{Phone}</span
-        >
-        <span class="material-symbols-rounded pl-1 text-base! text-gray-500"
-          >phone</span
-        >
+    <div class="relative mt-8 flex flex-row">
+      <div class="flex w-full flex-col">
+        <h1 class="text-start font-bold">{Name}</h1>
+        <h3 class="text-start text-sm">{Title}</h3>
       </div>
-      <div class="flex self-end">
-        <span
-          class="relative bottom-[1px] self-center text-end font-extralight text-gray-500"
-          >{Mail}</span
-        >
-        <span class="material-symbols-rounded pl-1 text-base! text-gray-500"
-          >mail</span
-        >
+      <div
+        class="group bg-background hover:border-primary absolute top-0 right-0 z-1 flex w-4 flex-col overflow-hidden text-xs transition-[width] duration-300 ease-in-out hover:w-full hover:border-l-2"
+      >
+        <div class="flex self-end">
+          <span
+            class="relative bottom-[1px] w-max self-center text-end font-extralight"
+            >{Mail}</span
+          >
+
+          <span class="material-symbols-rounded pl-1 text-base!">mail</span>
+        </div>
+        <div class="flex self-end">
+          <span
+            class="relative bottom-[1px] w-max self-center text-end font-extralight"
+            >{Phone}</span
+          >
+
+          <span class="material-symbols-rounded pl-1 text-base!">phone</span>
+        </div>
       </div>
     </div>
   </div>
