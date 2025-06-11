@@ -10,66 +10,11 @@ import mwkonzept from "../assets/mwkonzept.png";
 import iglogo from "../assets/instagramwhite.svg";
 ---
 
-<div class="flex flex-col md:hidden">
-  <nav class="bg-primary z-20 flex h-40 w-full flex-row">
-    <div
-      class="mobile-menu flex h-min flex-1 content-center justify-start text-white"
-    >
-      <span class="material-symbols-rounded ml-1 text-4xl!"> menu </span>
-      <label class="self-center text-sm font-light">MENÜ</label>
-    </div>
-    <div class="flex flex-1 justify-center self-center">
-      <Image class="h-28 w-28" src={logo} alt="Club Logo." />
-    </div>
-    <div class="flex flex-1 justify-end">
-      <span class="material-symbols-rounded mt-1.5 mr-1 text-xl! text-white">
-        search
-      </span>
-    </div>
-  </nav>
-  <div
-    class="bg-primary mobile-sliding-menu overshoot absolute z-10 flex h-lvh w-full flex-1 flex-col text-white"
-  >
-    <div class="h-40"></div>
-    <div
-      class="flex max-h-[calc(50%-(--spacing(20)))] flex-1 flex-col content-center justify-evenly p-4 text-3xl font-light"
-    >
-      <a href="/" class="link">NEWS</a>
-      <a href="/vorstand" class="link">VORSTAND</a>
-      <a class="link">KONTAKT</a>
-      <a class="link">IMPRESSUM</a>
-    </div>
-    <div
-      class="flex max-h-[calc(50%-(--spacing(20)))] flex-1 content-center rounded-xs border-1 border-white text-center text-2xl font-light"
-    >
-      <div
-        class="bigsponsorscroller hidescrollbar flex max-h-full w-full flex-1 snap-x snap-mandatory overflow-auto scroll-smooth"
-      >
-        <div class="flex max-h-full max-w-full min-w-full snap-center p-10">
-          <Image class="fobject-contain flex-1" src={obbo} alt="Club Logo." />
-        </div>
-        <div class="flex max-h-full max-w-full min-w-full snap-center p-10">
-          <Image
-            class="flex-1 object-contain"
-            src={mwkonzept}
-            alt="Club Logo."
-          />
-        </div>
-        <div class="flex max-h-full max-w-full min-w-full snap-center p-10">
-          <Image class="flex-1 object-contain" src={britz} alt="Club Logo." />
-        </div>
-        <div class="flex max-h-full max-w-full min-w-full snap-center p-10">
-          <Image class="flex-1 object-contain" src={bruno} alt="Club Logo." />
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 <div
   class="relative z-20 hidden w-full flex-row justify-evenly border-0 border-t-4 border-solid border-t-blue-600 bg-black p-3 text-white md:flex"
 >
   <span
-    class="material-symbols-rounded absolute left-6 self-center text-4xl! text-white"
+    class="material-symbols-rounded absolute left-6 self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50"
     >menu</span
   >
   <div class="flex h-full w-full max-w-6xl justify-between">
@@ -87,13 +32,16 @@ import iglogo from "../assets/instagramwhite.svg";
       </div>
     </div>
     <div class="flex h-full w-max flex-row items-center justify-between gap-6">
-      <button class="border-primary text-md border-2 border-solid px-4 py-2"
+      <button
+        class="border-primary text-md border-2 border-solid px-4 py-2 hover:cursor-not-allowed hover:opacity-50"
         >LOGIN</button
       >
-      <span class="material-symbols-rounded h-max text-xl! text-white"
+      <span
+        class="material-symbols-rounded h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50"
         >shopping_cart</span
       >
-      <span class="material-symbols-rounded h-max text-xl! text-white"
+      <span
+        class="material-symbols-rounded h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50"
         >search</span
       >
       <a class="h-max" href="https://www.instagram.com/sgthalexweileraschbach/"

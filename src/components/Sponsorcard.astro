@@ -1,41 +1,62 @@
 ---
-const { ImageUrl, Title, Name, Link, Color } = Astro.props;
+const {
+  ImageUrls,
+  Urls,
+  Interval,
+  WidthTailwindClass,
+  Identifier,
+  BackgroundTailwindClasses,
+} = Astro.props;
 import { Image } from "astro:assets";
-import iglogo from "../assets/instagram2.svg";
 ---
 
-<div
-  class="card text-primary flex h-28 w-full flex-1 flex-row rounded-sm bg-white"
->
-  <div class="flex h-full flex-1 justify-center overflow-hidden p-1">
-    {
-      ImageUrl ? (
-        <Image
-          src={ImageUrl}
-          alt="Portrait"
-          class:list={["min-w-full", "object-contain", "p-2", Color]}
-        />
-      ) : (
-        <h1 class="max-w-full self-center text-center font-extrabold break-words lg:text-xl">
-          {Title}
-        </h1>
-      )
-    }
-  </div>
-  <div class="flex flex-1 flex-col justify-between overflow-hidden p-2 pl-0">
-    <div class="relative bottom-[4px] flex w-full flex-col">
-      <h1 class="text-end font-bold">{Name}</h1>
-      <h3 class="text-end text-sm">{Title}</h3>
-    </div>
-    <div class="relative top-[5px] flex flex-col text-xs">
-      <div class="flex self-end">
-        <a href={Link}>
-          <span
-            class="relative bottom-[1px] self-center text-end font-extralight text-gray-500"
-            >Weiter Infos</span
-          ></a
-        >
-      </div>
+<div class:list={["bg-background flex shrink-0 px-2", WidthTailwindClass]}>
+  <div
+    class="card bg-dark-gray-700 after:bg-primary relative flex w-full shrink-0 flex-col items-center justify-center gap-4 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full"
+  >
+    <div
+      data-interval={Interval}
+      class:list={[
+        "hidescrollbar flex w-full snap-x snap-mandatory flex-row overflow-auto scroll-smooth",
+        Identifier,
+      ]}
+    >
+      {
+        ImageUrls.map((url: string, index: number) => {
+          return (
+            <a href={Urls[index]} class="flex min-w-full snap-start">
+              <Image
+                src={url}
+                inferSize
+                alt="Portrait"
+                class:list={[
+                  "mx-18 aspect-square w-full object-contain",
+                  BackgroundTailwindClasses && BackgroundTailwindClasses[index],
+                ]}
+              />
+            </a>
+          );
+        })
+      }
     </div>
   </div>
 </div>
+<script define:vars={{ Identifier }}>
+  //this dont work for social, check it out
+  let test = document.querySelector("." + Identifier);
+
+  (function () {
+    let interval = test.getAttribute("data-interval");
+    console.log(interval);
+    console.log(test);
+    setInterval(function () {
+      if (test) {
+        let max_scroll = test.scrollWidth - test.clientWidth;
+        let current_scroll = test.scrollLeft;
+        if (test.scrollLeft + test.clientWidth * 0.51 > max_scroll) {
+          test.scrollLeft = 0;
+        } else test.scrollLeft = current_scroll + test.clientWidth * 0.51;
+      }
+    }, +interval);
+  })();
+</script>

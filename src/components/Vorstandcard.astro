@@ -3,38 +3,38 @@ const { Imagesrc, Name, Title, Mail, Phone } = Astro.props;
 import { Image } from "astro:assets";
 ---
 
-<div
-  class="vorstandcard bg-background flex aspect-[1/1] w-1/8 shrink-0 px-2 text-white"
->
+<div class="vorstandcard bg-background flex w-1/8 shrink-0 px-2 text-white">
   <div
-    class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full"
+    class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col gap-8 pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full"
   >
     <div class="flex aspect-[1/1] w-full overflow-hidden">
       <Image src={Imagesrc} alt="Portrait" class="min-w-full object-cover" />
     </div>
-    <div class="relative mt-8 flex flex-row">
-      <div class="flex w-full flex-col">
-        <h1 class="text-start font-bold">{Name}</h1>
-        <h3 class="text-start text-sm">{Title}</h3>
-      </div>
-      <div
-        class="group bg-background hover:border-primary absolute top-0 right-0 z-1 flex w-4 flex-col overflow-hidden text-xs transition-[width] duration-300 ease-in-out hover:w-full hover:border-l-2"
-      >
-        <div class="flex self-end">
-          <span
-            class="relative bottom-[1px] w-max self-center text-end font-extralight"
-            >{Mail}</span
-          >
-
-          <span class="material-symbols-rounded pl-1 text-base!">mail</span>
+    <div class="flex flex-col gap-4">
+      <div class="relative flex flex-row">
+        <div class="flex w-full flex-col">
+          <h1 class="text-start font-bold">{Name}</h1>
+          <h3 class="text-start text-sm">{Title}</h3>
         </div>
-        <div class="flex self-end">
-          <span
-            class="relative bottom-[1px] w-max self-center text-end font-extralight"
-            >{Phone}</span
-          >
+        <div
+          class="group bg-background hover:border-primary absolute top-0 right-0 z-1 flex w-4 flex-col overflow-hidden text-xs transition-[width] duration-300 ease-in-out hover:w-full hover:border-l-2"
+        >
+          <div class="flex self-end">
+            <span
+              class="relative bottom-[1px] w-max self-center text-end font-extralight"
+              >{Mail}</span
+            >
 
-          <span class="material-symbols-rounded pl-1 text-base!">phone</span>
+            <span class="material-symbols-rounded pl-1 text-base!">mail</span>
+          </div>
+          <div class="flex self-end">
+            <span
+              class="relative bottom-[1px] w-max self-center text-end font-extralight"
+              >{Phone}</span
+            >
+
+            <span class="material-symbols-rounded pl-1 text-base!">phone</span>
+          </div>
         </div>
       </div>
     </div>

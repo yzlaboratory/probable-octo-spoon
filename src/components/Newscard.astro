@@ -4,12 +4,10 @@ import { Image } from "astro:assets";
 import iglogo from "../assets/instagram2.svg";
 ---
 
-<div
-  class="bg-background newscardcontainer flex aspect-[1/1] w-1/4 shrink-0 px-2"
->
+<div class="bg-background newscardcontainer flex h-max w-1/4 shrink-0 px-2">
   <a
     href="createthisurlforstorynews"
-    class="card after:bg-primary relative flex h-full w-full shrink-0 flex-col justify-evenly gap-4 pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full"
+    class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col justify-start gap-8 pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full"
   >
     <div class="flex aspect-[100/56] w-full overflow-hidden">
       <Image
@@ -20,19 +18,21 @@ import iglogo from "../assets/instagram2.svg";
       />
     </div>
 
-    <div class="flex w-full flex-row items-center gap-4">
-      <div class="bg-primary h-3 w-10"></div>
-      <h3 class="text-md font-medium text-white">
-        {Date} / {Tag}
-      </h3>
-    </div>
+    <div class="flex flex-col gap-2">
+      <div class="flex w-full flex-row items-center gap-4">
+        <div class="bg-primary h-3 w-10"></div>
+        <h3 class="text-md font-medium text-white">
+          {Date} / {Tag}
+        </h3>
+      </div>
 
-    <h1 class="text-3xl font-semibold">
-      {Title}
-    </h1>
+      <h1 class="text-3xl font-semibold">
+        {Title}
+      </h1>
 
-    <div class="text-md h-max font-light overflow-ellipsis text-gray-300">
-      <p class="inter-primary line-clamp-4 text-wrap">{Description}</p>
+      <div class="text-md h-max font-light overflow-ellipsis text-gray-300">
+        <p class="inter-primary line-clamp-4 text-wrap">{Description}</p>
+      </div>
     </div>
   </a>
 </div>

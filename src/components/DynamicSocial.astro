@@ -5,6 +5,7 @@ import Gallery from "./Gallery.astro";
 import Socialcard from "./Socialcard.astro";
 
 import { IG_ACCESS_TOKEN, getSecret } from "astro:env/server";
+import SmallSponsors from "./SmallSponsors.astro";
 
 const KEY = getSecret("IG_ACCESS_TOKEN");
 const response1 = await fetch(
@@ -15,7 +16,7 @@ const res = await response1.json();
 ---
 
 {
-  res.data.map(async (item: any) => {
+  res.data.map(async (item: any, index: number) => {
     const mediaArray: any[] = [];
     const response2 = await fetch(
       "https://graph.instagram.com/v22.0/" +
@@ -33,17 +34,33 @@ const res = await response1.json();
         media_product_type,
         children,
       } = await response2.json();
-      return (
-        <Socialcard
-          ImageUrl={media_url}
-          Caption={caption}
-          Permalink={permalink}
-          Timestamp={timestamp}
-          Type={media_type}
-          ProductType={media_product_type}
-          Children={children}
-        />
-      );
+      if (index == 4) {
+        return (
+          <>
+            <SmallSponsors />
+            <Socialcard
+              ImageUrl={media_url}
+              Caption={caption}
+              Permalink={permalink}
+              Timestamp={timestamp}
+              Type={media_type}
+              ProductType={media_product_type}
+              Children={children}
+            />
+          </>
+        );
+      } else
+        return (
+          <Socialcard
+            ImageUrl={media_url}
+            Caption={caption}
+            Permalink={permalink}
+            Timestamp={timestamp}
+            Type={media_type}
+            ProductType={media_product_type}
+            Children={children}
+          />
+        );
     } else return;
   })
 }

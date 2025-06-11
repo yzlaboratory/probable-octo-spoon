@@ -9,23 +9,25 @@ utility.fill(1);
 {
   utility.map(() => {
     return (
-      <div class="socialcard bg-background flex aspect-[1/1] h-max w-1/5 shrink-0 px-2">
-        <div class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col gap-4 pb-16 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-300 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full">
+      <div class="socialcard bg-background flex h-max w-1/5 shrink-0 px-2">
+        <div class="card after:bg-primary relative flex h-max w-full shrink-0 flex-col justify-start gap-8 pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-300 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full">
           <div class="bg-loading flex aspect-[100/56] w-full animate-pulse" />
 
-          <div class="flex w-full flex-row items-center gap-4">
-            <div class="bg-primary h-3 w-10" />
-            <div class="headerfallback bg-loading h-5 w-34 animate-pulse rounded-xs" />
-            <div class="socialicon bg-loading h-5 w-5 animate-pulse rounded-xs" />
-          </div>
-
-          <div class="flex h-max flex-col gap-2">
-            <>
-              <div class="textfallback bg-loading mt-3 h-4 w-full animate-pulse rounded-xs" />
-              <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
-              <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
-              <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
-            </>
+          <div class="flex flex-col gap-4">
+            {" "}
+            <div class="flex w-full flex-row items-center gap-4">
+              <div class="bg-primary h-3 w-10" />
+              <div class="headerfallback bg-loading h-5 w-34 animate-pulse rounded-xs" />
+              <div class="socialicon bg-loading h-5 w-5 animate-pulse rounded-xs" />
+            </div>
+            <div class="flex h-max flex-col gap-2">
+              <>
+                <div class="textfallback bg-loading mt-3 h-4 w-full animate-pulse rounded-xs" />
+                <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
+                <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
+                <div class="textfallback bg-loading h-4 w-full animate-pulse rounded-xs" />
+              </>
+            </div>
           </div>
         </div>
       </div>

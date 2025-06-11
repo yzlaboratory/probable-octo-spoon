@@ -10,13 +10,14 @@ import Hero2 from "../components/Hero2.astro";
 import DynamicSocial from "../components/DynamicSocial.astro";
 import Gallery from "../components/Gallery.astro";
 import Vorstand from "../components/Vorstand.astro";
+import Footer from "../components/Footer.astro";
 
 export const prerender = true;
 ---
 
 <Layout>
   <div class="flex flex-1 flex-col justify-start overflow-auto">
-    <div class="my-30 flex w-full flex-col gap-30">
+    <div class="mt-30 flex w-full flex-col gap-30">
       <News />
       <!-- 
             <Calendar />
@@ -39,6 +40,7 @@ export const prerender = true;
       >
         <Vorstand />
       </Gallery>
+      <Footer />
     </div>
   </div>
 </Layout>
