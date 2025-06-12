@@ -6,11 +6,10 @@ import { sponsorJSON } from "../utilities/sponsors";
 <Sponsorcard
   ImageUrls={sponsorJSON.sponsors.flatMap((item) => item.ImageUrl)}
   Urls={sponsorJSON.sponsors.flatMap((item) => item.Link)}
-  Interval="7500"
+  Interval="5000"
   WidthTailwindClass="w-1/5"
-  Identifier="socialsponsors"
+  Identifier="socialsponsorsfallback"
   BackgroundTailwindClasses={sponsorJSON.sponsors.flatMap((item) =>
     item.Color != undefined ? item.Color : "",
   )}
-  Animated="True"
 />

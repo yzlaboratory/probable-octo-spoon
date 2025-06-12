@@ -31,16 +31,18 @@ if (!images[ImageUrl])
     <div class="flex flex-col gap-2">
       <div class="flex w-full flex-row items-center gap-4">
         <div class="bg-primary h-3 w-10"></div>
-        <h3 class="text-md font-medium text-white">
+        <h3 class="text-sm font-medium text-white 2xl:text-base">
           {Date} / {Tag}
         </h3>
       </div>
 
-      <h1 class="text-3xl font-semibold">
+      <h1 class="text-xl font-semibold 2xl:text-3xl">
         {Title}
       </h1>
 
-      <div class="text-md h-max font-light overflow-ellipsis text-gray-300">
+      <div
+        class="h-max text-sm font-light overflow-ellipsis text-gray-300 2xl:text-base"
+      >
         <p class="inter-primary line-clamp-4 text-wrap">{Description}</p>
       </div>
     </div>

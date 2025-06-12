@@ -37,6 +37,7 @@ const allNews = await getCollection("news").then(array => array.sort((a,b) =>  b
             Interval="15000"
             WidthTailwindClass="w-1/4"
             Identifier="newssponsors"
+            Animated="true"
           />
           <Newscard
             Title={item.data.title}

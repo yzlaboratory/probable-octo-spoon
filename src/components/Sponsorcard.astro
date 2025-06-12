@@ -6,6 +6,7 @@ const {
   WidthTailwindClass,
   Identifier,
   BackgroundTailwindClasses,
+  Animated,
 } = Astro.props;
 import { Image } from "astro:assets";
 ---
@@ -41,20 +42,23 @@ import { Image } from "astro:assets";
     </div>
   </div>
 </div>
-<script define:vars={{ Identifier }}>
-  let test = document.querySelector("." + Identifier);
+<script define:vars={{ Identifier, Animated }}>
+  if (Animated) {
+    console.log(Identifier);
+    let test = document.querySelector("." + Identifier);
 
-  (function () {
-    let interval = test.getAttribute("data-interval");
-
-    setInterval(function () {
-      if (test) {
-        let max_scroll = test.scrollWidth - test.clientWidth;
-        let current_scroll = test.scrollLeft;
-        if (test.scrollLeft + test.clientWidth * 0.51 > max_scroll) {
-          test.scrollLeft = 0;
-        } else test.scrollLeft = current_scroll + test.clientWidth * 0.51;
-      }
-    }, +interval);
-  })();
+    (function () {
+      let interval = test.getAttribute("data-interval");
+      test.scrollLeft = 0;
+      setInterval(function () {
+        if (test) {
+          let max_scroll = test.scrollWidth - test.clientWidth;
+          let current_scroll = test.scrollLeft;
+          if (test.scrollLeft + test.clientWidth * 0.51 > max_scroll) {
+            test.scrollLeft = 0;
+          } else test.scrollLeft = current_scroll + test.clientWidth * 0.51;
+        }
+      }, +interval);
+    })();
+  }
 </script>

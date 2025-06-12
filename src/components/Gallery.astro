@@ -51,7 +51,7 @@ const { childrenClassName, headerTitle, classPrefix, numberOfItemsInViewport } =
     )!;
 
     galleryNextButton.style.height =
-      scrollContainer.clientHeight.toString() + "px";
+      scrollContainer.getBoundingClientRect().height.toString() + "px";
     galleryPrevButton.style.height = galleryNextButton.style.height;
     let scrollValue =
       document
