@@ -1,0 +1,41 @@
+ [
+        {
+            "id":1,
+            "path": "websitedev2025-02-20",
+            "title": "Website Development",
+            "tag": "DIGITAL",
+            "short": "Die neue Webseite befindet sich noch in der Entwicklung. Dementsprechend werden regelmäßig in den kommenden Wochen neue Features und Änderungen eingespielt.",
+            "long": "Die neue Webseite befindet sich noch in der Entwicklung. Dementsprechend werden regelmäßig in den kommenden Wochen neue Features und Änderungen eingespielt. Die nächsten wichtigen Features sind Kontaktseite, Spieltagskalender, Tabelle und Kader.",
+            "date": "2025-02-20",
+            "imageurl": "/src/assets/code.jpg"
+        },    
+        {   "id":2,
+            "path": "dreikampf2025-01-24",
+            "title": "Faasend Dreikampf",
+            "tag": "FESTLICHKEIT",
+            "short": "Bald ist es wieder soweit. Der diesjährige Fasend-Dreikampf steht schon wieder vor der Tür. Am 01.03.25 in der Don-Bosco-Halle Thalexweiler. Los geht's um 12:30 Uhr. \nWie gewohnt werden pro Team 4 Spieler benötigt. Die Disziplinen sind Mini-Tischtennis, Dosenwerfen und Leiter-Golf. Anmeldungen mit dem jeweiligen Team-Namen werden ab sofort gerne via Social-Media Kanälen oder von unseren Vorstandsmitgliedern entgegengenommen. Anmeldeschluss ist der 23.02.25. Für Speis und Trank ist wie immer ebenfalls bestens gesorgt. \nWir freuen uns auf euch! ",
+            "long": "Bald ist es wieder soweit. Der diesjährige Fasend-Dreikampf steht schon wieder vor der Tür. Am 01.03.25 in der Don-Bosco-Halle Thalexweiler. Los geht's um 12:30 Uhr. \nWie gewohnt werden pro Team 4 Spieler benötigt. Die Disziplinen sind Mini-Tischtennis, Dosenwerfen und Leiter-Golf. Anmeldungen mit dem jeweiligen Team-Namen werden ab sofort gerne via Social-Media Kanälen oder von unseren Vorstandsmitgliedern entgegengenommen. Anmeldeschluss ist der 23.02.25. Für Speis und Trank ist wie immer ebenfalls bestens gesorgt. \nWir freuen uns auf euch! ",
+            "date": "2025-01-24",
+            "imageurl": "/src/assets/newsimage1.png"
+        },
+        {
+            "id":3,
+            "path": "fuenfkampf2025-05-07",
+            "title": "Fünfkampf",
+            "tag": "FESTLICHKEIT",
+            "short": "SERVUS ihr coolen Leute da draußen! Nicht mehr lange bis zum Fünfkampf! Yes! \n Trommelt euch zu SECHST zusammen und meldet euch (zum Beispiel hier) an! Eure Teams dürfen natürlich auch gemischt sein ✌🏽 Fußball kann gespielt werden, muss aber nicht! Dein Team entscheidet selbst! 💥 Es gibt für euch eine leckere Auswahl an Getränken und Essen. Auch für Kinder ist einiges im Angebot (Wasserspiele, Cub, Sackloch, Wurfspiele etc). Noch Fragen? Immer her damit",
+            "long": "SERVUS ihr coolen Leute da draußen! Nicht mehr lange bis zum Fünfkampf! Yes! \n Trommelt euch zu SECHST zusammen und meldet euch (zum Beispiel hier) an! Eure Teams dürfen natürlich auch gemischt sein ✌🏽 Fußball kann gespielt werden, muss aber nicht! Dein Team entscheidet selbst! 💥 Es gibt für euch eine leckere Auswahl an Getränken und Essen. Auch für Kinder ist einiges im Angebot (Wasserspiele, Cub, Sackloch, Wurfspiele etc). Noch Fragen? Immer her damit",
+            "date": "2025-05-07",
+            "imageurl": "/src/assets/fuenfkampf25.jpg"
+        },    
+        {   "id":4,
+            "path": "kirmes2025-06-12",
+            "title": "Kirmes",
+            "tag": "FESTLICHKEIT",
+            "short": "Nächste Woche ist wieder Kirmes in Thalexweiler. Wie in den vorherigen Jahren kümmert sich der Sportverein wieder um den Bierstand. Der Boule Club ist am Rostwurststand zu finden, die Interessengemeinschaft \"Gemeinsam für Exweller\n am Weinstand, der Musikverein bietet Frühlingsrollen an und der Turnverein Cocktails. Ein großes Dankeschön geht auch von uns aus schon vorab an die Werbeagentur MW Konzept für die tollen Plakate und Printmedien. Wir sehen uns !",
+            "long": "Nächste Woche ist wieder Kirmes in Thalexweiler. Wie in den vorherigen Jahren kümmert sich der Sportverein wieder um den Bierstand. Der Boule Club ist am Rostwurststand zu finden, die Interessengemeinschaft \"Gemeinsam für Exweller\n am Weinstand, der Musikverein bietet Frühlingsrollen an und der Turnverein Cocktails. Ein großes Dankeschön geht auch von uns aus schon vorab an die Werbeagentur MW Konzept für die tollen Plakate und Printmedien. Wir sehen uns !",
+            "date": "2025-06-12", 
+            "imageurl": "/src/assets/kirmes25.jpg"
+        }
+    ]
+

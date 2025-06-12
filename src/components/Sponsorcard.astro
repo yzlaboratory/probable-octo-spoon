@@ -42,13 +42,11 @@ import { Image } from "astro:assets";
   </div>
 </div>
 <script define:vars={{ Identifier }}>
-  //this dont work for social, check it out
   let test = document.querySelector("." + Identifier);
 
   (function () {
     let interval = test.getAttribute("data-interval");
-    console.log(interval);
-    console.log(test);
+
     setInterval(function () {
       if (test) {
         let max_scroll = test.scrollWidth - test.clientWidth;

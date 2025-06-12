@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+import Footer from "../../components/Footer.astro";
+import Layout from "../../layouts/Layout.astro";
+// 1. Generate a new path for every collection entry
+export async function getStaticPaths() {
+  const news = await getCollection("news");
+  return news.map((item) => ({
+    params: { news: item.data.path },
+    props: { data: item.data },
+  }));
+}
+// 2. For your template, you can get the entry directly from the prop
+const { data } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/*.{jpeg,jpg,png,svg}",
+);
+if (!images[data.imageurl])
+  throw new Error(
+    `"${data.imageurl}" does not exist in glob: "src/assets/*.{jpeg,jpg,png,gif}"`,
+  );
+
+export const prerender = true;
+---
+
+<Layout>
+  <div class="flex flex-1 flex-col justify-start overflow-auto">
+    <div class="flex w-full flex-col">
+      <div class="m-32 flex flex-col gap-16 text-white">
+        <div>
+          <h1 class="text-7xl font-black">{data.title.toUpperCase()}</h1>
+          <div class="flex w-full flex-row items-center gap-4">
+            <div class="bg-primary h-3 w-10"></div>
+            <h3 class="text-md font-medium text-white">
+              {data.date.toLocaleDateString()} / {data.tag}
+            </h3>
+          </div>
+        </div>
+        <div class="flex flex-row">
+          <Image
+            src={images[data.imageurl]()}
+            inferSize
+            alt="Portrait"
+            class="min-w-1/2 object-fill"
+          />
+          <div class="flex max-w-1/2 flex-1 items-center justify-center">
+            <p class="max-w-1/2 text-3xl/10 text-white">
+              {data.long}
+            </p>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  </div>
+</Layout>
