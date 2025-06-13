@@ -11,29 +11,35 @@ import iglogo from "../assets/instagramwhite.svg";
 ---
 
 <div
-  class="relative z-20 hidden w-full flex-row justify-evenly border-0 border-t-4 border-solid border-t-blue-600 bg-black p-3 text-white md:flex"
+  class="relative z-20 flex w-full flex-row justify-evenly border-0 border-t-4 border-solid border-t-blue-600 bg-black p-3 text-white"
 >
   <span
-    class="material-symbols-rounded absolute left-6 self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50"
+    class="material-symbols-rounded absolute left-6 hidden! self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50 xl:flex!"
     >menu</span
   >
   <div class="flex h-full w-full max-w-6xl justify-between">
-    <div class="flex h-full">
+    <div class="flex h-full items-center justify-center gap-2 md:gap-0">
+      <span
+        class="material-symbols-rounded left-6 flex self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50 xl:hidden!"
+        >menu</span
+      >
       <Image
-        class="mr-3 h-14 w-14"
+        class="mr-3 h-8 w-8 md:h-14 md:w-14"
         width="38"
         height="38"
         src={logo}
         alt="Club Logo."
       />
-      <div class="flex h-full flex-col justify-center">
+      <div class="hidden h-full flex-col justify-center md:flex">
         <div class="mb-[-3px] font-black">SVALEMANNIA</div>
         <div class="mt-[-3px] font-black">THALEXWEILER</div>
       </div>
     </div>
-    <div class="flex h-full w-max flex-row items-center justify-between gap-6">
+    <div
+      class="flex h-full w-max flex-row items-center justify-between gap-2 md:gap-6"
+    >
       <button
-        class="border-primary text-md border-2 border-solid px-4 py-2 hover:cursor-not-allowed hover:opacity-50"
+        class="border-primary border-2 border-solid px-4 py-2 text-xs hover:cursor-not-allowed hover:opacity-50 md:text-base"
         >LOGIN</button
       >
       <span
