@@ -11,14 +11,14 @@ const { childrenClassName, headerTitle, classPrefix, numberOfItemsInViewport } =
     data-childrenclassname={childrenClassName}
     data-prefix={classPrefix}
     data-numberofitemsinviewport={numberOfItemsInViewport}
-    class="galleryContainer relative flex max-w-full flex-row flex-nowrap content-start overflow-hidden scroll-smooth px-20"
+    class="galleryContainer hidescrollbar relative flex max-w-full flex-row flex-nowrap content-start overflow-auto scroll-smooth px-4 md:px-20"
   >
     <slot />
   </div>
   <div
     class={classPrefix +
       "NextButton " +
-      "bg-background/75 absolute right-0 z-1 bottom-0 flex h-full w-20 items-center justify-center hover:bg-background/90 transition-colors ease-in-out duration-300 hover:cursor-pointer"}
+      "bg-background/75 hidden lg:flex absolute right-0 z-1 bottom-0 h-full w-20 items-center justify-center hover:bg-background/90 transition-colors ease-in-out duration-300 hover:cursor-pointer"}
   >
     <span
       class="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl! text-zinc-400 hover:cursor-pointer"
@@ -27,7 +27,7 @@ const { childrenClassName, headerTitle, classPrefix, numberOfItemsInViewport } =
   </div>
   <div
     class={classPrefix +
-      "PrevButton bg-background/75 absolute bottom-0 left-0 z-1 flex hidden h-full w-20 items-center justify-center hover:bg-background/90 transition-colors ease-in-out duration-300 hover:cursor-pointer"}
+      "PrevButton hidden lg:flex  bg-background/75 absolute bottom-0 left-0 z-1 h-full w-20 items-center justify-center hover:bg-background/90 transition-colors ease-in-out duration-300 hover:cursor-pointer"}
   >
     <span
       class="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl! text-zinc-400"
@@ -36,91 +36,95 @@ const { childrenClassName, headerTitle, classPrefix, numberOfItemsInViewport } =
   </div>
 </div>
 <script>
-  const galleries = document.querySelectorAll(".galleryContainer");
-  galleries.forEach((gallery) => {
-    let prefixString = gallery.getAttribute("data-prefix");
-    let galleryPrevButton = document.querySelector(
-      "." + prefixString + "PrevButton",
-    ) as HTMLElement;
-    let galleryNextButton = document.querySelector(
-      "." + prefixString + "NextButton",
-    ) as HTMLElement;
-    let scrollContainer = gallery;
-    let numberOfItemsInViewport = +scrollContainer.getAttribute(
-      "data-numberofitemsinviewport",
-    )!;
+  if (window.matchMedia("(width >= 64rem)").matches) {
+    const galleries = document.querySelectorAll(".galleryContainer");
+    galleries.forEach((gallery) => {
+      let prefixString = gallery.getAttribute("data-prefix");
+      let galleryPrevButton = document.querySelector(
+        "." + prefixString + "PrevButton",
+      ) as HTMLElement;
+      let galleryNextButton = document.querySelector(
+        "." + prefixString + "NextButton",
+      ) as HTMLElement;
+      let scrollContainer = gallery;
+      let numberOfItemsInViewport = +scrollContainer.getAttribute(
+        "data-numberofitemsinviewport",
+      )!;
 
-    galleryNextButton.style.height =
-      scrollContainer.getBoundingClientRect().height.toString() + "px";
-    galleryPrevButton.style.height = galleryNextButton.style.height;
-    let scrollValue =
-      document
-        .querySelector(
-          "." +
-            scrollContainer.getAttribute("data-childrenclassname")?.toString()!,
-        )
-        ?.getBoundingClientRect().width! * numberOfItemsInViewport;
-    scrollContainer.setAttribute(
-      "finalscrollvalue",
-      scrollContainer.scrollLeft.toString(),
-    );
+      galleryNextButton.style.height =
+        scrollContainer.getBoundingClientRect().height.toString() + "px";
+      galleryPrevButton.style.height = galleryNextButton.style.height;
+      let scrollValue =
+        document
+          .querySelector(
+            "." +
+              scrollContainer
+                .getAttribute("data-childrenclassname")
+                ?.toString()!,
+          )
+          ?.getBoundingClientRect().width! * numberOfItemsInViewport;
+      scrollContainer.setAttribute(
+        "finalscrollvalue",
+        scrollContainer.scrollLeft.toString(),
+      );
 
-    let checkForwardButton = function (finalscrollvalue: number) {
-      if (scrollContainer && galleryNextButton) {
-        if (
-          finalscrollvalue >=
-          scrollContainer.scrollWidth - scrollContainer.clientWidth
-        ) {
-          galleryNextButton.classList.add("hidden");
-        } else {
-          galleryNextButton.classList.remove("hidden");
+      let checkForwardButton = function (finalscrollvalue: number) {
+        if (scrollContainer && galleryNextButton) {
+          if (
+            finalscrollvalue >=
+            scrollContainer.scrollWidth - scrollContainer.clientWidth
+          ) {
+            galleryNextButton.classList.add("hidden");
+          } else {
+            galleryNextButton.classList.remove("hidden");
+          }
         }
-      }
-    };
-    let checkBackButton = function (finalscrollvalue: number) {
-      if (galleryPrevButton) {
-        if (finalscrollvalue <= 0) {
-          galleryPrevButton.classList.add("hidden");
-        } else {
-          galleryPrevButton.classList.remove("hidden");
+      };
+      let checkBackButton = function (finalscrollvalue: number) {
+        if (galleryPrevButton) {
+          if (finalscrollvalue <= 0) {
+            galleryPrevButton.classList.add("hidden");
+          } else {
+            galleryPrevButton.classList.remove("hidden");
+          }
         }
-      }
-    };
-    let checkButtons = function (finalscrollvalue: number) {
-      checkForwardButton(finalscrollvalue);
-      checkBackButton(finalscrollvalue);
-    };
+      };
+      let checkButtons = function (finalscrollvalue: number) {
+        checkForwardButton(finalscrollvalue);
+        checkBackButton(finalscrollvalue);
+      };
 
-    galleryNextButton?.addEventListener("click", () => {
-      if (scrollContainer) {
-        let finalScrollValue =
-          +scrollContainer.getAttribute("finalscrollvalue")!;
-        finalScrollValue = finalScrollValue + scrollValue;
+      galleryNextButton?.addEventListener("click", () => {
+        if (scrollContainer) {
+          let finalScrollValue =
+            +scrollContainer.getAttribute("finalscrollvalue")!;
+          finalScrollValue = finalScrollValue + scrollValue;
 
-        scrollContainer.scrollLeft = finalScrollValue;
-        scrollContainer.setAttribute(
-          "finalscrollvalue",
-          finalScrollValue.toString(),
-        );
-        checkButtons(finalScrollValue);
-      }
+          scrollContainer.scrollLeft = finalScrollValue;
+          scrollContainer.setAttribute(
+            "finalscrollvalue",
+            finalScrollValue.toString(),
+          );
+          checkButtons(finalScrollValue);
+        }
+      });
+      galleryPrevButton?.addEventListener("click", () => {
+        if (scrollContainer) {
+          let finalScrollValue =
+            +scrollContainer.getAttribute("finalscrollvalue")!;
+
+          finalScrollValue = finalScrollValue - scrollValue;
+          scrollContainer.scrollLeft = finalScrollValue;
+          scrollContainer.setAttribute(
+            "finalscrollvalue",
+            finalScrollValue.toString(),
+          );
+          checkButtons(finalScrollValue);
+        }
+      });
+      checkButtons(scrollContainer.scrollLeft);
     });
-    galleryPrevButton?.addEventListener("click", () => {
-      if (scrollContainer) {
-        let finalScrollValue =
-          +scrollContainer.getAttribute("finalscrollvalue")!;
-
-        finalScrollValue = finalScrollValue - scrollValue;
-        scrollContainer.scrollLeft = finalScrollValue;
-        scrollContainer.setAttribute(
-          "finalscrollvalue",
-          finalScrollValue.toString(),
-        );
-        checkButtons(finalScrollValue);
-      }
-    });
-    checkButtons(scrollContainer.scrollLeft);
-  });
+  }
 </script>
 <style>
   .hidden {

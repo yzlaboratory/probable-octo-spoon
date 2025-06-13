@@ -14,7 +14,9 @@ if (!images[ImageUrl])
   );
 ---
 
-<div class="bg-background newscardcontainer flex h-auto w-1/4 shrink-0 px-2">
+<div
+  class="bg-background newscardcontainer flex h-auto w-9/10 shrink-0 px-2 lg:w-1/4"
+>
   <a
     href={"news/" + Path}
     class="card after:bg-primary relative flex h-auto w-full shrink-0 flex-col justify-start gap-8 pb-8 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full"

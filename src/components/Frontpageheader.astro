@@ -4,6 +4,10 @@ import logo from "../assets/logo.svg";
 const { text } = Astro.props;
 ---
 
-<div class="mb-8 flex w-full justify-center">
-  <h1 class="min-w-6xl text-4xl font-black text-white italic">{text}</h1>
+<div
+  class="mb-4 flex w-full justify-start pl-6 md:mb-8 md:justify-center md:pl-0"
+>
+  <h1 class="text-2xl font-black text-white italic xl:min-w-6xl xl:text-4xl">
+    {text}
+  </h1>
 </div>
