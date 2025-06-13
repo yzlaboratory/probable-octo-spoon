@@ -2,26 +2,32 @@
 import { Image } from "astro:assets";
 import iglogo from "../assets/instagramwhite.svg";
 import { sponsorJSON } from "../utilities/sponsors";
+import logo from "../assets/logo.svg";
 ---
 
 <div
   class="from-background to-dark-gray-750 border-b-primary flex min-h-[var(--container-2xl)] w-full max-w-full flex-col justify-end gap-8 border-b-8 bg-linear-to-b p-4 pb-8 text-lg text-neutral-400 lg:gap-16 lg:p-16"
 >
+  <!-- can this be ordered in a better way or just limit size for mobile -->
   <div
-    class="allsponsors flex w-full flex-row flex-wrap justify-between gap-2 lg:justify-start lg:gap-6"
+    class="allsponsors flex w-full flex-row flex-wrap justify-center gap-3 lg:justify-start lg:gap-6"
   >
     {
       sponsorJSON.sponsors.map((sponsor: any) => {
-        return (
-          <div class="w-max rounded-xl border-[1px] border-solid border-zinc-300 px-2 py-2 lg:px-4">
-            <Image
-              src={sponsor.ImageUrl}
-              inferSize
-              alt="Portrait"
-              class="h-6 w-max object-contain grayscale lg:h-12"
-            />
-          </div>
-        );
+        if (sponsor.ImageUrl != logo)
+          return (
+            <div class="flex w-24 items-center justify-center rounded-xl border-[1px] border-solid border-zinc-300 px-2 py-2 lg:w-max lg:px-4">
+              <Image
+                src={sponsor.ImageUrl}
+                inferSize
+                alt="Portrait"
+                class:list={[
+                  "h-6 w-max object-contain lg:h-12",
+                  sponsor.hasBackground ? "grayscale" : "brightness-0 invert",
+                ]}
+              />
+            </div>
+          );
       })
     }
   </div>

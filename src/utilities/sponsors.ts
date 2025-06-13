@@ -50,6 +50,7 @@ export const sponsorJSON = {
       Title: "seit 1927",
       ImageUrl: falk,
       Link: "https://www.xn--getrnke-falk-jcb.de/",
+      hasBackground: true
     },
     {
       Name: "Sporthaus Glaab",
@@ -61,13 +62,15 @@ export const sponsorJSON = {
       Name: "Holzhauser GmBH",
       Title: "Baumaschinen Vermietung & Verkauf",
       ImageUrl: holzhauser,
-      Link: "https://www.holzhauser.info/",
+      Link: "https://www.holzhauser.info/",      
+      hasBackground: true
     },
     {
       Name: "Kempf Aussenanlagen",
       Title: "Garten- & Landschaftsbau",
       ImageUrl: kempf,
       Link: "https://kempf-gmbh.com/",
+      hasBackground: true
     },
     {
       Name: "Rolladen Kessler GmbH",
@@ -86,6 +89,7 @@ export const sponsorJSON = {
       Title: "Heizung & Sanitär",
       ImageUrl: lsheizung,
       Link: "https://www.ls-heizung.de/",
+      hasBackground: true
     },
     {
       Name: "Michael Schmidt",
@@ -105,6 +109,7 @@ export const sponsorJSON = {
       Title: "Spenglerei seit 1956",
       ImageUrl: metallbauwalter,
       Link: "https://www.metallbau-walter.info/",
+      hasBackground: true
     },
     {
       Name: "Opticland",
@@ -118,6 +123,7 @@ export const sponsorJSON = {
       Title: "Tradition seit 20 Jahren",
       ImageUrl: rack,
       Link: "https://beerdigungsinstitut-rack.de/",
+      hasBackground: true
     },
     {
       Name: "Reis & Wilhelm",
@@ -130,12 +136,14 @@ export const sponsorJSON = {
       Title: "50 Jahre GmbH",
       ImageUrl: reitenbach,
       Link: "https://www.mercedes-benz-reitenbach.de/",
+      hasBackground: true
     },
     {
       Name: "Baustoffe Rosport",
       Title: "Bauen Sie auf uns",
       ImageUrl: rosport,
       Link: "https://www.baustoffe-rosport.de/",
+      hasBackground: true
     },
     {
       Name: "Saar-Mosel Baumaschinen",
@@ -148,6 +156,7 @@ export const sponsorJSON = {
       Title: "Qualität seit 1893",
       ImageUrl: schmittfood,
       Link: "https://www.schmitt-food.net/",
+      hasBackground: true
     },
     {
       Name: "Gasthaus Grohs-Thewes",
