@@ -5,36 +5,46 @@ import { sponsorJSON } from "../utilities/sponsors";
 ---
 
 <div
-  class="from-background to-dark-gray-750 border-b-primary flex min-h-[var(--container-2xl)] w-full flex-col justify-end gap-16 border-b-8 bg-linear-to-b p-16 text-lg text-neutral-400"
+  class="from-background to-dark-gray-750 border-b-primary flex min-h-[var(--container-2xl)] w-full max-w-full flex-col justify-end gap-8 border-b-8 bg-linear-to-b p-4 pb-8 text-lg text-neutral-400 lg:gap-16 lg:p-16"
 >
-  <div class="allsponsors flex flex-row flex-wrap gap-6">
+  <div
+    class="allsponsors flex w-full flex-row flex-wrap justify-between gap-2 lg:justify-start lg:gap-6"
+  >
     {
       sponsorJSON.sponsors.map((sponsor: any) => {
         return (
-          <div class="w-max rounded-xl border-[1px] border-solid border-zinc-300 px-4 py-2">
+          <div class="w-max rounded-xl border-[1px] border-solid border-zinc-300 px-2 py-2 lg:px-4">
             <Image
               src={sponsor.ImageUrl}
               inferSize
               alt="Portrait"
-              class="h-12 w-max object-contain grayscale"
+              class="h-6 w-max object-contain grayscale lg:h-12"
             />
           </div>
         );
       })
     }
   </div>
-  <div class="informationcontainer flex flex-col font-light">
+  <div
+    class="informationcontainer flex flex-col items-center text-xs font-bold uppercase lg:items-start lg:text-base"
+  >
     <div>SV Alemannia Thalexweiler</div>
     <div>Alemaniastraße 21</div>
     <div>66822 Lebach</div>
   </div>
-  <div class="flex flex-row gap-8 font-light">
+  <div
+    class="flex w-full flex-col flex-wrap items-center gap-8 text-xs font-bold uppercase lg:flex-row lg:items-start lg:gap-8 lg:text-base"
+  >
     <div>© 2025 SV Thalexweiler</div>
-    <a href="/">Startseite</a>
-    <a class="h-max" href="https://www.instagram.com/sgthalexweileraschbach/"
-      >Instagram
-    </a>
-    <a href="/Impressum">Impressum</a>
-    <a href="/Datenschutzerklaerung">Datenschutzerklärung</a>
+    <div
+      class="flex flex-row flex-wrap items-center justify-center gap-2 text-xs font-bold lg:items-start lg:gap-8 lg:text-base"
+    >
+      <a href="/">Startseite</a>
+      <a class="h-max" href="https://www.instagram.com/sgthalexweileraschbach/"
+        >Instagram
+      </a>
+      <a href="/Impressum">Impressum</a>
+      <a href="/Datenschutzerklaerung">Datenschutzerklärung</a>
+    </div>
   </div>
 </div>
