@@ -14,5 +14,5 @@ export default defineConfig({
     mode: "standalone",
    
   }),
-  output: 'static'
+  output: 'server'
 });
