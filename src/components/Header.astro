@@ -20,17 +20,19 @@ import iglogo from "../assets/instagramwhite.svg";
   <div class="flex h-full w-full max-w-6xl justify-between">
     <div class="flex h-full items-center justify-center gap-2 md:gap-0">
       <span
-        class="material-symbols-rounded left-6 flex self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50 xl:hidden!"
+        class="material-symbols-rounded left-6 flex hidden! self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50 xl:hidden!"
         >menu</span
       >
       <Image
-        class="mr-3 h-8 w-8 md:h-14 md:w-14"
+        class="mr-0 h-10 w-10 md:mr-2 md:h-14 md:w-14 lg:mr-4"
         width="38"
         height="38"
         src={logo}
         alt="Club Logo."
       />
-      <div class="hidden h-full flex-col justify-center md:flex">
+      <div
+        class="flex h-full flex-col justify-center text-sm md:flex md:text-base"
+      >
         <div class="mb-[-3px] font-black">SVALEMANNIA</div>
         <div class="mt-[-3px] font-black">THALEXWEILER</div>
       </div>
@@ -39,19 +41,19 @@ import iglogo from "../assets/instagramwhite.svg";
       class="flex h-full w-max flex-row items-center justify-between gap-2 md:gap-6"
     >
       <button
-        class="border-primary border-2 border-solid px-4 py-2 text-xs hover:cursor-not-allowed hover:opacity-50 md:text-base"
+        class="border-primary hidden border-2 border-solid px-4 py-2 text-xs hover:cursor-not-allowed hover:opacity-50 md:text-base lg:flex"
         >LOGIN</button
       >
       <span
-        class="material-symbols-rounded h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50"
+        class="material-symbols-rounded hidden! h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50 lg:flex!"
         >shopping_cart</span
       >
       <span
-        class="material-symbols-rounded h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50"
+        class="material-symbols-rounded hidden! h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50 lg:flex!"
         >search</span
       >
       <a class="h-max" href="https://www.instagram.com/sgthalexweileraschbach/"
-        ><Image src={iglogo} alt="" class="w-4" /></a
+        ><Image src={iglogo} alt="" class="w-8 lg:w-4" /></a
       >
     </div>
   </div>
