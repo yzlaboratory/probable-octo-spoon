@@ -4,6 +4,7 @@ const { ImageUrl, Caption, Timestamp, Permalink, Type, ProductType, Children } =
 import { Image } from "astro:assets";
 
 import iglogo from "../assets/instagramwhite.svg";
+//we got a problem here with sliders, specifically carousel albums with videos inside
 ---
 
 <div
@@ -27,14 +28,26 @@ import iglogo from "../assets/instagramwhite.svg";
           </video>
         ) : Type == "CAROUSEL_ALBUM" ? (
           <div class="ig_gallery hidescrollbar flex snap-x snap-mandatory flex-row overflow-auto scroll-smooth">
-            {Children.data.map((item: any) => (
-              <Image
-                src={item.media_url}
-                inferSize
-                alt="Portrait"
-                class="min-w-full snap-start object-cover"
-              />
-            ))}
+            {Children.data.map((item: any) =>
+              item.media_type == "IMAGE" ? (
+                <Image
+                  src={item.media_url}
+                  inferSize
+                  alt="Portrait"
+                  class="min-w-full snap-start object-cover"
+                />
+              ) : item.media_type == "VIDEO" ? (
+                <video
+                  class="min-w-full snap-start object-cover"
+                  muted
+                  autoplay
+                >
+                  <source src={item.media_url} />
+                </video>
+              ) : (
+                <div />
+              ),
+            )}
           </div>
         ) : (
           ""

@@ -21,7 +21,7 @@ const res = await response1.json();
     const response2 = await fetch(
       "https://graph.instagram.com/v22.0/" +
         item.id +
-        "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username,media_type,media_product_type,children{media_url}&access_token=" +
+        "?fields=caption,comments_count,id,like_count,media_url,permalink,thumbnail_url,timestamp,username,media_type,media_product_type,children{media_url,media_type}&access_token=" +
         KEY,
     );
     if (response2.ok) {
@@ -35,6 +35,7 @@ const res = await response1.json();
         media_product_type,
         children,
       } = await response2.json();
+      console.log(children);
       if (index == 4) {
         return (
           <>
