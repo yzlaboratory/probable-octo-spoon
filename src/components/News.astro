@@ -3,6 +3,13 @@ import Newscard from "./Newscard.astro";
 import news1 from "../assets/newsimage1.png";
 import code from "../assets/code.jpg";
 import obbo from "../assets/obbo.svg";
+import metallbauwalter from "../assets/metallbauwalter.jpg";
+import zs from "../assets/logos/zimmerundschu.png";
+import kempf from "../assets/logos/kempf.png";
+import lsheizung from "../assets/logos/ls.png";
+import hjm from "../assets/logos/hjm.png"
+import tankstellezimmer from "../assets/logos/tankstellezimmer.png"
+import schmittfood from "../assets/schmittfood.jpg";
 import mwkonzept from "../assets/mwkonzept.png";
 import britz from "../assets/britz.png";
 import bruno from "../assets/bruno.png";
@@ -27,12 +34,16 @@ const allNews = await getCollection("news").then(array => array.sort((a,b) =>  b
       {
       return (
           <Sponsorcard
-            ImageUrls={[obbo, mwkonzept, britz, bruno]}
+            ImageUrls={[schmittfood, hjm, metallbauwalter, lsheizung, kempf, obbo, zs, tankstellezimmer]}
             Urls={[
+              "https://www.schmitt-food.net/",
+              "https://www.sachverstaendiger-mueller.de/index.html",
+              "https://www.metallbau-walter.info/",
+              "https://www.ls-heizung.de/",
+              "https://kempf-gmbh.com/",
               "https://www.obbo.de/",
-              "https://www.mwkonzept.de/",
-              "https://www.britz-beste-boeden.de",
-              "https://www.trattoria-dabruno.com/",
+              "https://www.zsmobile.de/",
+              "https://www.zsmobile.de/"
             ]}
             Interval="15000"
             WidthTailwindClass="w-1/4"
