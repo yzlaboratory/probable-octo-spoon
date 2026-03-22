@@ -1,9 +1,9 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import Gallery from "./Gallery";
 import Socialcard from "./Socialcard";
 import SocialcardFallback from "./SocialcardFallback";
 import Sponsorcard from "./Sponsorcard";
-import { sponsorJSON } from "../utilities/sponsors";
+import { shuffleSponsors } from "../utilities/sponsors";
 
 interface SocialItem {
   media_url: string;
@@ -16,14 +16,15 @@ interface SocialItem {
 }
 
 function SmallSponsors({ animated }: { animated: boolean }) {
+  const sponsors = useMemo(() => shuffleSponsors(), []);
   return (
     <Sponsorcard
-      imageUrls={sponsorJSON.sponsors.map((item) => item.ImageUrl)}
-      urls={sponsorJSON.sponsors.map((item) => item.Link)}
+      imageUrls={sponsors.map((item) => item.ImageUrl)}
+      urls={sponsors.map((item) => item.Link)}
       interval={animated ? 7500 : 5000}
       lgWidthClass="lg:w-1/5"
       animated={animated}
-      backgroundClasses={sponsorJSON.sponsors.map((item) =>
+      backgroundClasses={sponsors.map((item) =>
         item.Color != undefined ? item.Color : "",
       )}
     />

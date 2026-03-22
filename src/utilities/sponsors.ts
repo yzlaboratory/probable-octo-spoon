@@ -31,6 +31,13 @@ import hermann from "../assets/hermann.jpeg"
 import starz from "../assets/logos/starz.png"
 import logo from "../assets/logo.svg";
 
+export function shuffleSponsors() {
+  return [...sponsorJSON.sponsors]
+    .map((s) => ({ s, key: Math.random() ** (1 / (s.money || 1)) }))
+    .sort((a, b) => b.key - a.key)
+    .map(({ s }) => s);
+}
+
 export const sponsorJSON = {
   sponsors: [
     // {
@@ -57,7 +64,8 @@ export const sponsorJSON = {
       Title: "seit 1927",
       ImageUrl: falk,
       Link: "https://www.xn--getrnke-falk-jcb.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     // {
     //   Name: "Sporthaus Glaab",
@@ -77,21 +85,24 @@ export const sponsorJSON = {
       Title: "Garten- & Landschaftsbau",
       ImageUrl: kempf,
       Link: "https://kempf-gmbh.com/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "Erik Kirchen",
       Title: "Stuckateurmeister",
       ImageUrl: kirchen,
       Link: "https://kirchen-stuckateur.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "LS",
       Title: "Heizung & Sanitär",
       ImageUrl: lsheizung,
       Link: "https://www.ls-heizung.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     // {
     //   Name: "Michael Schmidt",
@@ -105,14 +116,16 @@ export const sponsorJSON = {
       Title: "Meeresspezialitäten",
       ImageUrl: mbfischhaus,
       Link: "https://www.mb-fischhaus.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "Metallbau Walter",
       Title: "Spenglerei seit 1956",
       ImageUrl: metallbauwalter,
       Link: "https://www.metallbau-walter.info/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     // {
     //   Name: "Opticland",
@@ -126,14 +139,16 @@ export const sponsorJSON = {
       Title: "Tradition seit 20 Jahren",
       ImageUrl: paulrack,
       Link: "https://beerdigungsinstitut-rack.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "Reis & Wilhelm",
       Title: "Fliesenleger in der 3. Generation",
       ImageUrl: reiswilhelm,
       Link: "https://www.reis-wilhelm.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     // {
     //   Name: "Autohaus Reitenbach",
@@ -160,7 +175,8 @@ export const sponsorJSON = {
       Title: "Qualität seit 1893",
       ImageUrl: schmittfood,
       Link: "https://www.schmitt-food.net/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "Gasthaus Grohs-Thewes",
@@ -168,7 +184,8 @@ export const sponsorJSON = {
       ImageUrl: grohsthewes,
       Link: "https://www.grohs-thewes.de/",
       Color: "bg-rose-200",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     // {
     //   Name: "Gartenbau Waigel",
@@ -181,14 +198,16 @@ export const sponsorJSON = {
       Title: "Ihr kompetenter Auto-Service",
       ImageUrl: zs,
       Link: "https://www.zsmobile.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "Gasthaus zur Starz",
       Title: "Dörsdorf",
       ImageUrl: starz,
       Link: "https://www.tripadvisor.de/Restaurant_Review-g1081425-d14989641-Reviews-Gasthaus_zur_Starz-Lebach_Saarland.html",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
 
     // {
@@ -202,28 +221,32 @@ export const sponsorJSON = {
       Title: "Zur Erzkaul 1, Thalexweiler",
       ImageUrl: bestattungengiebel,
       Link: "https://www.thalexweiler.de/portfolio-item/bestattungen-giebel/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "HaArTrium",
       Title: "Mühlenstr. 29, Thalexweiler",
       ImageUrl: haartrium,
-      Link: "https://www.thalexweiler.de/portfolio-item/at-haartrium/",      
-      hasBackground: true
+      Link: "https://www.thalexweiler.de/portfolio-item/at-haartrium/",
+      hasBackground: true,
+      money: 50
     },
     {
       Name: "Sandra Maione",
       Title: "Friseursalon",
       ImageUrl: logo,
-      Link: "https://branchenbuch.meinestadt.de/schmelz/company/500036897",      
-      hasBackground: true
+      Link: "https://branchenbuch.meinestadt.de/schmelz/company/500036897",
+      hasBackground: true,
+      money: 50
     },
         {
       Name: "Anne Treib",
       Title: "Buch & Papier",
       ImageUrl: annetreib,
-      Link: "https://www.anne-treib.de/",      
-      hasBackground: true
+      Link: "https://www.anne-treib.de/",
+      hasBackground: true,
+      money: 50
     },
     //     {
     //   Name: "Hermann",
@@ -236,29 +259,33 @@ export const sponsorJSON = {
       Name: "Tankstelle Zimmer",
       Title: "Freie Tankstelle",
       ImageUrl: tankstellezimmer,
-      Link: "https://www.zsmobile.de/",      
-      hasBackground: true
+      Link: "https://www.zsmobile.de/",
+      hasBackground: true,
+      money: 50
     },
             {
       Name: "Hans-Jürgen Müller",
       Title: "Sachverständiger",
       ImageUrl: hansjuergenmueller,
       Link: "https://www.sachverstaendiger-mueller.de/index.html",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
               {
       Name: "Rieker Physiotherapie",
       Title: "Mühlenstr. 57, Thalexweiler",
       ImageUrl: rieker,
       Link: "https://www.thalexweiler.de/portfolio-item/rieker-physiotherapie/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
                   {
       Name: "Obbo",
       Title: "",
       ImageUrl: obbo,
       Link: "https://www.obbo.de/",
-      hasBackground: true
+      hasBackground: true,
+      money: 50
     },
 
   ],
