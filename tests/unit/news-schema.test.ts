@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { z } from "astro/zod";
+import { z } from "zod";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 

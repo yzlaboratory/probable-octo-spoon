@@ -41,6 +41,7 @@ describe("News Detail Page", () => {
       "fuenfkampf2025-05-07",
       "kirmes2025-06-12",
       "dreikampf2026-02-14",
+      "vereinbrauchtdich2026-03-22",
     ];
 
     for (const path of paths) {

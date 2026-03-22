@@ -15,7 +15,7 @@ describe("Gallery Components", () => {
       cy.get(".newscardcontainer a")
         .first()
         .should("have.attr", "href")
-        .and("match", /^news\//);
+        .and("match", /\/news\//);
     });
 
     it("news cards show title, tag, date, and description", () => {
