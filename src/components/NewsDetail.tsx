@@ -30,9 +30,9 @@ export default function NewsDetail({
         <img
           src={imageUrl}
           alt="Portrait"
-          className="max-w-full min-w-full object-contain lg:max-w-2/3 lg:min-w-2/3 lg:pr-8"
+          className="w-full max-h-[70vh] object-contain lg:w-2/3 lg:max-w-[66.67%] lg:min-w-[66.67%] lg:pr-8"
         />
-        <div className="flex max-w-full min-w-full items-center justify-center text-sm font-light text-balance text-white lg:max-w-1/3 lg:min-w-1/3 lg:pl-8 lg:text-xl">
+        <div className="flex w-full items-center justify-center text-sm font-light text-balance text-white lg:w-1/3 lg:max-w-[33.33%] lg:min-w-[33.33%] lg:pl-8 lg:text-xl">
           {long}
         </div>
       </div>
