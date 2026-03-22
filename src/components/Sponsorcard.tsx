@@ -36,23 +36,23 @@ export default function Sponsorcard({
 
   return (
     <div
-      className={`bg-background flex w-9/10 shrink-0 px-2 ${lgWidthClass}`}
+      className={`bg-background relative w-9/10 shrink-0 px-2 ${lgWidthClass}`}
     >
-      <div className="card bg-dark-gray-700 after:bg-primary relative flex w-full shrink-0 flex-col items-center justify-center gap-4 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full">
+      <div className="absolute inset-0 card bg-dark-gray-700 after:bg-primary flex flex-col items-center justify-center overflow-hidden text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full">
         <div
           ref={scrollRef}
-          className="hidescrollbar flex w-full snap-x snap-mandatory flex-row overflow-auto scroll-smooth"
+          className="hidescrollbar flex w-full h-full snap-x snap-mandatory flex-row overflow-auto scroll-smooth"
         >
           {imageUrls.map((img, index) => (
             <a
               key={index}
               href={urls[index]}
-              className="flex min-w-full snap-start"
+              className="flex min-w-full snap-start items-center justify-center"
             >
               <img
                 src={img}
                 alt="Sponsor"
-                className={`w-full object-contain px-4 ${backgroundClasses?.[index] || ""}`}
+                className={`max-w-full max-h-full object-contain px-4 ${backgroundClasses?.[index] || ""}`}
               />
             </a>
           ))}
