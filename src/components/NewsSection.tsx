@@ -1,16 +1,8 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import Gallery from "./Gallery";
 import Newscard from "./Newscard";
 import Sponsorcard from "./Sponsorcard";
-
-import schmittfood from "../assets/schmittfood.jpg";
-import hjm from "../assets/logos/hjm.png";
-import metallbauwalter from "../assets/metallbauwalter.jpg";
-import lsheizung from "../assets/logos/ls.png";
-import kempf from "../assets/logos/kempf.png";
-import obbo from "../assets/obbo.svg";
-import zs from "../assets/logos/zimmerundschu.png";
-import tankstellezimmer from "../assets/logos/tankstellezimmer.png";
+import { shuffleTopSponsors } from "../utilities/sponsors";
 
 interface NewsItem {
   path: string;
@@ -25,29 +17,8 @@ interface Props {
   newsItems: NewsItem[];
 }
 
-const sponsorImages = [
-  schmittfood,
-  hjm,
-  metallbauwalter,
-  lsheizung,
-  kempf,
-  obbo,
-  zs,
-  tankstellezimmer,
-];
-
-const sponsorUrls = [
-  "https://www.schmitt-food.net/",
-  "https://www.sachverstaendiger-mueller.de/index.html",
-  "https://www.metallbau-walter.info/",
-  "https://www.ls-heizung.de/",
-  "https://kempf-gmbh.com/",
-  "https://www.obbo.de/",
-  "https://www.zsmobile.de/",
-  "https://www.zsmobile.de/",
-];
-
 export default function NewsSection({ newsItems }: Props) {
+  const sponsors = useMemo(() => shuffleTopSponsors(8), []);
   return (
     <Gallery
       childrenClassName="newscardcontainer"
@@ -60,11 +31,14 @@ export default function NewsSection({ newsItems }: Props) {
           return (
             <Fragment key={`sponsor-${index}`}>
               <Sponsorcard
-                imageUrls={sponsorImages}
-                urls={sponsorUrls}
+                imageUrls={sponsors.map((s) => s.ImageUrl)}
+                urls={sponsors.map((s) => s.Link)}
                 interval={15000}
                 lgWidthClass="lg:w-1/4"
                 animated
+                backgroundClasses={sponsors.map((s) =>
+                  s.Color != undefined ? s.Color : "",
+                )}
               />
               <Newscard
                 title={item.title}

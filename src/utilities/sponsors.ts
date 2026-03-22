@@ -38,6 +38,15 @@ export function shuffleSponsors() {
     .map(({ s }) => s);
 }
 
+export function shuffleTopSponsors(count: number = 8) {
+  return [...sponsorJSON.sponsors]
+    .sort((a, b) => (b.money || 0) - (a.money || 0))
+    .slice(0, count)
+    .map((s) => ({ s, key: Math.random() ** (1 / (s.money || 1)) }))
+    .sort((a, b) => b.key - a.key)
+    .map(({ s }) => s);
+}
+
 export const sponsorJSON = {
   sponsors: [
     // {
