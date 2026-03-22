@@ -24,3 +24,8 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 infrastructure/.terraform/
+infrastructure/terraform.tfstate
+infrastructure/terraform.tfstate.backup
+infrastructure/tfplan
+infrastructure/lambda/*.zip
+cypress/screenshots/
