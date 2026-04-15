@@ -1,68 +1,56 @@
 # Sponsor display
 
-Sponsors are load-bearing for the club — they underwrite the facilities, the youth teams, the festivities. The site surfaces them in three distinct contexts with three different rotation rules, each tuned for what the section is already doing.
+Sponsors are load-bearing for the club — they underwrite the facilities, the youth teams, the festivities. The site surfaces them in three distinct contexts with three different rotation rhythms, each tuned to what the section around it is already doing.
 
 ## Where sponsors appear
 
-1. **Inside the News gallery**, as the fourth item (before the fourth news card).
-2. **Inside the Socials gallery**, as the fifth item (before the fifth social card).
-3. **In the Footer**, as a flat grid of logos.
+1. **Inside the News gallery**, partway through the news cards, as a single rotating panel.
+2. **Inside the Socials gallery**, partway through the post cards, as a single rotating panel.
+3. **In the Footer**, as a flat grid of every sponsor's logo.
 
-## The weighted shuffle
+## Weighted-but-fair rotation
 
-Each sponsor in `src/utilities/sponsors.ts` has a numeric `money` field (currently all active sponsors are set to `50`). The shuffle function uses the exponential-key algorithm:
+Each sponsor carries an internal contribution weight. The rotation order is randomized on every page load, but higher-weight sponsors are biased toward earlier slots — so a top-tier sponsor appears more often in the visible position, while every sponsor still has a real chance at every slot. No one feels permanently buried.
 
-```ts
-key = Math.random() ** (1 / money)
-```
+Currently every active sponsor shares the same weight, so the effective behavior is a uniform shuffle. The weighting is in place for the moment a higher-tier partnership lands.
 
-Sort by `key` descending. Sponsors with higher money have keys biased closer to 1, so they rise to the front on average — but the randomness guarantees that every sponsor has a chance at every slot. This means no sponsor feels "always buried" even if their tier is lower.
+## Rule 1: News section — top tier only, slow rotation
 
-Currently all sponsors share `money: 50`, so the effective behavior is a uniform random shuffle. The weighting infrastructure is in place for the moment a higher-tier sponsor comes in.
-
-## Rule 1: News section — top-tier only, big rotator
-
-Inside the News gallery, `shuffleTopSponsors(8)` is called. It:
-
-1. Sorts by `money` descending.
-2. Takes the top 8.
-3. Weighted-shuffles just those 8.
-
-The resulting card is one wide rotator (25% of viewport on desktop) that auto-advances every **15 seconds**. A visitor lingering on the news section sees 4 distinct sponsors in a typical minute.
+Inside the News gallery the rotator draws from the top-funded sponsors only. The panel is roomy and auto-advances slowly, so a visitor lingering on the news section sees a handful of distinct sponsors over the course of a minute.
 
 ### Example
 
-Maria reads the news cards for 30 seconds while deciding whether to tap Dreikampf. In that time, the rotator has cycled through two sponsors — a stuckateur and a Fliesenleger.
+A visitor reads the news cards for half a minute while deciding whether to tap an article. In that time, the rotator has cycled through two top-tier sponsors.
 
-## Rule 2: Socials section — full roster, tighter rotation
+## Rule 2: Socials section — full roster, faster rotation
 
-Inside the Socials gallery, `shuffleSponsors()` is called with the full sponsor list. The card is narrower (20% of viewport) and auto-advances every **7.5 seconds** in the live state, or **5 seconds** during the skeleton fallback — so even during loading, sponsor impressions continue.
+Inside the Socials gallery the rotator uses the full sponsor list and advances faster than the news rotator. Even while the socials section is in its skeleton-loading state, the rotator keeps cycling so sponsor impressions continue.
 
 ### Example
 
-Thomas scrolls past the news, pauses at the socials to watch a carousel post, and during his 20-second pause the sponsor card has flipped through three sponsors.
+A visitor scrolls past the news, pauses on a carousel post in socials, and during their twenty-second pause the sponsor card has cycled through three sponsors.
 
 ## Rule 3: Footer — every sponsor, static grid
 
-The Footer shuffles the full sponsor list once per render and displays every sponsor as a small tile in a wrap-flex grid. Sponsors whose `ImageUrl` is the fallback club logo (e.g. "Sandra Maione Friseursalon") are filtered out — they would collapse to the club's own crest and look wrong among third-party marks.
+The Footer shuffles the full sponsor list once per render and displays every sponsor as a small tile. Sponsors whose logo asset is the club's own crest (a fallback for partners without a usable logo file) are filtered out — they would render as the club's own mark and look wrong among third-party brands.
 
-Tiles are 96px wide on mobile and auto-width on desktop, with a thin white border. Logos are dimmed — `grayscale` when the sponsor has `hasBackground: true` (their logo is already on a colored background), otherwise `brightness-0 invert` (flatten to pure white). This enforces a visually consistent sponsor row even though the real logos vary wildly in palette.
+Logos are normalized to a uniform tone — either desaturated or flattened to a single color — so the row reads as a coherent band even though real sponsor logos vary wildly in palette. The visual treatment is chosen per sponsor based on whether their logo already sits on a colored background.
 
 ### Example: the walking tour
 
-A visitor scrolls all the way to the bottom after reading an article. They see the full sponsor roster at a glance — about 16 local businesses. They recognize their neighbor's company (Bestattungen Giebel), their dentist's landlord (Reis & Wilhelm Fliesenleger), the café (Gasthaus Grohs-Thewes), and mentally note that "the sport club is embedded in the town."
+A visitor scrolls all the way to the bottom after reading an article. They see the full sponsor roster at a glance — about a dozen and a half local businesses. They recognize a neighbor's company, their dentist's landlord, the village café, and mentally note that "the sport club is embedded in the town."
 
-## Commented-out sponsors
+## Paused or former sponsors
 
-The source file carries a large history of commented-out sponsor entries (Allianz, BBL, Bikesport, Sporthaus Glaab, Holzhauser, Opticland, Reitenbach, Baustoffe Rosport, Saar-Mosel Baumaschinen, Gartenbau Waigel, Paulus & Korneker, Hermann). These are former or paused partnerships, preserved in-file rather than deleted so that the club can reactivate them quickly when a sponsorship renews.
+The codebase preserves a history of inactive partnerships in commented-out form, so the club can reactivate any of them quickly when a sponsorship renews. They never reach the visitor today.
 
 ## Click behavior
 
-Every sponsor logo is an `<a>` to the sponsor's own website (or a TripAdvisor / local-directory page for businesses without their own site). These links are external and open in the same tab — the visitor trusts that they can use the back button. The links do not include `rel="noopener"` or a tracking UTM — clicks are not measured.
+Every sponsor logo links to the sponsor's own website (or to a directory listing for businesses without one). Clicks are not measured.
 
 ## What sponsor display does not do
 
-- No sponsor detail pages ("About Getränke Falk") — only the logo and outbound link.
-- No tier labels shown to visitors (Gold/Silver/Bronze). `money` is internal.
+- No sponsor detail pages — only the logo and outbound link.
+- No tier labels shown to visitors. The contribution weight is internal.
 - No ad-server integration; sponsor rotation is entirely client-side.
 - No impressions reporting back to sponsors.

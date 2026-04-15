@@ -4,35 +4,35 @@
 
 A villager in Thalexweiler hears at the bakery that the Fasend-Dreikampf registration deadline is approaching. They pull out their phone and type `svthalexweiler.de` into Chrome.
 
-The page loads with a black header band: on the left, the club crest sits beside the stacked wordmark **SVALEMANNIA / THALEXWEILER**. On the right, a small Instagram glyph links out to `@sgthalexweileraschbach`. A few ghostly menu, search, and login affordances are visible on larger screens but inert — they have `hover:cursor-not-allowed` and no routes. The visitor ignores them.
+The page opens with a dark header band: the club crest sits beside the stacked wordmark **SVALEMANNIA / THALEXWEILER**, and an Instagram glyph on the right links out to the club's account. On larger screens the visitor may notice menu, login, cart, and search affordances rendered in a disabled style — they signal "not yet" rather than offering a broken click.
 
-Below the header, scrolling begins. Three thematic sections appear in order, each preceded by a large italic headline:
+Below the header, the visitor scrolls through three thematic sections in fixed order, each preceded by a large italic headline:
 
-1. **ALEMANNIA NEWS** — the four most recent news items as cards, newest first.
+1. **ALEMANNIA NEWS** — the most recent news items as cards, newest first.
 2. **SOCIALS** — the club's recent Instagram posts.
-3. **VORSTAND** — twelve board members with name, role, and contact-on-hover.
+3. **VORSTAND** — the board of directors with name, role, and contact-on-hover.
 
-A dark gradient footer closes the page with the remaining sponsor logos, the club's postal address (Alemaniastraße 21, 66822 Lebach), the 2025 copyright, and links to Impressum and Datenschutzerklärung.
+A footer closes the page with the remaining sponsor logos, the club's postal address, the copyright line, and links to Impressum and Datenschutzerklärung.
 
 ### Example: the Dreikampf-hunter
 
-Maria, mid-30s, a Thalexweiler resident, lands on the homepage in February 2026. The news section's first card is **DREIKAMPF** tagged `FESTLICHKEIT`, dated 28.01.2026, with a photo of the hall. She taps it and reads the long description with the registration phone number.
+A Thalexweiler resident lands on the homepage and the freshest news card is the upcoming Dreikampf event with a photo of the hall. They tap it and read the registration details in the long description.
 
 ### Example: the first-time supporter
 
-Thomas, a relative visiting from out of town, opens the site to find a contact for joining. He scrolls past news and socials, reaches VORSTAND, hovers Björn Perius' card on his laptop — the right edge slides open revealing his email and phone. He now has a direct line to the Präsident without needing a contact form.
+A relative visiting from out of town opens the site to find a contact for joining. They scroll past news and socials, reach VORSTAND, hover the Präsident's card on their laptop — the right edge slides open revealing email and phone. They have a direct line without needing a contact form.
 
 ## Section ordering is fixed
 
-News always comes before Socials, which always comes before Vorstand. This reflects the club's priority: event-driven announcements outrank social-media activity, which outrank the static people directory. The Footer is last.
+News always comes before Socials, which always comes before Vorstand. This reflects the club's priority: event-driven announcements outrank social-media activity, which outranks the static people directory. The Footer is last.
 
-## The gap between sections
+## Section rhythm
 
-Every section is separated by a fixed `gap-30` rhythm (120px). On mobile, content starts 120px below the header band so the first news card is never clipped by the header on load.
+Sections breathe with consistent vertical spacing, and the first news card is never clipped by the header on initial load — even on a small phone. The visitor feels a deliberate cadence rather than a wall of content.
 
 ## What the homepage does not do
 
-- No login, no cart, no search — the icons render as disabled visual placeholders.
+- No login, no cart, no search — the affordances render as disabled visual placeholders.
 - No newsletter signup.
-- No contact form — contact is always a `mailto:` or `tel:` or Instagram DM.
-- No game schedule, no table, no squad list. (The existing "Website Development" news post acknowledges these as future work.)
+- No contact form — contact is always a `mailto:`, `tel:`, or Instagram DM.
+- No game schedule, no league table, no squad list. (The legacy "Website Development" news post acknowledges these as future work.)

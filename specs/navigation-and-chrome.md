@@ -1,68 +1,48 @@
 # Navigation and site chrome
 
-## Single-page application with four routes
+## A small set of routes
 
-The site is a Vite + React 19 SPA. Four routes live under a shared `Layout`:
+The site exposes a handful of routes:
 
-- `/` — HomePage (news, socials, vorstand, footer).
-- `/Impressum` — static legal page.
-- `/Datenschutzerklaerung` — static privacy page.
-- `/news/:path` — dynamic article page.
+- `/` — the homepage (news, socials, vorstand, footer).
+- `/Impressum` — the legal disclosure page.
+- `/Datenschutzerklaerung` — the privacy policy.
+- `/news/:slug` — a single news article.
 
-All transitions are client-side via react-router's `<Link>`. A user clicking a news card or a footer legal link never sees a full page reload; the browser history still advances so the back button works.
-
-A refresh at any URL (including `/news/foo`) is served by the Express static middleware with an SPA fallback: any unknown path returns `dist/index.html` and react-router re-resolves the route on the client.
+All transitions feel instant: clicking a news card or a footer link does not produce a full page reload, and the browser's back button still works as expected. Refreshing a deep URL also lands on the right page.
 
 ## The persistent header
 
-`Header` renders at the top of every route. It never scrolls away (relative, not sticky, but always first in the layout order).
+A header renders at the top of every route. It does not scroll away with the content below.
 
-Visible and functional on every screen:
+Always visible and functional:
 
-- **Club crest** (left) — decorative, not a link.
-- **Wordmark** `SVALEMANNIA / THALEXWEILER` — decorative.
-- **Instagram glyph** (right) — outbound to `https://www.instagram.com/sgthalexweileraschbach/`.
+- The club crest on the left (decorative, not a link).
+- The wordmark **SVALEMANNIA / THALEXWEILER** (decorative).
+- An Instagram glyph on the right that links out to the club's Instagram account.
 
-Visible but inert on large screens (≥lg, 1024px):
-
-- A hamburger `menu` icon at left edge.
-- `LOGIN` button.
-- `shopping_cart` glyph.
-- `search` glyph.
-
-These all carry `hover:cursor-not-allowed hover:opacity-50`. They exist in the markup because the design anticipates a future with member login, merchandise, and site search, but none of those ship today. A visitor who hovers any of them sees a "not allowed" cursor and dimmed opacity — an honest signal that the feature is not live.
+On larger screens, additional affordances are visible but visibly disabled — a hamburger menu, a `LOGIN` button, a cart, and a search icon. They render with a dimmed appearance and a "not allowed" cursor on hover. They exist because the design anticipates a future site with member login, merchandise, and search; today they communicate "not yet" without producing a broken click.
 
 ### Example: the member who expects to log in
 
-A long-time member who heard the website was relaunched goes looking for a login. They see the `LOGIN` button at large-screen size, click it, notice nothing happens, hover again and see the crossed-circle cursor, and close the tab. The affordance tells them "not yet" without a broken-looking error.
+A long-time member who heard the website was relaunched goes looking for a login. They see the disabled `LOGIN` affordance, hover it, see the disabled cursor, and close the tab. The signal is honest — "not yet" — rather than a broken-looking error.
 
 ## The header is not a navigation menu
 
-There is no menu of site sections in the header. The only navigation out of the homepage is via footer links or by clicking a news card. This is deliberate: with only four routes, a nav bar would be more chrome than content.
+There is no menu of site sections in the header. The only navigation away from the homepage is via footer links or by tapping a news card. With only a handful of routes, a nav bar would be more chrome than content.
 
 ## The footer as nav-of-last-resort
 
-The Footer is the only place to reach Impressum, Datenschutzerklärung, and the external Instagram page (besides the header glyph). It also includes a `Startseite` link so a visitor stranded on a news article can get home without using the back button.
+The Footer is the only place to reach Impressum, Datenschutzerklärung, and the external Instagram page (besides the header glyph). A `Startseite` link returns a visitor stranded on a news article to the homepage without forcing the back button.
 
-## Layout nesting
+## Responsive behavior
 
-`<Layout>` renders `<Header>` once, then `<Outlet>` for the page content. Each page is responsible for rendering its own `<Footer>` (HomePage, NewsDetailPage, ImpressumPage all do). The DatenschutzPage also includes a footer. If a future page forgets to include a footer, it will render without one — the Layout does not enforce a footer.
-
-## Responsive breakpoints
-
-The site uses Tailwind's default breakpoints, and real layout shifts happen at:
-
-- **md (768px)** — wordmark grows, spacing between logo and wordmark opens up, headings scale up.
-- **lg (1024px)** — gallery left/right chevrons appear; sponsors-in-footer go from 96px-wide tiles to auto-width; Datenschutz headings jump to display sizes.
-- **xl (1280px)** — menu icon becomes "visible" (still inert).
-- **2xl** — font sizes bump once more inside cards.
-
-Below 768px the site is phone-first: one news card fills 90% of the viewport, the gallery chevrons are hidden, and horizontal swipe is the only way to advance.
+The site rearranges itself across phone, tablet, and desktop widths: spacing opens up, typography scales up, gallery navigation buttons appear on wider screens, and footer sponsor tiles change shape. The phone experience is swipe-first; the desktop experience adds chevron buttons and shows more content per row.
 
 ## What the site chrome does not include
 
-- No breadcrumb trail (e.g. on news detail, the user is not told "News > Dreikampf").
-- No skip-to-content link for accessibility.
+- No breadcrumb trail.
+- No skip-to-content link.
 - No language switcher.
 - No theme switcher — the site is dark-mode-only.
 - No cookie banner.

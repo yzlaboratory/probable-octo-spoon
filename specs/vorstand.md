@@ -6,54 +6,49 @@ The Vorstand section is the club's phone book. Any reader — a potential sponso
 
 ## The card grid
 
-Below SOCIALS, the third horizontal gallery renders **VORSTAND**. Twelve cards, six visible at a time on desktop. Each card is a 1:1 portrait photo above the person's name (bold), their role/title (smaller), and a hover-reveal contact strip.
+Below SOCIALS, the third horizontal gallery renders **VORSTAND**. A grid of cards covering the current board, with several visible at a time on desktop and the rest reachable by horizontal scroll. Each card is a square portrait above the person's name (bold), their role/title (smaller), and a hover-reveal contact strip.
 
-The twelve current members are hardcoded in `VorstandSection.tsx`:
+The roster currently covers roughly a dozen members across the standard committees:
 
-| Name | Role |
-|---|---|
-| Björn Perius | Präsident |
-| Christian Schwirz | Präsident |
-| Matthias Heinrich | Geschäftsführer |
-| Yannik Zeyer | Schatzmeister |
-| Benno Bohliner | Haushaltsausschuss |
-| Mathias Zöhler | Spielausschuss |
-| Pascal Herre | Jugendausschuss |
-| Dennis Hurth | Festausschuss |
-| Markus Leinenbach | Bau- & Betriebsausschuss |
-| Holger Saar | Vorsitzender AH Abteilung |
-| Nicolas Heinrich | Spielausschuss |
-| Andre Seewald | AH Abteilung |
+- **Präsidenten** — top-level club leadership (the club traditionally has more than one).
+- **Geschäftsführer** — day-to-day operations and external correspondence.
+- **Schatzmeister** — finances, sponsor renewals, infrastructure ownership.
+- **Haushaltsausschuss** — budget oversight.
+- **Spielausschuss** — match operations and senior team logistics.
+- **Jugendausschuss** — youth teams and registrations.
+- **Festausschuss** — events and festivities (Kirmes, Dreikampf, etc.).
+- **Bau- & Betriebsausschuss** — pitch, clubhouse, and grounds.
+- **AH Abteilung** — Alte-Herren team leadership.
 
-Five members have a portrait photo (Matthias Heinrich, Mathias Zöhler, Dennis Hurth, Holger Saar, Nicolas Heinrich). The remaining seven fall back to the club logo.
+Some members have a portrait photo; the rest fall back to the club crest in the same card frame.
 
 ## The hover-reveal contact
 
-Each card has an invisible vertical sliver on the right edge — 4px wide. When the visitor hovers, the sliver expands to fill the card's width, revealing the person's email and phone number with mail and phone icons. On mobile (no hover), the strip never opens — phone users instead tap the sponsor/news sections or use the footer links for contact.
+Each card has a thin invisible sliver on its right edge. When the visitor hovers it, the sliver expands across the card to reveal the person's email and phone number with mail and phone icons. On phones (no hover) the strip never opens — phone visitors instead use the Instagram glyph in the header or the footer email links to reach the club.
 
 ### Example: the sponsorship inquiry
 
-A local business owner wants to discuss sponsoring the club. They scroll to VORSTAND, hover Matthias Heinrich (Geschäftsführer), get `matze234@t-online.de` and `0151 1560 7391`, and decide to call.
+A local business owner wants to discuss sponsoring the club. They scroll to VORSTAND, hover the Geschäftsführer's card, see the email and phone, and decide to call.
 
 ### Example: the youth registration
 
-A parent wants to enroll their 10-year-old in the youth team. They hover Pascal Herre (Jugendausschuss) and use the email.
+A parent wants to enroll their ten-year-old in the youth team. They hover the Jugendausschuss card and use the email there.
 
 ## Roles drive navigation
 
-The implicit expectation: the reader maps their concern to a committee (`Ausschuss`) and that committee's chair is their contact. Finance → Schatzmeister. Events/festivities → Festausschuss. Games/matches → Spielausschuss. Youth → Jugendausschuss. Building/grounds → Bau- & Betriebsausschuss. Senior/Alte-Herren team → AH Abteilung.
+The implicit expectation: the reader maps their concern to a committee (`Ausschuss`) and that committee's chair is their contact. Finance → Schatzmeister. Events → Festausschuss. Matches → Spielausschuss. Youth → Jugendausschuss. Building/grounds → Bau- & Betriebsausschuss. Senior/Alte-Herren team → AH Abteilung.
 
 ## Dual Präsidenten
 
-The site lists **two** Präsidenten (Björn Perius and Christian Schwirz). Both are treated as peers — either is a valid top-level contact.
+The club is led by more than one Präsident, treated as peers. Either is a valid top-level contact — the visitor does not have to pick the "right" one.
 
-## Data staleness warning
+## Data staleness
 
-The Vorstand list is a hardcoded TSX constant, not loaded from a CMS. If a member resigns or a role changes hands, someone must edit `VorstandSection.tsx` and redeploy. There is no admin interface.
+The roster currently lives as a hardcoded list in the source. If a member resigns or a role changes hands, someone has to edit code and redeploy. There is no admin interface yet — see `planned/admin-vorstand-editor.md`.
 
 ## What the section does not offer
 
 - No biographies or "meet the team" pages.
-- No photos on click (the image is decorative only).
+- No photos on click — the image is decorative only.
 - No sorting or filtering.
 - No org-chart visualization of the committee hierarchy.
