@@ -1,6 +1,6 @@
 # League standings (planned)
 
-> **Status:** not implemented. The legacy "Website Development" news post lists "Tabelle" among the missing features.
+> **Status:** not implemented.
 > **Blocked on:** an open question, not on engineering.
 
 ## The open question that gates everything
@@ -45,7 +45,7 @@ Rough order:
 
 ## Architecture
 
-Once the source decision is made, the fetch pipeline (Lambda? cron? cache layer?), endpoint shape, schema, structured-data emission, and accessibility specifics belong in an ADR. Do not pre-design the implementation in this spec.
+Tracked in `adr/0003-architecture-backlog.md` B2 (shared with `game-schedule.md`).
 
 ## What it does not do
 

@@ -18,9 +18,9 @@ A footer closes the page with the remaining sponsor logos, the club's postal add
 
 A Thalexweiler resident lands on the homepage and the freshest news card is the upcoming Dreikampf event with a photo of the hall. They tap it and read the registration details in the long description.
 
-### Example: the first-time supporter
+### Example: the first-time supporter (on a laptop)
 
-A relative visiting from out of town opens the site to find a contact for joining. They scroll past news and socials, reach VORSTAND, hover the Präsident's card on their laptop — the right edge slides open revealing email and phone. They have a direct line without needing a contact form.
+A relative visiting from out of town opens the site on a laptop to find a contact for joining. They scroll past news and socials, reach VORSTAND, hover the Präsident's card — the right edge slides open revealing email and phone. They have a direct line without needing a contact form. (On a phone the hover-reveal does not open; see `vorstand.md`.)
 
 ## Section ordering is fixed
 
@@ -35,4 +35,4 @@ Sections breathe with consistent vertical spacing, and the first news card is ne
 - No login, no cart, no search — the affordances render as disabled visual placeholders.
 - No newsletter signup.
 - No contact form — contact is always a `mailto:`, `tel:`, or Instagram DM.
-- No game schedule, no league table, no squad list. (The legacy "Website Development" news post acknowledges these as future work.)
+- No game schedule, no league table, no squad list — those are tracked in `planned/game-schedule.md` and `planned/league-standings.md`.

@@ -1,25 +1,26 @@
 # ADR 0003 — Architecture backlog (planned-feature open questions)
 
 - **Status:** Living document
-- **Date:** 2026-04-15
-- **Deciders:** Yannik Zeyer (infrastructure), Vorstand (approval per feature)
+- **Date:** 2026-04-15 (last rewrite)
+- **Deciders:** Yannik Zeyer, per feature.
 
 ## Why this document exists
 
-The `specs/` folder describes user behavior, deliberately not implementation. Several planned specs surface architectural questions that need answers — but answering them now, before each feature is prioritized, produces dead requirements (the critique that triggered this rewrite).
+The `specs/` folder describes user behavior, deliberately not implementation. Several planned specs surface architectural questions that need answers — but answering them now, before each feature is prioritized, produces dead requirements.
 
-This file is the place those questions live until a feature is committed to. When one is, the relevant question(s) graduate into a proper ADR (0004, 0005, …) that supersedes its entry here.
+This file is the place those questions live until a feature is committed to. When one is, the relevant question(s) graduate into a proper ADR that supersedes its entry here.
+
+Each entry is a **reminder that something is unknown**, not a blueprint of what will be built. Entries here are deliberately terse; expand them only when the feature is about to be scheduled.
 
 ## Backlog
 
-### B1 — Public site backend reads (relates to ADR 0001)
+### B1 — Frontend data delivery, pooling, and backup mechanics (relates to ADR 0001, 0004)
 
-ADR 0001 commits to migrating hardcoded data into a database with a backend CRUD surface. Open questions:
+The engine (Postgres on RDS) and API shape (REST/JSON) are fixed in ADR 0004 and 0006. What's still open:
 
-- Database engine (Postgres vs. DynamoDB vs. SQLite-on-EFS).
-- API style (REST/JSON vs. tRPC vs. GraphQL — defaulting to REST).
-- First-paint strategy: inlined-at-request vs. fetch-with-skeleton.
-- Connection pooling, secrets rotation, backup/restore process.
+- **First-paint strategy** per public section: inline-at-request vs. skeleton-first fetch. The Instagram section already does skeleton-first; news and Vorstand might land differently.
+- **Connection pooling:** RDS Proxy vs. a per-process pool in the Express app.
+- **Backup/restore drill:** must be documented and rehearsed before the admin UI goes public.
 
 **Trigger to write the ADR:** when phase 1 of ADR 0001's migration starts.
 
@@ -39,7 +40,7 @@ Until this is settled, neither feature can move forward.
 
 Open questions deferred from the spec:
 
-- Where do user records live (same DB as content, or a dedicated auth store)?
+- Where do user records live (same DB as content, or a dedicated auth schema)?
 - Password hashing algorithm choice (argon2id is the obvious default; document the parameters).
 - Session storage (in-DB vs. signed-cookie sessions).
 - Session and lockout numbers (idle timeout, absolute timeout, lockout window, lockout count).
@@ -100,9 +101,10 @@ Open questions:
 Open questions:
 
 - Topic-to-recipient mapping storage (code vs. admin-editable config table).
-- MTA choice (SES vs. continue using the Impressum-alias provider).
-- SPF/DKIM/DMARC posture for the sending domain.
-- Server-side log retention.
+- Log retention for inbound messages server-side, given the recipient mailbox is canonical.
+- Spam-handling escalation if the honeypot + rate limit is insufficient.
+
+SES is the default MTA (ADR 0002). SPF/DKIM/DMARC posture is part of that umbrella; not a separate question.
 
 **Trigger:** when contact-form is scheduled.
 
@@ -110,4 +112,5 @@ Open questions:
 
 - A new planned feature with architectural unknowns adds an entry here, not a paragraph in the spec.
 - When a feature is scheduled for build, the relevant entry is converted into a real ADR in this directory and the entry here is replaced with a pointer to it.
+- When a question is answered by a broader ADR (for example B1's API-shape question, now owned by ADR 0006), remove it — don't leave a stale entry.
 - Entries are not commitments. They are reminders of what is *unknown*, not blueprints of what will be built.

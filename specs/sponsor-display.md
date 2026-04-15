@@ -12,8 +12,6 @@ Sponsors are load-bearing for the club — they underwrite the facilities, the y
 
 Each sponsor carries an internal contribution weight. The rotation order is randomized on every page load, but higher-weight sponsors are biased toward earlier slots — so a top-tier sponsor appears more often in the visible position, while every sponsor still has a real chance at every slot. No one feels permanently buried.
 
-Currently every active sponsor shares the same weight, so the effective behavior is a uniform shuffle. The weighting is in place for the moment a higher-tier partnership lands.
-
 ## Rule 1: News section — top tier only, slow rotation
 
 Inside the News gallery the rotator draws from the top-funded sponsors only. The panel is roomy and auto-advances slowly, so a visitor lingering on the news section sees a handful of distinct sponsors over the course of a minute.
@@ -42,7 +40,7 @@ A visitor scrolls all the way to the bottom after reading an article. They see t
 
 ## Paused or former sponsors
 
-The codebase preserves a history of inactive partnerships in commented-out form, so the club can reactivate any of them quickly when a sponsorship renews. They never reach the visitor today.
+Inactive partnerships never reach the visitor. When a sponsor returns, they reappear in the rotation; the visitor has no way to tell the difference between "new sponsor" and "reactivated sponsor."
 
 ## Click behavior
 

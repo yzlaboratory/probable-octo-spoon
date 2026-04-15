@@ -41,7 +41,7 @@ Rough order:
 
 ## Architecture
 
-Storage schema, audit-log entries, image pipeline, drag-reorder persistence, vCard generation, and any structured-data emission belong in an ADR. Not visitor-facing.
+Tracked in `adr/0003-architecture-backlog.md` B6.
 
 ## What the Vorstand editor does not do
 

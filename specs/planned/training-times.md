@@ -44,7 +44,7 @@ Trainings move around twice a year (winter pitch closures, summer break). The da
 
 ## Architecture
 
-Data shape (fields, weekday encoding, time format, validity ranges), the cancellation mechanism, ICS generation, and any structured-data emission belong in an ADR — not in a visitor scenario.
+Tracked in `adr/0003-architecture-backlog.md` B7.
 
 ## What it does not do
 

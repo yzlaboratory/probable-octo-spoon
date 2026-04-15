@@ -46,7 +46,7 @@ The form should make the meaning of the weight obvious to a non-technical Schatz
 
 ## Architecture
 
-Storage schema, the impression/click tracking pipeline, image variants/CDN strategy, audit-log entries, and CSV import/export formats belong in an ADR. They are not visitor-facing scenarios.
+Tracked in `adr/0003-architecture-backlog.md` B5.
 
 ## What the sponsor editor does not do
 

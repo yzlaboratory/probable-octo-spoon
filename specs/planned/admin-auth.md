@@ -48,7 +48,7 @@ None of these belong in the MVP. Each one expands the operational and support su
 
 ## Architecture and security mechanics
 
-The hashing algorithm choice, session storage, cookie attributes, rate-limit numbers, audit-log schema, security-header set (CSP, HSTS, etc.), and observability hooks all belong in an ADR. They are not visitor-facing scenarios.
+Tracked in `adr/0003-architecture-backlog.md` B3.
 
 ## What admin auth does not do
 

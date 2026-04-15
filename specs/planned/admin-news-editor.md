@@ -49,7 +49,7 @@ Most of these are routine improvements; none belongs in the first cut.
 
 ## Architecture
 
-Editor library choice (TipTap, ProseMirror, or other), the rich-text storage format, the image-pipeline (sizes, formats, CDN invalidation), versioning schema, audit-log integration, and the SEO/structured-data emission belong in an ADR. They are not user-facing scenarios.
+Tracked in `adr/0003-architecture-backlog.md` B4.
 
 ## What the news editor does not do
 

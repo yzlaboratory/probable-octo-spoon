@@ -8,7 +8,7 @@ News is sorted newest first. Each card shows: an accent bar in the primary color
 
 ### Example: Maria and the freshest news
 
-In April, the top card is a recent call-for-volunteers article. Behind it come Dreikampf, Kirmes, Fünfkampf, the previous year's Dreikampf, and the legacy Website Development post last.
+On a given weekend, the top card is whatever the club announced most recently — a call-for-volunteers, a festivity, an event. Older cards trail behind in reverse-chronological order. The visitor's attention naturally lands on the freshest item.
 
 ## The sponsor card breaks up the news flow
 

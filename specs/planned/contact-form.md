@@ -15,7 +15,7 @@ That's the whole flow. The visitor never sees an internal email address — the 
 ## MVP
 
 - A `/kontakt` route, linked from the footer alongside the existing legal links.
-- Form fields: name, email, topic (dropdown of a small fixed list — Allgemein, Sponsoring, Jugend, Training, Presse, Feedback zur Website, Sonstiges), message, mandatory privacy consent checkbox linking to the Datenschutzerklärung.
+- Form fields: name, email, topic (dropdown of a small fixed list — roughly the committee axes from Vorstand plus a general and a press option), message, mandatory privacy consent checkbox linking to the Datenschutzerklärung.
 - A backend endpoint that validates input, applies a simple per-IP rate limit, and forwards the message by email to the Vorstand member responsible for that topic. The mapping lives on the server only, so the form cannot be scraped for addresses.
 - A minimal honeypot field (no CAPTCHA).
 - Three visible result states: success (form replaced by a confirmation), validation error (per-field hint), and a generic "please try again later" for backend failures.
@@ -45,7 +45,7 @@ Each of these is independently shippable and should only land when an actual pro
 
 ## Architecture
 
-Endpoint shape, validation rules, rate-limit numbers, mail-server choice, SPF/DKIM/DMARC posture, log retention, and accessibility implementation details belong in an ADR. They are not visitor-facing scenarios.
+Tracked in `adr/0003-architecture-backlog.md` B8.
 
 ## What the contact form does not do
 

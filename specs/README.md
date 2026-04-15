@@ -2,7 +2,9 @@
 
 Prose-style user scenarios for the SV Alemannia Thalexweiler website.
 
-Each file describes what a visitor experiences on the site. Implementation details (component structure, routing config, build tooling, data shapes, endpoint definitions) live in the code, in `CLAUDE.md`, and in `adr/` — not in these specs. If a paragraph here only makes sense by reading source, it has drifted and should be moved.
+Each file describes what a person using the site experiences. Implementation details (component structure, routing config, build tooling, data shapes, endpoint definitions) live in the code, in `CLAUDE.md`, and in `adr/` — not in these specs. If a paragraph here only makes sense by reading source, it has drifted and should be moved.
+
+"Person using the site" covers both public visitors and admins (once the admin area lands). Both get scenarios written the same way.
 
 ## Current behavior
 
@@ -16,16 +18,7 @@ Each file describes what a visitor experiences on the site. Implementation detai
 
 ## Planned (not yet implemented)
 
-Each planned spec follows a fixed shape:
-
-1. **The visitor scenario** — what a real person would do, end to end.
-2. **MVP** — the smallest set of behaviors that satisfies the scenario.
-3. **Could ship later** — stack-ranked follow-ups, *not* requirements.
-4. **Open questions** — what is unknown and gates the work.
-5. **Architecture** — a one-line pointer to where implementation choices live (the ADR backlog).
-6. **What it does not do** — explicit scope cuts.
-
-Files:
+See `planned/README.md` for the shared shape every planned spec follows. Files:
 
 - `planned/league-standings.md` — Tabelle on the homepage. **Blocked on data-source decision.**
 - `planned/game-schedule.md` — Next-fixtures section. Same data-source dependency.
@@ -39,9 +32,13 @@ Files:
 
 ## Where architecture lives
 
+- `adr/0000-template.md` — template for new ADRs.
 - `adr/0001-migrate-hardcoded-data-to-database.md` — the umbrella decision the admin specs depend on.
 - `adr/0002-aws-as-infrastructure.md` — hosting baseline.
 - `adr/0003-architecture-backlog.md` — open architectural questions per planned feature, kept here until each feature is scheduled and graduates into its own ADR.
+- `adr/0004-database-postgres-on-rds.md` — DB engine and instance choice.
+- `adr/0005-compute-ecs-fargate-behind-alb.md` — compute topology and ingress.
+- `adr/0006-api-shape-rest-json.md` — internal API shape.
 
 ## Conventions
 

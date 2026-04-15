@@ -45,4 +45,4 @@ Each of these ships independently. None should be bundled with the MVP.
 
 ## Architecture and instrumentation
 
-Specific endpoint shapes, tracking payloads, UTM conventions, rate-limit policies, and the session-frequency cap all belong in their own ADR if and when the persistent band or the impression counters move from "could ship later" to "shipping now."
+Tracked in `adr/0003-architecture-backlog.md` B5 (shared with `admin-sponsor-editor.md`).

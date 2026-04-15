@@ -1,6 +1,6 @@
 # Game schedule (planned)
 
-> **Status:** not implemented. The legacy "Website Development" news post explicitly lists "Spieltagskalender" among the missing features.
+> **Status:** not implemented.
 > **Depends on:** the same data-source decision as `league-standings.md`. If that question doesn't get answered, this feature can't ship either.
 
 ## What a visitor wants
@@ -44,7 +44,7 @@ This feature does not exist without a reliable feed of fixtures. The same SFV-da
 
 ## Architecture
 
-Endpoint shape, data fetch cadence, caching strategy, ICS generation, structured-data emission, and accessibility implementation details belong in the same data-source ADR as the standings feature.
+Tracked in `adr/0003-architecture-backlog.md` B2 (shared with `league-standings.md`).
 
 ## What it does not do
 

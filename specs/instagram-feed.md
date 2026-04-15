@@ -31,11 +31,9 @@ A multi-image Kirmes post appears as a single card whose media area cycles throu
 
 Just like the news gallery, a sponsor rotator is injected partway through the socials section. Here the rotator draws from the full sponsor roster (not just the top tier), and it cycles a little faster than the news rotator. While the section is in its skeleton state, the rotator keeps cycling so sponsor impressions continue. See `sponsor-display.md`.
 
-## How posts arrive
+## How posts arrive, as far as the visitor can tell
 
-The frontend asks the site's own backend for the latest posts. The backend talks to Instagram on behalf of the visitor and returns the result. If anything goes wrong — missing credentials, network error, Instagram outage — the backend returns an empty list and the frontend keeps showing skeletons. The visitor never sees an error message; the section gracefully looks like it is still loading.
-
-The backend implementation, the credential-refresh pipeline, and the Instagram API surface are described in the codebase and in the AWS infrastructure module — they are not part of the user-facing scenario.
+From the visitor's side there is no visible handshake with Instagram. Posts appear when they are ready, skeletons stay when they are not. If anything goes wrong — expired credentials, network error, Instagram outage — the visitor sees skeletons, not an error message. The section gracefully looks like it is still loading.
 
 ## What the socials section does not do
 
