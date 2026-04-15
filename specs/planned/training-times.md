@@ -6,68 +6,48 @@
 
 A parent wondering whether their ten-year-old can try a training session, or an adult new to the village looking to stay fit, wants to know: **when does which group train, and is it open to visitors?**
 
-## Where it lives
+Today, that information lives only inside Vorstand members' heads, in WhatsApp groups, and on a paper noticeboard at the clubhouse. A first-time visitor cannot answer the question without already knowing someone.
 
-A section titled **TRAINING** placed after **VORSTAND** on the homepage — the board directory already funnels contact intent, and training times sit naturally next to that "how to get involved" moment. A deep-link `/training` also works for direct sharing.
+## The visitor scenario
 
-## The layout: a weekly grid
+A parent of a nine-year-old sees an Instagram post about youth training, lands on the homepage, and scrolls to a section called **TRAINING**. They see a weekly grid: each row a day, each cell a group. The Bambini cell on Tuesday afternoon names the trainer, the time, and a small label that says "open to visitors." They show up the following Tuesday with their child.
 
-A Monday-through-Sunday grid. Each cell shows the team/group training at that slot with:
+That's the entire flow. No login, no signup, no calendar subscription required.
 
-- Group name (e.g. `A-Jugend`, `Erste Mannschaft`, `AH`, `Bambini`).
-- Time window (`18:30 – 20:00`).
-- Trainer name and phone (tap-to-call).
-- A small **offen für Gäste / Anmeldung erforderlich / nur Mitglieder** pill that tells a newcomer at a glance whether they can just show up.
+## MVP
 
-Empty cells render as a dim "–" so the grid's shape is always readable.
+- A new section **TRAINING** on the homepage, after VORSTAND, plus a deep-link route `/training`.
+- A weekly grid showing, per slot: group name, time window, trainer name + phone (tap-to-call), and a visibility label — **offen für Gäste** / **Anmeldung erforderlich** / **nur Mitglieder**.
+- An admin-editable data source, so a coaching change does not require a deploy. (Depends on the admin area.)
+- A simple seasonal banner — "Sommerpause bis [date]" — controllable by the same admin.
 
-### Example: the curious parent
+That is enough to answer the visitor's question. If the data source can't be admin-editable yet, ship it as a hardcoded list and treat that as a temporary state — but do not ship it as the long-term shape.
 
-A mother of a 9-year-old sees an Instagram post about youth training, lands on the homepage, scrolls to the training grid. She sees **Dienstag 17:00 – 18:15 / Bambini / Trainer: [name] / offen für Gäste**. She shows up with her son next Tuesday at 17:00.
+## Could ship later
 
-### Example: the hobby player
+In rough order of incremental value:
 
-A 40-year-old who moved into the village wants to kick a ball with the Alte Herren. The grid shows **AH / Donnerstag 19:30 – 21:00 / Anmeldung erforderlich** with Holger Saar's phone. He calls first, introduces himself, then comes along the following Thursday.
+1. **One-off cancellation overlays** ("Training fällt heute aus — Gewitter") — most valuable feature beyond the static grid, and the one a coach will actually ask for.
+2. **iCalendar feed** so a parent can subscribe their child's group to the family calendar.
+3. **Mobile collapse to per-day accordions**, today expanded — only if user testing shows the desktop grid is hard to read on phones.
+4. **Per-slot trainer photo or "first time visiting?" expanded help block.**
+5. **Weather hint or push-notification cancellations** — speculative; probably never.
 
-## Data shape
+## Seasonal handling
 
-Training entries are stored in the data layer alongside news and sponsors. Fields:
+Trainings move around twice a year (winter pitch closures, summer break). The data shape needs to support either a date range per slot or a season toggle. Settle on one approach in an ADR — both work; mixing them is what hurts.
 
-- `group` — display name.
-- `weekday` — `1` (Monday) through `7` (Sunday).
-- `startTime`, `endTime` — 24-hour HH:MM.
-- `trainerName`, `trainerPhone`.
-- `visitorPolicy` — one of `open`, `registration`, `members_only`.
-- `location` — default is Sportplatz Alemaniastraße 21, override for winter-hall bookings.
-- `validFrom`, `validTo` — optional date range so seasonal schedule changes can be staged.
+## Open questions
 
-The source lives in `src/data/training.json` initially, later editable via the admin UI (see `planned/admin-*.md`).
+- Who maintains this? If the answer is "the trainers themselves," they need their own login and a UI scoped to their group only. If the answer is "one admin types it in once a year," the MVP admin UI is enough.
+- Is the AH evening session "open to visitors" or "registration required" by club policy? The grid only works if the labels are accurate; the spec needs the Vorstand's input here.
 
-## Seasonal variants
+## Architecture
 
-In the winter months the outdoor pitch is unusable and some groups move to Don-Bosco-Halle. The `validFrom`/`validTo` fields let two versions of the same slot coexist. The homepage shows whichever entry is active for today's date.
-
-## Closed-period handling
-
-Summer break (typically 6 weeks) and winter break should be announceable without deleting every entry. A global `trainingPause` field with start/end dates, when present, renders a banner above the grid: *"Sommerpause bis 12.08. – ab dann läuft der normale Trainingsbetrieb wieder."*
-
-## Responsive behavior
-
-- **Desktop**: 7-column weekly grid.
-- **Mobile**: stacked day-by-day, each day a collapsed accordion by default, with today expanded on load.
-
-## Cross-cutting polish
-
-- **ICS per group** — `/api/training/:group.ics` generates a recurring iCalendar event so a parent can subscribe their child's group to the family calendar and inherit cancellations and venue changes automatically.
-- **One-off cancellations** — admins can post a single-session cancellation ("Training heute Abend fällt aus – Gewitter") that renders above the relevant cell for the next 6 hours, fires an ICS `EXDATE` for subscribers, and (for opt-in push subscribers) sends a notification.
-- **Weather hint (optional)** — when Open-Meteo reports heavy rain during a slot's window, a small cloud icon appears next to the time as a non-authoritative hint. Not an automatic cancellation.
-- **Structured data** — Schema.org `SportsActivityLocation` with weekly schedules for local-SEO discoverability.
-- **First-time visitor block** — a persistent helper near the grid: "Erstes Mal dabei? Sportzeug, Hallenschuhe, Getränk mitbringen. Probetraining kostenlos."
-- **Accessibility** — alongside the grid, an equivalent list-style view for screen readers. Each slot is a focusable region with a complete `aria-label` ("Dienstag 17:00 bis 18:15, Bambini, Trainer X, offen für Gäste"). Reduced-motion disables accordion animations.
-- **Analytics** — ICS downloads, cancellation views, group-filter usage counted cookielessly.
+Data shape (fields, weekday encoding, time format, validity ranges), the cancellation mechanism, ICS generation, and any structured-data emission belong in an ADR — not in a visitor scenario.
 
 ## What it does not do
 
-- No self-service registration flow (no sign-up form). Contact is phone/email only for now.
+- No self-service registration or sign-up form.
 - No attendance tracking.
-- No match-preparation plans shared publicly.
+- No publicly shared match-prep plans.

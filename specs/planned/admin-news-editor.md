@@ -1,95 +1,59 @@
 # Admin news editor (planned)
 
-> **Status:** not implemented. Today, news are edited by modifying `src/data/news.json` and redeploying. This locks content updates to whoever has commit access.
+> **Status:** not implemented. Today, news are edited by modifying the source JSON and redeploying. Content updates are locked to whoever has commit access.
 
 ## What the admin wants
 
-An admin — typically the Geschäftsführer or the Jugendausschuss chair announcing an event — wants to write a news post in the browser with a title, tag, short summary, long body, hero image, and publish date, then publish it live without code.
+A board member announcing a youth tournament, an event, or a call-for-volunteers wants to write a post in the browser — title, tag, short summary, long body, hero image — and publish it without touching code.
 
-## Where it lives
+## The visitor scenario
 
-Under `/admin/news`, a list view plus create/edit dialogs. Reached from the admin dashboard's main navigation.
+A youth-committee chair wants to announce a tournament. They log in, click `+ Neue Meldung` in the news list, fill the form, choose to publish either immediately or on a future date, and save. The homepage news reel reflects the post within seconds (or at the scheduled time).
 
-## The list view
+For an existing post, the same admin opens the list, clicks `Bearbeiten` on the row, edits the long text, saves. The change appears live shortly after.
 
-A reverse-chronological table of all news items with columns: `Datum`, `Tag`, `Titel`, `Status`, `Aktionen`. Filterable by `Tag` and by `Status` (`draft`, `published`, `scheduled`). A big primary-color `+ Neue Meldung` button top-right.
+## MVP
 
-Each row has inline actions: `Bearbeiten`, `Duplizieren`, `Löschen`, and (depending on status) `Veröffentlichen` or `Zurückziehen`.
+- A `/admin/news` list view: reverse chronological table of all news with date, tag, title, status, and per-row actions (Bearbeiten, Löschen, Veröffentlichen / Zurückziehen).
+- A create/edit form with: title, tag (autocompleting against existing tags), date, short summary, long body, hero image upload, slug (auto-derived, editable, uniqueness-validated), status (Entwurf / Sofort veröffentlichen / Planen + datetime).
+- A long-body editor that supports headings, bold/italic, lists, links, blockquotes, and inline images. No raw HTML input. No third-party embeds.
+- Image uploads stored server-side and served from a stable URL. Images survive editing the post.
+- Soft delete with a `Papierkorb` view; hard delete only after soft delete.
+- Save creates a new version; the editor exposes a short version history that an admin can roll back from.
+- A `Vorschau` action that renders the article exactly as a visitor will see it, accessible only to logged-in admins, not crawlable.
 
-### Example: the Monday morning
+That covers the actual job. Everything else is later.
 
-Pascal Herre wants to announce a youth tournament. He logs in, clicks `+ Neue Meldung`, fills the editor, sets the publish date to Wednesday 08:00, clicks `Planen`. The homepage news reel does not change until Wednesday morning.
+## Could ship later
 
-## The create/edit editor
+Roughly in order of when a real need is likely to surface:
 
-A single form, full-width on desktop, stacked on mobile:
+1. **Autosave of in-progress drafts** — if an admin loses work to a tab close, this pays for itself fast.
+2. **Edit-lock warning** when two admins open the same post.
+3. **Co-author attribution.**
+4. **Per-article SEO meta override fields** — only if defaults from title + summary stop being good enough.
+5. **Responsive image variants** generated on upload — pure performance win, but not visitor-blocking.
+6. **RSS feed.**
+7. **Sitemap regeneration on publish.**
+8. **Draft share link** for non-admin reviewers.
+9. **Publish webhook** for cross-posting to social media.
+10. **Full-text search across the admin archive.**
 
-- **Titel** — single-line text, max 80 characters. Live character counter.
-- **Tag** — dropdown + free text. The dropdown suggests existing tags (`FESTLICHKEIT`, `DIGITAL`, `AUFRUF`, `JUGEND`, `SPORT`, …); typing a new one adds it.
-- **Datum** — date picker, default today.
-- **Kurzfassung** — textarea, 2–4 lines expected, displayed on the homepage card. Live four-line preview clamped to match the card.
-- **Langfassung** — richer editor (see below).
-- **Hero-Bild** — drag-and-drop zone or file picker. Accepts `.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`. Max 8 MB. Preview renders at the exact card aspect (100:56) so the admin can see how it will be cropped. An optional focal point picker lets the admin click on the part of the image that must stay visible if crops tighten.
-- **Pfad (Slug)** — auto-derived from title + date (`dreikampf-2026-02-14`), editable. Must be unique; inline validation warns on conflict.
-- **Status** — `Entwurf` / `Planen` (with date-time) / `Sofort veröffentlichen`.
+Most of these are routine improvements; none belongs in the first cut.
 
-At the bottom: `Speichern`, `Vorschau`, `Abbrechen`. Autosaves the draft every 30 seconds so a tab-close doesn't lose work.
+## Open questions
 
-## The long-body editor
+- Does the long-body field need its own structured representation (portable rich-text JSON), or is sanitized HTML enough? Choosing JSON unlocks safer rendering later but is more work upfront.
+- How does the existing local-asset image pipeline migrate to the new image-id scheme without breaking old slugs? This needs a one-time backfill plan.
+- Is there a "scheduled unpublish" use case, or do posts simply age out of the reel?
 
-A lightweight rich-text editor (TipTap or similar). Supported formatting:
+## Architecture
 
-- Headings (H2, H3 only — H1 is reserved for the title).
-- Bold, italic, underline.
-- Bulleted and numbered lists.
-- Links (URL validation, `rel="noopener"` added automatically for external links).
-- Inline images (same upload flow as the hero image), displayed full-width on the detail page.
-- Blockquotes.
-
-No raw HTML input. No embeds (no YouTube, no Instagram embed in news — Socials section handles that).
-
-The long text is stored as portable rich-text JSON, rendered back as React nodes on the detail page. No innerHTML injection.
-
-### Example: the call-to-arms update
-
-Björn needs to update the "Der Verein braucht DICH!" post with a new phone number. He opens the list, clicks `Bearbeiten`, changes the phone number in the long text, clicks `Speichern`. The homepage reflects the change within seconds.
-
-## Preview
-
-`Vorschau` opens a new tab at `/news/{slug}?preview=1` that renders the article exactly as visitors will see it, using the current draft state, accessible only to logged-in admins. The preview URL is not crawlable and carries `noindex`.
-
-## Media handling
-
-Images are uploaded to S3 (existing stack) under a `news/` prefix, stored at original resolution, and served through CloudFront. Thumbnail variants (homepage card size) are generated by a Lambda triggered on upload.
-
-The `imageurl` field in `news.json` is retired in favor of a stable image id that points to the S3 object; the existing `import.meta.glob` resolution in `Newscard.tsx` and `NewsDetailPage.tsx` is replaced by direct CloudFront URLs. Existing local-asset posts are migrated once by a backfill script.
-
-## Delete and restore
-
-`Löschen` is a soft delete — the item moves to a `Papierkorb` tab, visible for 30 days, after which it is purged. A `Wiederherstellen` action returns it to `draft` state. Published news cannot be hard-deleted without first soft-deleting.
-
-## Versioning
-
-Every save writes a new version record with the admin id, timestamp, and diff. The editor has a `Versionen` dropdown that shows the last 20 versions; selecting one loads it into the editor as a draft so the admin can restore or compare.
-
-## Cross-cutting polish
-
-- **SEO meta** — per-article `title`, `description`, and OpenGraph image fields with defaults derived from title/short/hero. Inline preview of both the Google SERP snippet and the Facebook/WhatsApp card so the admin sees how the post will look when shared.
-- **Structured data** — Schema.org `NewsArticle` JSON-LD on the detail page (headline, datePublished, dateModified, author, image, publisher).
-- **RSS feed** — `/news.rss` for feed readers; auto-updates on publish.
-- **Sitemap** — `/sitemap.xml` auto-regenerates with accurate `lastmod` timestamps on every publish/unpublish/update. `robots.txt` references it.
-- **Responsive image pipeline** — on upload, Lambda generates AVIF + WebP + JPEG at 400/800/1600 widths and the detail page renders a `<picture>` with `srcset` and `sizes`. CloudFront caches aggressively; publish issues a targeted invalidation for the article URL and the news feed.
-- **Draft share link** — a draft can be shared via a signed, expiring URL (e.g. 48 h) so a non-admin (the person being quoted, the Jugendausschuss reviewing a youth-team post) can preview before publish without holding an account.
-- **Co-author attribution** — optional secondary author field renders as "von X und Y."
-- **Publish webhook** — optional outbound `POST` fires on publish, to be wired later into a Zapier/Make bridge that cross-posts to Instagram or Facebook.
-- **Autosave crash recovery** — if a browser session ends mid-edit, the next admin sign-in surfaces: "Ungespeicherter Entwurf von vor 12 Minuten wiederherstellen?"
-- **Full-text admin search** — a search box over title, short, long body, and tag; chips for quick filters.
-- **Accessibility authoring aids** — the hero-image field requires non-empty `alt` text before publish; a contrast check flags headings added inline that drop below WCAG AA against the dark background.
+Editor library choice (TipTap, ProseMirror, or other), the rich-text storage format, the image-pipeline (sizes, formats, CDN invalidation), versioning schema, audit-log integration, and the SEO/structured-data emission belong in an ADR. They are not user-facing scenarios.
 
 ## What the news editor does not do
 
-- No scheduled unpublish ("retire this post on date X"). Posts just age out of the reel by being older.
 - No comments, reactions, or shares.
-- No multilingual authoring (site is German-only).
-- No SEO meta-tag editor; `title` and `short` are used as `<title>` and `<meta description>` automatically.
-- No collaborative editing (one admin at a time; lock warning if two try to open the same post).
+- No multilingual authoring; the site is German-only.
+- No collaborative real-time editing.
+- No scheduled-unpublish workflow in the MVP.

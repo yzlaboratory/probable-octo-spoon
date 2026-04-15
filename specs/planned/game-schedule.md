@@ -1,64 +1,53 @@
 # Game schedule (planned)
 
-> **Status:** not implemented. The legacy "Website Development" news post dated 2025-02-20 explicitly lists "Spieltagskalender" among the missing features.
+> **Status:** not implemented. The legacy "Website Development" news post explicitly lists "Spieltagskalender" among the missing features.
+> **Depends on:** the same data-source decision as `league-standings.md`. If that question doesn't get answered, this feature can't ship either.
 
 ## What a visitor wants
 
-A supporter deciding whether to drive out to the pitch on Saturday wants to know: who is playing, at what time, home or away, and where. A traveling relative wants to check if the team has a home fixture during their visit.
+A supporter deciding whether to drive out to the pitch on Saturday wants to know: who is playing, what time, home or away, where. A traveling relative wants to check whether the team has a home fixture during their visit.
 
-## Where it lives
+## The visitor scenario
 
-A new section **NÄCHSTE SPIELE** (next matches) on the homepage, directly under the TABELLE section. A deep-link `/spiele` renders a fuller schedule view with past results included.
+A villager opens the homepage on Friday afternoon. Below the news, a section called **NÄCHSTE SPIELE** shows the next handful of fixtures as cards, each with a date, kickoff time, the two teams (with the club's name bolded), the venue, and a small home/away tag. Tapping the venue opens Maps with directions. After kickoff the same visitor reopens the page and the card for the live match shows a "LIVE" pill instead of the kickoff time.
 
-## The homepage component: next 3 fixtures
+That's the entire flow. Routing to a separate screen is optional.
 
-A horizontal strip of three cards, styled like the existing news cards for visual consistency:
+## MVP
 
-- **Left edge** — a large day/month block (`SA 22.03.`) in the primary color.
-- **Kickoff time** — `15:00 Uhr`.
-- **Teams** — `SV Alemannia Thalexweiler — FC Schmelz`, with the club name bolded whichever side it is on.
-- **Venue** — `Alemaniastr. 21, Thalexweiler` for home matches, the away club's address for away matches. Tapping opens Google/Apple Maps.
-- **Competition badge** — small pill, e.g. `Kreisliga`, `Pokal`, `Freundschaft`.
-- **Home/Away indicator** — a two-character tag `H` or `A` in the corner.
+- A homepage section showing the next two or three fixtures as cards.
+- A `/spiele` route showing all fixtures for the current season, grouped by month, past matches showing final score, future matches showing kickoff time.
+- Cards/rows show: date, kickoff, both team names, venue, home/away tag, competition (Liga / Pokal / Freundschaft).
+- Venue is tappable and opens the device's default maps app.
 
-### Example: the away-match fan
+That's enough to answer "is there a match this weekend, and where?" Anything else is later.
 
-Thomas checks Friday afternoon. The first card shows: **SA 22.03. / 15:00 Uhr / SV Schmelz — SV Alemannia Thalexweiler / A / Kreisliga**. He taps the venue and Maps opens with directions from his house.
+## Could ship later
 
-## The full schedule view `/spiele`
+In rough order:
 
-A vertical list grouped by month. Past matches show the final score in a primary-color box (`3:1` green if won, `1:1` neutral if drawn, `0:2` muted red if lost), upcoming matches show just the kickoff time. A filter bar at the top switches between **Alle | Heim | Auswärts | Pokal**.
+1. **Live state** ("LIVE" pill during the kickoff window) — only if the data source actually emits a status. If not, skip it; nobody refreshes the website during a match anyway.
+2. **`SPIELBERICHT` cross-linking** between a finished fixture and a news article about it — a nice editorial touch, low effort once both exist.
+3. **Filter bar** (Heim / Auswärts / Pokal) on `/spiele` — only if the season has enough fixtures to warrant it.
+4. **iCalendar feed** (`.ics` per team), so a supporter can subscribe.
+5. **Match-day push reminders** — speculative; probably never.
 
-### Example: the season review
+## Hard prerequisite: the data source
 
-In April, a long-time fan opens `/spiele`, scrolls through the season, and sees which matches Thalexweiler won, lost, drew. No stats dashboard — just the list, honest.
+This feature does not exist without a reliable feed of fixtures. The same SFV-data question covered in `league-standings.md` applies here. **Solve that first.** Until it's solved, this spec is paper.
 
-## Data source
+## Open questions
 
-Same pipeline as the standings — a Lambda scrapes SFV once per hour and writes `/api/schedule`. Each fixture has: date, time, home team, away team, venue, competition, status (`scheduled` / `live` / `finished`), and score (for finished).
+- Same data-access uncertainty as standings.
+- Does the club ever play "behind closed doors" / cancelled fixtures, and if so how does the source represent them? The card needs a clean way to render that.
+- Are there second-team or youth-team fixtures the audience would also want? If yes, scope multiplies — pick a primary team for the MVP and add tabs only when the data exists.
 
-## Live-match state
+## Architecture
 
-On match day during the kickoff window, the card for the currently-playing match switches to a "LIVE" pill (pulsing primary color) with the current minute if available from the scrape. When the scrape does not supply live minute data, the pill just reads "LIVE" without a clock.
-
-## Team selection
-
-Matches the league-standings section: a tab row to switch between Erste, AH, youth teams as applicable. Default is Erste.
-
-## Cross-cutting polish
-
-- **ICS calendar feed** — `/api/schedule.ics` emits an iCalendar document a supporter can subscribe to once in Apple Calendar, Google Calendar, or Outlook and receive fixture updates automatically. Per-team feeds (`/api/schedule/erste.ics`, `/api/schedule/ah.ics`) also available.
-- **Structured data** — Schema.org `SportsEvent` JSON-LD per fixture (home/away, kickoff, venue, competition) drives rich Google snippets.
-- **OpenGraph per fixture** — `/spiele/:id` produces a shareable OG image with the date, teams, kickoff, and competition badge.
-- **Match-day reminders** (opt-in via Web Push API) — two hours before kickoff, subscribed visitors get a browser notification. Opt-out is a single click in the notification settings of the site.
-- **Schedule ↔ news linking** — a finished match with a `SPIELBERICHT` news article linked by fixture id gets a "Bericht lesen" action on its row. Conversely the news article shows a small fixture card above the body.
-- **Accessibility** — list items use `<time datetime>` for machine-readable times; keyboard focus order follows reading order; live state uses `aria-live="polite"` so screen readers announce changes.
-- **Analytics** — schedule.ics downloads, push-subscription rate, fixture detail views, and news cross-click counted.
-- **Caching** — same SFV-scrape → S3 → `/api/schedule` pipeline as standings, with ETag and `stale-while-revalidate`.
+Endpoint shape, data fetch cadence, caching strategy, ICS generation, structured-data emission, and accessibility implementation details belong in the same data-source ADR as the standings feature.
 
 ## What it does not do
 
 - No ticket purchase (amateur football, free entry).
-- No lineup announcements (manager decides minutes before kickoff).
+- No lineup announcements.
 - No in-match commentary.
-- No calendar export button (could be added later as an `.ics` endpoint).

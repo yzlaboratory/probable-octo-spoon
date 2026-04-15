@@ -1,87 +1,55 @@
 # Contact form (planned)
 
-> **Status:** not implemented. Today, contact happens exclusively through the hover-reveal phone/email on Vorstand cards or the footer Impressum email (`throwaway.relock977@passinbox.com`).
+> **Status:** not implemented. Today, contact happens exclusively through the hover-reveal phone/email on Vorstand cards or the disposable address linked from the Impressum.
 
 ## What a visitor wants
 
-Someone with a question that doesn't cleanly map to a committee — a sponsorship inquiry, a feedback note about the website, a press request, a "hey I'd like to help but don't know who to call" — needs a catch-all channel. Not everyone is comfortable cold-calling a mobile number.
+Someone with a question that doesn't cleanly map to a single committee — a sponsorship inquiry, a press request, feedback about the website, a "I want to help but don't know who to call" — needs a catch-all channel. Not everyone is comfortable cold-calling a mobile number, especially first-time visitors.
 
-## Where it lives
+## The visitor scenario
 
-A new route `/kontakt` with its own top-level mention at the bottom of every page (added to the footer nav row: `Startseite | Instagram | Impressum | Datenschutzerklärung | Kontakt`). No header entry.
+A local insurance broker wants to discuss sponsoring the club. They open the site, find a `Kontakt` link in the footer, land on a single short form: their name, their email, a topic dropdown, a message, and a privacy consent checkbox. They pick `Sponsoring`, type a paragraph, hit `Nachricht senden`. They see a confirmation message. A day or two later, the right Vorstand member emails them back.
 
-## The form
+That's the whole flow. The visitor never sees an internal email address — the routing happens out of sight.
 
-A single column, center-aligned on desktop, full-bleed on mobile:
+## MVP
 
-- **Name** — text input, required.
-- **E-Mail** — email input, required, client-side format validation (`<input type="email">`).
-- **Betreff / Concern** — select dropdown with options: Allgemein, Sponsoring, Jugend, Training, Presse, Feedback zur Website, Sonstiges. Defaults to "Allgemein."
-- **Nachricht** — multi-line textarea, required, minimum 20 characters client-side.
-- **Datenschutz-Checkbox** — "Ich habe die [Datenschutzerklärung](/Datenschutzerklaerung) gelesen und bin mit der Verarbeitung meiner Angaben einverstanden." Required. Link opens the privacy page in the same tab; pressing back returns with form state preserved.
-- **Submit button** — labeled `Nachricht senden`, primary-color background, full-width on mobile.
+- A `/kontakt` route, linked from the footer alongside the existing legal links.
+- Form fields: name, email, topic (dropdown of a small fixed list — Allgemein, Sponsoring, Jugend, Training, Presse, Feedback zur Website, Sonstiges), message, mandatory privacy consent checkbox linking to the Datenschutzerklärung.
+- A backend endpoint that validates input, applies a simple per-IP rate limit, and forwards the message by email to the Vorstand member responsible for that topic. The mapping lives on the server only, so the form cannot be scraped for addresses.
+- A minimal honeypot field (no CAPTCHA).
+- Three visible result states: success (form replaced by a confirmation), validation error (per-field hint), and a generic "please try again later" for backend failures.
 
-All inputs use the existing dark-mode style system (transparent background, thin primary-color bottom border on focus, white text).
-
-### Example: the sponsor inquiry
-
-A local insurance broker wants to sponsor the club. They don't know who handles sponsorship. They open `/kontakt`, pick `Sponsoring` from the dropdown, type a paragraph, submit. The message routes to the appropriate committee member automatically.
+That's it. No autosave, no draft persistence, no analytics, no auto-acknowledgment.
 
 ### Example: the feedback sender
 
-A fan notices that the website shows the wrong phone number for one of the board members. They use the contact form with `Feedback zur Website` — which routes to Yannik Zeyer (redaktionell verantwortlich per Impressum).
+A fan notices that the website shows the wrong phone number for one of the board members. They use the form with `Feedback zur Website` selected. The message reaches the editorially responsible person, who fixes the phone number on the next deploy.
 
-## Routing logic
+## Could ship later
 
-Each `Betreff` value maps to a board email on the backend:
+In rough order of likely usefulness once the MVP has run for a few months:
 
-| Betreff | Routes to |
-|---|---|
-| Allgemein | Geschäftsführer (Matthias Heinrich) |
-| Sponsoring | Präsident (Björn Perius) |
-| Jugend | Jugendausschuss (Pascal Herre) |
-| Training | Spielausschuss (Mathias Zöhler) |
-| Presse | Geschäftsführer |
-| Feedback zur Website | Yannik Zeyer |
-| Sonstiges | Geschäftsführer |
+1. **Auto-acknowledgment email** to the sender, so they know the message arrived.
+2. **Draft persistence in `localStorage`** if real users start losing long messages to accidental refreshes.
+3. **An admin inbox view** so messages don't only live in personal mailboxes — depends on the admin area landing first.
+4. **Adaptive anti-abuse** (lightweight challenge for repeat-offender IPs) only if spam gets through the honeypot in practice.
 
-The mapping is server-side only — the dropdown on the client never exposes an email address, so the form does not become a spam harvester.
+Each of these is independently shippable and should only land when an actual problem demonstrates the need.
 
-## Backend
+## Open questions
 
-A new Express route `POST /api/contact`:
+- Where does the topic-to-recipient mapping live operationally? In code (changes need a deploy) or in a small config table the Vorstand can edit (depends on the admin area)?
+- Is SES the right MTA, or does the existing Impressum-alias provider already cover this?
+- What's the right retention policy for messages on the server side, given that the inbox copy is the canonical record?
 
-1. Validates payload (name, email format, non-empty message, privacy consent = true). Returns 400 on failure with a field-level error object.
-2. Honeypot field `website` must be empty — if filled, the request is silently accepted (returns 200) but not forwarded. Eliminates the simplest bots without CAPTCHA friction.
-3. Rate-limits by IP: max 3 messages per 10 minutes.
-4. Sends via SES (consistent with the existing AWS stack) with `Reply-To` set to the visitor's email, `To` the mapped recipient, `Bcc` the webmaster for auditing. Subject line: `[svthalexweiler.de] {Betreff} — {Name}`.
-5. Returns 200 with `{ ok: true }`.
+## Architecture
 
-## Success/failure states
+Endpoint shape, validation rules, rate-limit numbers, mail-server choice, SPF/DKIM/DMARC posture, log retention, and accessibility implementation details belong in an ADR. They are not visitor-facing scenarios.
 
-- **Loading** — submit button becomes a spinner, inputs disabled.
-- **Success** — form replaced by a centered confirmation: *"Danke! Deine Nachricht ist unterwegs. Wir melden uns innerhalb weniger Tage."*
-- **Validation error** — per-field red hint below the input, no top-level alert.
-- **Network/server error** — generic card: *"Das hat nicht geklappt. Bitte versuche es später noch einmal oder schreibe direkt an [email]."*
-
-## Accessibility
-
-Every input has an associated `<label>`. The submit button has `aria-busy` during request. On success, focus moves to the confirmation so screen readers announce it.
-
-## Cross-cutting polish
-
-- **Email deliverability** — SPF, DKIM, and DMARC records on `svthalexweiler.de`; SES is the sending MTA. Monthly DMARC aggregate reports reviewed by the infrastructure owner.
-- **Auto-acknowledgment email** — the sender immediately receives a brief confirmation ("Deine Nachricht ist bei uns eingegangen. Wir melden uns innerhalb weniger Tage.") with `Reply-To` set to the routed recipient for seamless threading.
-- **Draft persistence** — every form-state change is mirrored to `localStorage` (debounced 500 ms) so a mistaken refresh or crashed tab doesn't lose a long message. On return, a banner offers `Entwurf wiederherstellen`.
-- **Structured data** — Schema.org `ContactPage` and `Organization.contactPoint` for SEO.
-- **Accessibility** — labels bound to inputs; error messages announced via `aria-live="polite"`; submit button toggles `aria-busy`; on success, focus moves to the confirmation so screen readers announce it.
-- **Adaptive anti-abuse** — clean first submissions pass; flagged IPs (3+ submissions in 24 h) see a lightweight challenge (simple math) before the honeypot fails are silently dropped. No reCAPTCHA — no third-party embed, no tracking cookie.
-- **Data retention policy** — contact messages are retained in inboxes per German record-keeping norms (6 years for business correspondence); server-side logs of `/api/contact` are deleted after 30 days.
-- **Analytics** — form open, validation fail, successful submit counted cookielessly. Conversion rate (open → submit) exposed in the admin dashboard.
-
-## What it does not do
+## What the contact form does not do
 
 - No file attachments.
-- No CAPTCHA (honeypot + rate limit instead). Revisit if spam becomes a real problem.
-- No message archive — messages live only in the recipient's inbox.
-- No auto-reply to the sender.
+- No CAPTCHA in the MVP — honeypot plus rate limit first; revisit only if abuse becomes real.
+- No on-site message archive; messages live in the recipient's inbox.
+- No multilingual form; the site is German-only.
