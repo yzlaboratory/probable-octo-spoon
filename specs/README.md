@@ -20,11 +20,12 @@ Each file describes what a person using the site experiences. Implementation det
 
 See `planned/README.md` for the shared shape every planned spec follows. Files:
 
-- `planned/league-standings.md` — Tabelle on the homepage. **Blocked on data-source decision.**
-- `planned/game-schedule.md` — Next-fixtures section. Same data-source dependency.
+- `planned/league-standings.md` — Tabelle on the homepage. Data source settled (FuPa); pre-ship terms check outstanding.
+- `planned/game-schedule.md` — Next-fixtures section. Shares the FuPa ingest with standings.
 - `planned/training-times.md` — Weekly public training grid.
 - `planned/contact-form.md` — `/kontakt` catch-all form, server-routed by topic.
 - `planned/mobile-sponsor-visibility.md` — Move the in-gallery rotator earlier on phones.
+- `planned/cart.md` — Placeholder for the header cart affordance's roadmap (merch and/or membership dues).
 - `planned/admin-auth.md` — Admin login for a small set of trusted board members.
 - `planned/admin-news-editor.md` — Browser-based news CRUD.
 - `planned/admin-sponsor-editor.md` — Sponsor CRUD with weight and status.
