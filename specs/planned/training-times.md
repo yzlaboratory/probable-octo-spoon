@@ -10,16 +10,17 @@ Today, that information lives only inside Vorstand members' heads, in WhatsApp g
 
 ## The visitor scenario
 
-A parent of a nine-year-old sees an Instagram post about youth training, lands on the homepage, and scrolls to a section called **TRAINING**. They see a weekly grid: each row a day, each cell a group. The Bambini cell on Tuesday afternoon names the trainer, the time, and a small label that says "open to visitors." They show up the following Tuesday with their child.
+A parent of a nine-year-old sees an Instagram post about youth training, lands on the homepage, and scrolls to a section called **TRAINING**. They see a weekly grid: each row a day, each cell a group. The Bambini cell on Tuesday afternoon names the trainer, the time, and a small label that says "offen für Gäste." They show up the following Tuesday with their child.
 
 That's the entire flow. No login, no signup, no calendar subscription required.
 
 ## MVP
 
-- A new section **TRAINING** on the homepage, after VORSTAND, plus a deep-link route `/training`.
+- A new section **TRAINING** on the homepage (placement: see `../homepage.md` for the canonical order), plus a deep-link route `/training`.
 - A weekly grid showing, per slot: group name, time window, trainer name + phone (tap-to-call), and a visibility label — **offen für Gäste** / **Anmeldung erforderlich** / **nur Mitglieder**.
 - An admin-editable data source, so a coaching change does not require a deploy. (Depends on the admin area.)
 - A simple seasonal banner — "Sommerpause bis [date]" — controllable by the same admin.
+- **One admin owns the grid.** The Geschäftsführer (or whoever holds the admin area) types the full season's grid in after the Jahreshauptversammlung and at the summer-break boundary, and tweaks individual slots as coaching changes happen. Trainers do not get their own logins in the MVP — scoped per-trainer auth is deferred until the volume of edits justifies it, if it ever does.
 
 That is enough to answer the visitor's question. If the data source can't be admin-editable yet, ship it as a hardcoded list and treat that as a temporary state — but do not ship it as the long-term shape.
 
@@ -39,8 +40,7 @@ Trainings move around twice a year (winter pitch closures, summer break). The da
 
 ## Open questions
 
-- Who maintains this? If the answer is "the trainers themselves," they need their own login and a UI scoped to their group only. If the answer is "one admin types it in once a year," the MVP admin UI is enough.
-- Is the AH evening session "open to visitors" or "registration required" by club policy? The grid only works if the labels are accurate; the spec needs the Vorstand's input here.
+None gating the MVP. The AH evening session is labelled **offen für Gäste**.
 
 ## Architecture
 
