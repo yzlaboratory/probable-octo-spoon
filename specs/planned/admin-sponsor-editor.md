@@ -17,6 +17,7 @@ A different sponsor's contract expires while renewal is being discussed. The Sch
 - A `/admin/sponsors` list view with the active roster, sortable, plus chips for filtering by status (Aktiv / Pausiert / Archiviert).
 - Per-row actions: Bearbeiten, Pausieren, Archivieren.
 - A create/edit form with: name, optional tagline, link (URL-validated), logo upload, "logo has its own background" flag (controls the footer color treatment), contribution weight (number, with inline guidance on what the values mean), status, optional active-from / active-until dates, and an admin-only notes field.
+- **Card background colour is picked from a fixed palette**, not a free hex picker. The palette covers the existing club accent (low-saturation purple), one warm neutral, one cool neutral, and a "no background / transparent" default. Keeps the visual system coherent and stops a non-designer Schatzmeister from picking a colour that clashes with the dark page or fails contrast against the logo. If a legacy sponsor used a one-off tone outside the palette, the closest palette entry is chosen at migration.
 - A live preview that shows how the sponsor will look in the news rotator, the socials rotator, and the footer tile — including the dark/grayscale treatment — so the Schatzmeister catches a logo that vanishes against the dark background before publishing.
 - Soft archive (the "commented-out" pattern in the source today, made first-class in the UI). Hard delete only from the archived state.
 
@@ -41,8 +42,7 @@ The form should make the meaning of the weight obvious to a non-technical Schatz
 
 ## Open questions
 
-- The current `Color` field on legacy sponsor entries (e.g. a rose-colored card background) — does the editor support arbitrary color picking, or is it a fixed palette? Pick one; both work.
-- Is there a sponsor-facing portal in the long-term roadmap (so sponsors see their own impressions directly)? If yes, the data model should leave room for sponsor user accounts. If not, don't pre-build for it.
+None gating the MVP. Colour is a fixed palette; no sponsor-facing portal is planned, so the data model does not reserve space for sponsor user accounts.
 
 ## Architecture
 
@@ -53,4 +53,4 @@ Tracked in `adr/0003-architecture-backlog.md` B5.
 - No invoicing or payment tracking (handled elsewhere by the Schatzmeister).
 - No contract document storage.
 - No automatic notifications when a contract is about to expire (in the MVP).
-- No sponsor-facing login.
+- No sponsor-facing login — not in the MVP, and not planned. Sponsors remain data, not users; the data model deliberately does not reserve a `sponsor_user` relationship.
