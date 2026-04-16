@@ -15,7 +15,13 @@ interface SocialItem {
   children?: { data: Array<{ media_url: string; media_type: string }> };
 }
 
-function SmallSponsors({ animated }: { animated: boolean }) {
+function SmallSponsors({
+  animated,
+  containerClassName,
+}: {
+  animated: boolean;
+  containerClassName?: string;
+}) {
   const sponsors = useMemo(() => shuffleSponsors(), []);
   return (
     <Sponsorcard
@@ -27,6 +33,7 @@ function SmallSponsors({ animated }: { animated: boolean }) {
       backgroundClasses={sponsors.map((item) =>
         item.Color != undefined ? item.Color : "",
       )}
+      containerClassName={containerClassName}
     />
   );
 }
@@ -71,25 +78,8 @@ export default function SocialsSection() {
         />
       ) : (
         items.map((item, index) => {
-          if (index === 4) {
-            return (
-              <Fragment key={`social-sponsor-${index}`}>
-                <SmallSponsors animated />
-                <Socialcard
-                  imageUrl={item.media_url}
-                  caption={item.caption}
-                  permalink={item.permalink}
-                  timestamp={item.timestamp}
-                  type={item.media_type}
-                  productType={item.media_product_type}
-                  children={item.children}
-                />
-              </Fragment>
-            );
-          }
-          return (
+          const card = (
             <Socialcard
-              key={item.permalink || index}
               imageUrl={item.media_url}
               caption={item.caption}
               permalink={item.permalink}
@@ -99,6 +89,24 @@ export default function SocialsSection() {
               children={item.children}
             />
           );
+          const cardKey = item.permalink || `social-${index}`;
+          if (index === 0) {
+            return (
+              <Fragment key={`mobile-social-sponsor-${cardKey}`}>
+                {card}
+                <SmallSponsors animated containerClassName="lg:hidden" />
+              </Fragment>
+            );
+          }
+          if (index === 4) {
+            return (
+              <Fragment key={`social-sponsor-${cardKey}`}>
+                <SmallSponsors animated containerClassName="hidden lg:block" />
+                {card}
+              </Fragment>
+            );
+          }
+          return <Fragment key={cardKey}>{card}</Fragment>;
         })
       )}
     </Gallery>

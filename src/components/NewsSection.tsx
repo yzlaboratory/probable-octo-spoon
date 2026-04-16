@@ -27,9 +27,20 @@ export default function NewsSection({ newsItems }: Props) {
       numberOfItemsInViewport={4}
     >
       {newsItems.map((item, index) => {
-        if (index === 3) {
+        const card = (
+          <Newscard
+            title={item.title}
+            tag={item.tag}
+            description={item.short}
+            date={item.date}
+            imageUrl={item.imageurl}
+            path={item.path}
+          />
+        );
+        if (index === 0) {
           return (
-            <Fragment key={`sponsor-${index}`}>
+            <Fragment key={`mobile-sponsor-${item.path}`}>
+              {card}
               <Sponsorcard
                 imageUrls={sponsors.map((s) => s.ImageUrl)}
                 urls={sponsors.map((s) => s.Link)}
@@ -39,29 +50,30 @@ export default function NewsSection({ newsItems }: Props) {
                 backgroundClasses={sponsors.map((s) =>
                   s.Color != undefined ? s.Color : "",
                 )}
-              />
-              <Newscard
-                title={item.title}
-                tag={item.tag}
-                description={item.short}
-                date={item.date}
-                imageUrl={item.imageurl}
-                path={item.path}
+                containerClassName="lg:hidden"
               />
             </Fragment>
           );
         }
-        return (
-          <Newscard
-            key={item.path}
-            title={item.title}
-            tag={item.tag}
-            description={item.short}
-            date={item.date}
-            imageUrl={item.imageurl}
-            path={item.path}
-          />
-        );
+        if (index === 3) {
+          return (
+            <Fragment key={`sponsor-${item.path}`}>
+              <Sponsorcard
+                imageUrls={sponsors.map((s) => s.ImageUrl)}
+                urls={sponsors.map((s) => s.Link)}
+                interval={15000}
+                lgWidthClass="lg:w-1/4"
+                animated
+                backgroundClasses={sponsors.map((s) =>
+                  s.Color != undefined ? s.Color : "",
+                )}
+                containerClassName="hidden lg:block"
+              />
+              {card}
+            </Fragment>
+          );
+        }
+        return <Fragment key={item.path}>{card}</Fragment>;
       })}
     </Gallery>
   );
