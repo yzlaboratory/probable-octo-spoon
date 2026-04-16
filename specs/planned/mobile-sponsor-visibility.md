@@ -14,13 +14,13 @@ A villager opens the site on their phone to check whether there's news. Within t
 
 That is the whole user-facing change. The visitor has nothing to learn, no setting to flip, and no banner to dismiss.
 
-## MVP — ship first, measure
+## MVP — ship and trust the reasoning
 
-Move the sponsor rotator forward in the news and socials galleries on phone widths only, so it lands within the first card or two a mobile visitor can swipe to. On desktop the rotator stays where it is — wider screens already show several cards plus the rotator together.
+Move the sponsor rotator forward in the news and socials galleries on phone widths only, so it lands within the first card or two a mobile visitor can swipe to. On desktop the rotator stays where it is — the desktop positions (index 3 in news, index 4 in socials) are treated as deliberate; wider screens already show several cards plus the rotator together, and changing them without need risks breaking the balance between "first few cards get read" and "rotator interrupts the scan."
 
 That single change is the MVP. It is reversible, has no new infrastructure, and either improves the situation or it doesn't.
 
-To know which, capture a baseline first: a couple of weeks of "current state" sponsor impression rates against the same metric after the change. Without the baseline this becomes a vibes-based decision.
+**No measurement in the MVP.** No baseline collection, no server-logged rotator-reached beacon, no third-party analytics. The change ships on reasoning alone. If renewal conversations later require sponsor-impression numbers, a server-side beacon becomes a follow-up — but it is not in scope here.
 
 ## Could ship later
 
@@ -40,8 +40,7 @@ Each of these ships independently. None should be bundled with the MVP.
 
 ## Open questions
 
-- Is the current "sponsor at index 3 in news, index 4 in socials" choice load-bearing for desktop, or did it inherit those positions from an earlier desktop-first layout? (If the latter, moving it on mobile is even cheaper.)
-- What is the smallest passive measurement we can do without introducing client-side tracking? Server-side rendering could log "rotator slot N reached" for the visible window without touching the browser.
+None gating the MVP. Desktop positions are treated as load-bearing and are not moved. No impression measurement in the MVP — if sponsor reporting becomes a real ask later, a server-side beacon is the path to explore.
 
 ## Architecture and instrumentation
 
