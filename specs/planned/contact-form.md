@@ -17,6 +17,9 @@ That's the whole flow. The visitor never sees an internal email address — the 
 - A `/kontakt` route, linked from the footer alongside the existing legal links.
 - Form fields: name, email, topic (dropdown of a small fixed list — roughly the committee axes from Vorstand plus a general and a press option), message, mandatory privacy consent checkbox linking to the Datenschutzerklärung.
 - A backend endpoint that validates input, applies a simple per-IP rate limit, and forwards the message by email to the Vorstand member responsible for that topic. The mapping lives on the server only, so the form cannot be scraped for addresses.
+- **Topic → recipient mapping is admin-editable** inside the admin area — the Geschäftsführer maintains it alongside the Vorstand editor, so a chair change after an AGM is one edit, not a deploy. This ties the feature to the admin area landing first; until then, the form cannot ship.
+- **AWS SES sends the mail.** The existing AWS stack (per ADR 0002) is the natural MTA; the DSE gains one line naming AWS as a processor for contact-form delivery.
+- **Zero server-side retention.** The backend validates, forwards via SES, and never writes the message body to disk or logs. If SES fails, the visitor sees the "try again later" state and the message is gone — no queue, no debug copy, no DSGVO follow-up question about residual data.
 - A minimal honeypot field (no CAPTCHA).
 - Three visible result states: success (form replaced by a confirmation), validation error (per-field hint), and a generic "please try again later" for backend failures.
 
@@ -39,9 +42,7 @@ Each of these is independently shippable and should only land when an actual pro
 
 ## Open questions
 
-- Where does the topic-to-recipient mapping live operationally? In code (changes need a deploy) or in a small config table the Vorstand can edit (depends on the admin area)?
-- Is SES the right MTA, or does the existing Impressum-alias provider already cover this?
-- What's the right retention policy for messages on the server side, given that the inbox copy is the canonical record?
+None gating the MVP. The feature is blocked on the admin area landing first (for the topic→recipient mapping), not on any open design question.
 
 ## Architecture
 
