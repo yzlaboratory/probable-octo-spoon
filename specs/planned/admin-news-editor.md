@@ -17,7 +17,9 @@ For an existing post, the same admin opens the list, clicks `Bearbeiten` on the 
 - A `/admin/news` list view: reverse chronological table of all news with date, tag, title, status, and per-row actions (Bearbeiten, Löschen, Veröffentlichen / Zurückziehen).
 - A create/edit form with: title, tag (autocompleting against existing tags), date, short summary, long body, hero image upload, slug (auto-derived, editable, uniqueness-validated), status (Entwurf / Sofort veröffentlichen / Planen + datetime).
 - A long-body editor that supports headings, bold/italic, lists, links, blockquotes, and inline images. No raw HTML input. No third-party embeds.
-- Image uploads stored server-side and served from a stable URL. Images survive editing the post.
+- **Long-body storage format: sanitized HTML.** The editor produces HTML; the server strips everything outside a small allowlist (`p`, `h2`, `h3`, `strong`, `em`, `ul`/`ol`/`li`, `a`, `blockquote`, `img`) before storing. Cheap to render and a low-friction migration from the existing long-string descriptions. Portable rich-text JSON is deliberately deferred — it earns its keep only once the site needs multiple renderers or structured block types, neither of which is on the horizon.
+- Image uploads stored server-side and served from a stable URL (see ADR 0002 for the S3/CloudFront pipeline). Images survive editing the post.
+- **One-time image backfill at cutover.** A migration script copies every image currently referenced by `src/data/news.json` and the `import.meta.glob` asset folder into the new image store, rewrites each article's `imageurl` to the new URL, and the build-time asset import disappears for news. Old slugs keep working; the codebase stops being a content store. No permanent legacy branching in the renderer.
 - Soft delete with a `Papierkorb` view; hard delete only after soft delete.
 - Save creates a new version; the editor exposes a short version history that an admin can roll back from.
 - A `Vorschau` action that renders the article exactly as a visitor will see it, accessible only to logged-in admins, not crawlable.
@@ -43,9 +45,7 @@ Most of these are routine improvements; none belongs in the first cut.
 
 ## Open questions
 
-- Does the long-body field need its own structured representation (portable rich-text JSON), or is sanitized HTML enough? Choosing JSON unlocks safer rendering later but is more work upfront.
-- How does the existing local-asset image pipeline migrate to the new image-id scheme without breaking old slugs? This needs a one-time backfill plan.
-- Is there a "scheduled unpublish" use case, or do posts simply age out of the reel?
+None gating the MVP. Long-body is sanitized HTML, image migration is a one-time backfill, and posts age out of the visible reel rather than auto-unpublishing.
 
 ## Architecture
 
@@ -54,6 +54,6 @@ Tracked in `adr/0003-architecture-backlog.md` B4.
 ## What the news editor does not do
 
 - No comments, reactions, or shares.
-- No multilingual authoring; the site is German-only.
+- No multilingual authoring today (the site is German-only — see `../navigation-and-chrome.md` for the project-wide language stance).
 - No collaborative real-time editing.
-- No scheduled-unpublish workflow in the MVP.
+- No scheduled-unpublish workflow. Posts stay published until an admin withdraws them or deletes them; the existing content pattern is evergreen announcements, and time-bounded notices have not been frequent enough to warrant a second date field.
