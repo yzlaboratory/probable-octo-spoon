@@ -18,7 +18,8 @@ The admin list mirrors the public section visually — they edit the cards as th
 - A create/edit dialog with: name, role/title (autocompleting against existing titles), email, phone, portrait upload (square crop, fallback to club crest if absent), status, admin-only notes.
 - An explicit DSGVO consent checkbox per member: the member's contact details cannot go public until an admin confirms the member has agreed. The list flags any member whose consent is missing.
 - Soft delete to an `Ehemalig` archive that preserves the historical record. Hard delete only from the archive, with name-typing confirmation.
-- Audit-log entry per change.
+- **Consent revocation = hard erase.** When a former member requests removal under DSGVO, their record is deleted from the live roster *and* their name is scrubbed from audit-log entries (replaced with `<ehemaliges Mitglied>`) within the 90-day audit window. The club does not maintain a separate "Vorstand 2023–2026" historical archive — the simplicity is deliberate, at the cost of losing a historical record of who held which role.
+- Audit-log entry per change, retained for 90 days per `admin-auth.md`.
 
 That's enough to retire the source-edit workflow.
 
@@ -36,8 +37,7 @@ Rough order:
 
 ## Open questions
 
-- Does the public hover-reveal need a redesign for keyboard and touch users now (it's currently mouse-only), or is that a separate accessibility track? If the latter, the admin editor doesn't change. If the former, the data model needs nothing new but the public component is in scope.
-- Consent revocation: when a former member asks to be removed, how far does the audit trail get anonymized vs. preserved for the legal record?
+None gating the MVP. The public hover-reveal's keyboard and touch accessibility are handled as a separate concern (tracked under each individual spec's follow-ups rather than a dedicated a11y track — see `../README.md`), and the editor ships against the current public component as-is. Consent revocation is hard-erase, as above.
 
 ## Architecture
 
