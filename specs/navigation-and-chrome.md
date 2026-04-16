@@ -11,6 +11,10 @@ The site exposes a handful of routes:
 
 All transitions feel instant: clicking a news card or a footer link does not produce a full page reload, and the browser's back button still works as expected. Refreshing a deep URL also lands on the right page.
 
+### Unknown routes
+
+If a visitor types a URL that doesn't match any route — a mistyped `/impresum`, a stale bookmark, a crawler guessing at paths — the page renders an inline **"Seite nicht gefunden"** message inside the standard Layout, with a short link back to the homepage. Header and footer still show. No dedicated 404 route, no error chrome; the treatment mirrors the article-level fallback in `news-browsing.md`.
+
 ## The persistent header
 
 A header renders at the top of every route. It does not scroll away with the content below.
@@ -21,7 +25,9 @@ Always visible and functional:
 - The wordmark **SVALEMANNIA / THALEXWEILER** (decorative).
 - An Instagram glyph on the right that links out to the club's Instagram account.
 
-On larger screens, additional affordances are visible but visibly disabled — a hamburger menu, a `LOGIN` button, a cart, and a search icon. They render with a dimmed appearance and a "not allowed" cursor on hover. They exist because the design anticipates a future site with member login, merchandise, and search; today they communicate "not yet" without producing a broken click.
+On larger screens, two affordances are visible but visibly disabled — a `LOGIN` button and a cart icon. They render with a dimmed appearance and a "not allowed" cursor on hover. Each anticipates a real roadmap item (`planned/admin-auth.md` for login, `planned/cart.md` for merch and membership dues) and communicates "not yet" without producing a broken click.
+
+A hamburger menu and a search icon previously rendered here alongside login and cart. Neither has a planned follow-up, so both have been removed — keeping disabled affordances that don't point at a real roadmap would be dishonest chrome.
 
 ### Example: the member who expects to log in
 
@@ -39,11 +45,15 @@ The Footer is the only place to reach Impressum, Datenschutzerklärung, and the 
 
 The site rearranges itself across phone, tablet, and desktop widths: spacing opens up, typography scales up, gallery navigation buttons appear on wider screens, and footer sponsor tiles change shape. The phone experience is swipe-first; the desktop experience adds chevron buttons and shows more content per row.
 
+## Language
+
+The site is German-only today because the audience is German. That is a current-state observation, not a permanent policy — if the club ever grows a meaningfully non-German-speaking cohort (airbase families, newly arrived residents, etc.), multilingual content becomes a real question. Individual specs repeat the "no multilingual" disclaimer because the feature is not on any roadmap, not because it has been ruled out forever.
+
 ## What the site chrome does not include
 
 - No breadcrumb trail.
 - No skip-to-content link.
-- No language switcher.
+- No language switcher (see "Language" above).
 - No theme switcher — the site is dark-mode-only.
 - No cookie banner.
 - No live chat widget.
