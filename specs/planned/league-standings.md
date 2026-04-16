@@ -1,30 +1,32 @@
 # League standings (planned)
 
 > **Status:** not implemented.
-> **Blocked on:** an open question, not on engineering.
+> **Data source:** FuPa (see below). Shipping still depends on a short terms-of-use check with FuPa support.
 
-## The open question that gates everything
+## Where the data comes from
 
-The Saarländischer Fußballverband (SFV) publishes the league table on its public website. The club does not have a contractual data feed and there is no community-maintained API the team has identified. Three options exist, none of them obviously correct:
+The club already embeds FuPa widgets on its current (legacy) site for the first team's table and fixtures, so FuPa is in practice the authoritative upstream. This spec assumes the same source:
 
-1. **Scrape the SFV page on a schedule.** Cheapest. Fragile to layout changes. Depends on what SFV's terms of service say about automated reuse — *that needs to be answered before any code is written.* Unknown today.
-2. **Manual entry by an admin** after each matchday. Robust, no scraping, but adds a recurring chore for someone in the Vorstand. Realistic only if there is an actual person willing to commit to it for a season.
-3. **Wait for an official feed.** Ongoing — there is no timeline.
+- Primary ingest: FuPa's public widget endpoints for the club's current league table.
+- Fallback: scraping FuPa's public league page if a widget can't deliver the shape the renderer needs.
+- SFV and fussball.de are not used — neither offers a reuse-friendly surface, and the club's own audience already encounters FuPa as the league-table brand.
 
-This spec exists, but **the feature does not move forward until one of these three options is selected and committed to.** Picking a UI before picking a source produces dead requirements.
+Before any code lands, someone emails support@fupa.net to confirm the terms for widget embedding and programmatic fetching, and to ask whether a documented export exists. That's an operational follow-up, not an open design question.
 
-## What a visitor would experience, once the source exists
+## What a visitor experiences
 
-On a Sunday evening after a matchday, a fan opens the homepage, scrolls past news, and lands on a section called **TABELLE**. A simple table shows the league: position, team name, games played, wins/draws/losses, goals for/against, goal difference, points. The club's own row is visually highlighted so the fan finds "us" immediately. Top and bottom of the table carry subtle visual cues for the promotion and relegation zones.
+On a Sunday evening after a matchday, a fan opens the homepage, scrolls past news and the next-fixtures section, and lands on a section called **TABELLE**. A simple table shows the league: position, team name, games played, wins/draws/losses, goals for/against, goal difference, points. The club's own row is visually highlighted so the fan finds "us" immediately. Top and bottom of the table carry subtle visual cues for the promotion and relegation zones.
 
 That is the entire scenario. No calculator, no chart, no notifications.
 
-## MVP — once the data source is settled
+## MVP
 
-- A homepage section after **ALEMANNIA NEWS** showing the current league table.
+- A homepage section (placement: see `../homepage.md` for the canonical order) showing the current league table.
 - The club's row visually marked.
-- A timestamp ("zuletzt aktualisiert: …") so the visitor knows whether the table is fresh.
-- Graceful skeleton/fallback when the source is unreachable, matching the same pattern the Instagram feed already uses.
+- A timestamp ("zuletzt aktualisiert: …") so the visitor knows whether the table is fresh. The timestamp reflects *the snapshot being shown*, which is important under the staleness rule below.
+- Graceful skeleton/fallback when FuPa is unreachable, matching the same pattern the Instagram feed already uses.
+- Daily ingest. A single refresh per day is enough for a Sunday-evening read; matchdays don't need faster cadence given the audience size.
+- Staleness rule: if the latest fetch returns data that fails a basic reconciliation check (e.g. points don't match wins×3 + draws, a row is obviously half-parsed), the site shows the **last-known-good snapshot** with its original "zuletzt aktualisiert" timestamp — not the broken numbers, and not a placeholder. Honesty about freshness, not about the outage.
 
 That's it. No deep-link route, no historical view, no per-team page.
 
@@ -38,10 +40,9 @@ Rough order:
 4. **Multiple-team tabs** (Erste / AH / youth) — only if those teams' tables come from the same data source.
 5. **Historical seasons** archive — useful only if the club ever wants it.
 
-## Open questions, beyond the data source
+## Open questions
 
-- If the data source ever returns inconsistent numbers (points don't match wins×3 + draws), what should the visitor see — the broken numbers, the last-known-good snapshot, or a "Tabelle wird geprüft" placeholder?
-- Update cadence: hourly is fine for a Sunday evening read; do we ever need faster?
+None gating the MVP. The FuPa terms-of-use check remains as an operational pre-ship step, tracked alongside the feature ticket rather than here.
 
 ## Architecture
 
