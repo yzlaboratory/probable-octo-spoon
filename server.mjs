@@ -1,12 +1,26 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { handler as fupaHandler } from "./infrastructure/lambda/fupa.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 4321;
 
 app.use(express.static(path.join(__dirname, "dist")));
+
+async function callFupa(req, res) {
+  try {
+    const result = await fupaHandler({ rawPath: req.path });
+    res.status(result.statusCode).set(result.headers || {}).send(result.body);
+  } catch (err) {
+    console.error("FuPa proxy error:", err);
+    res.status(200).json({ fetchedAt: null });
+  }
+}
+
+app.get("/api/fupa/standings", callFupa);
+app.get("/api/fupa/fixtures", callFupa);
 
 app.get("/api/instagram", async (_req, res) => {
   try {

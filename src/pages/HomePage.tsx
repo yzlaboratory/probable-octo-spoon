@@ -1,5 +1,7 @@
 import Footer from "../components/Footer";
+import LeagueStandingsSection from "../components/LeagueStandingsSection";
 import NewsSection from "../components/NewsSection";
+import NextFixturesSection from "../components/NextFixturesSection";
 import SocialsSection from "../components/SocialsSection";
 import TrainingSection from "../components/TrainingSection";
 import VorstandSection from "../components/VorstandSection";
@@ -30,6 +32,8 @@ export default function HomePage() {
     <div className="flex flex-1 flex-col justify-start overflow-auto">
       <div className="mt-30 flex w-full flex-col gap-30">
         <NewsSection newsItems={newsItems} />
+        <NextFixturesSection />
+        <LeagueStandingsSection />
         <TrainingSection />
         <SocialsSection />
         <VorstandSection />

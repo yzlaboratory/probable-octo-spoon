@@ -22,3 +22,15 @@ variable "ig_access_token" {
   sensitive   = true
   default     = "placeholder"
 }
+
+variable "fupa_team_slug" {
+  description = "FuPa canonical team slug without season suffix (e.g. sv-thalexweiler-m1)"
+  type        = string
+  default     = "sv-thalexweiler-m1"
+}
+
+variable "fupa_club_slug" {
+  description = "FuPa club slug used to highlight the club in the standings"
+  type        = string
+  default     = "sv-thalexweiler"
+}

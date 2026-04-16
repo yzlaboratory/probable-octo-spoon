@@ -204,6 +204,52 @@ resource "aws_lambda_function" "refresh" {
   }
 }
 
+# -----------------------------------------------------------------------------
+# FuPa ingest Lambda
+# -----------------------------------------------------------------------------
+data "archive_file" "fupa_lambda" {
+  type        = "zip"
+  source_file = "${path.module}/lambda/fupa.mjs"
+  output_path = "${path.module}/lambda/fupa.zip"
+}
+
+resource "aws_iam_role" "fupa_lambda" {
+  name = "svthalexweiler-fupa-lambda"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = { Service = "lambda.amazonaws.com" }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "fupa_lambda_basic" {
+  role       = aws_iam_role.fupa_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "fupa" {
+  function_name    = "svthalexweiler-fupa-proxy"
+  role             = aws_iam_role.fupa_lambda.arn
+  handler          = "fupa.handler"
+  runtime          = "nodejs22.x"
+  timeout          = 15
+  memory_size      = 256
+  filename         = data.archive_file.fupa_lambda.output_path
+  source_code_hash = data.archive_file.fupa_lambda.output_base64sha256
+
+  environment {
+    variables = {
+      FUPA_TEAM_SLUG = var.fupa_team_slug
+      FUPA_CLUB_SLUG = var.fupa_club_slug
+    }
+  }
+}
+
 # EventBridge schedule: run every 7 days
 resource "aws_scheduler_schedule" "token_refresh" {
   name       = "svthalexweiler-token-refresh"
@@ -267,6 +313,33 @@ resource "aws_apigatewayv2_route" "instagram" {
   api_id    = aws_apigatewayv2_api.instagram.id
   route_key = "GET /api/instagram"
   target    = "integrations/${aws_apigatewayv2_integration.instagram.id}"
+}
+
+resource "aws_apigatewayv2_integration" "fupa" {
+  api_id                 = aws_apigatewayv2_api.instagram.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.fupa.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "fupa_standings" {
+  api_id    = aws_apigatewayv2_api.instagram.id
+  route_key = "GET /api/fupa/standings"
+  target    = "integrations/${aws_apigatewayv2_integration.fupa.id}"
+}
+
+resource "aws_apigatewayv2_route" "fupa_fixtures" {
+  api_id    = aws_apigatewayv2_api.instagram.id
+  route_key = "GET /api/fupa/fixtures"
+  target    = "integrations/${aws_apigatewayv2_integration.fupa.id}"
+}
+
+resource "aws_lambda_permission" "apigw_fupa" {
+  statement_id  = "AllowAPIGatewayInvokeFupa"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.fupa.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.instagram.execution_arn}/*/*"
 }
 
 resource "aws_apigatewayv2_stage" "default" {
@@ -474,7 +547,10 @@ resource "aws_iam_role_policy" "github_deploy" {
         Action = [
           "lambda:UpdateFunctionCode"
         ]
-        Resource = aws_lambda_function.instagram.arn
+        Resource = [
+          aws_lambda_function.instagram.arn,
+          aws_lambda_function.fupa.arn,
+        ]
       }
     ]
   })

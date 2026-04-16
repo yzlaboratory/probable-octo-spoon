@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import ImpressumPage from "./pages/ImpressumPage";
 import DatenschutzPage from "./pages/DatenschutzPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
+import SchedulePage from "./pages/SchedulePage";
 import TrainingPage from "./pages/TrainingPage";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/Datenschutzerklaerung" element={<DatenschutzPage />} />
         <Route path="/news/:path" element={<NewsDetailPage />} />
         <Route path="/training" element={<TrainingPage />} />
+        <Route path="/spiele" element={<SchedulePage />} />
       </Route>
     </Routes>
   );
