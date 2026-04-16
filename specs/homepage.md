@@ -26,6 +26,20 @@ A relative visiting from out of town opens the site on a laptop to find a contac
 
 News always comes before Socials, which always comes before Vorstand. This reflects the club's priority: event-driven announcements outrank social-media activity, which outranks the static people directory. The Footer is last.
 
+## Planned section order (canonical, once new sections land)
+
+As planned features land, they slot into a single agreed order so no planned spec has to claim homepage real estate on its own:
+
+1. **ALEMANNIA NEWS** (current)
+2. **NÄCHSTE SPIELE** (`planned/game-schedule.md`)
+3. **TABELLE** (`planned/league-standings.md`)
+4. **TRAINING** (`planned/training-times.md`)
+5. **SOCIALS** (current)
+6. **VORSTAND** (current)
+7. Footer
+
+The shape is match-first: news, then the weekend's fixtures, then where the club sits in the table, then the weekly training grid — the "what's happening this week" block — followed by the existing social and people sections. Each planned spec references this order rather than redeclaring it.
+
 ## Section rhythm
 
 Sections breathe with consistent vertical spacing, and the first news card is never clipped by the header on initial load — even on a small phone. The visitor feels a deliberate cadence rather than a wall of content.
