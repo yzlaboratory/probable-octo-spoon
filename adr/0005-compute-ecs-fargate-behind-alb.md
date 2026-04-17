@@ -1,11 +1,13 @@
 # ADR 0005 — ECS Fargate behind an Application Load Balancer for the Express app
 
-- **Status:** Accepted
+- **Status:** Superseded
 - **Date:** 2026-04-15
 - **Deciders:** Yannik Zeyer (infrastructure owner), with Vorstand budget sign-off.
 - **Supersedes:** none
-- **Superseded by:** none
+- **Superseded by:** ADR 0008
 - **Related:** ADR 0002 (AWS as infrastructure), ADR 0001 (database migration).
+
+> Superseded by ADR 0008 (single EC2 with Traefik). ADR 0007 moved the datastore to a local SQLite file, which pins the app to a single node regardless of how the compute layer is topologised — running multiple Fargate tasks against it would be unsafe, not an improvement. The ALB's price stopped being redeemable. Kept in the folder for history; do not build against it.
 
 ## Context
 
