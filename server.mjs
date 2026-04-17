@@ -1,42 +1,13 @@
 import express from "express";
-import cookieParser from "cookie-parser";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import fs from "node:fs";
 import { handler as fupaHandler } from "./infrastructure/lambda/fupa.mjs";
-import { openDb, dbPath, mediaRoot } from "./server/db.mjs";
-import { sweepExpiredSessions } from "./server/auth.mjs";
-import { helmetMiddleware, sessionMiddleware } from "./server/middleware.mjs";
-import authRoutes from "./server/routes/auth.mjs";
-import mediaRoutes from "./server/routes/media.mjs";
-import newsRoutes, { runPublishTick } from "./server/routes/news.mjs";
-import sponsorRoutes from "./server/routes/sponsors.mjs";
-import vorstandRoutes from "./server/routes/vorstand.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 4321;
 
-fs.mkdirSync(path.dirname(dbPath()), { recursive: true });
-fs.mkdirSync(mediaRoot(), { recursive: true });
-const db = openDb(dbPath());
-
-app.set("trust proxy", 1);
-app.use(helmetMiddleware());
-app.use(express.json({ limit: "512kb" }));
-app.use(cookieParser());
-app.use(sessionMiddleware(db));
-
-app.use(
-  "/media",
-  express.static(mediaRoot(), { fallthrough: true, maxAge: "1y", immutable: true }),
-);
-
-app.use("/api/auth", authRoutes(db));
-app.use("/api/media", mediaRoutes(db));
-app.use("/api/news", newsRoutes(db));
-app.use("/api/sponsors", sponsorRoutes(db));
-app.use("/api/vorstand", vorstandRoutes(db));
+app.use(express.static(path.join(__dirname, "dist")));
 
 async function callFupa(req, res) {
   try {
@@ -85,23 +56,9 @@ app.get("/api/instagram", async (_req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, "dist")));
 app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
-
-setInterval(() => {
-  try {
-    runPublishTick(db);
-  } catch (e) {
-    console.error("publish tick:", e);
-  }
-  try {
-    sweepExpiredSessions(db);
-  } catch (e) {
-    console.error("session sweep:", e);
-  }
-}, 60_000);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
