@@ -1,11 +1,13 @@
 # ADR 0004 — PostgreSQL on Amazon RDS as the primary datastore
 
-- **Status:** Accepted
+- **Status:** Superseded
 - **Date:** 2026-04-15
 - **Deciders:** Yannik Zeyer (infrastructure owner), with Vorstand budget sign-off.
 - **Supersedes:** none
-- **Superseded by:** none
+- **Superseded by:** ADR 0007
 - **Related:** ADR 0001 (migrate hardcoded data to a database), ADR 0002 (AWS as infrastructure).
+
+> Superseded by ADR 0007 (SQLite on EBS). Re-examination of the workload — 2–3 admins, kilobytes of data, low public read volume — made RDS's managed-backup and replication features fixed cost for capacity the site will never use. Kept in the folder for history; do not build against it.
 
 ## Context
 
