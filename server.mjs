@@ -87,7 +87,7 @@ app.get("/api/instagram", async (_req, res) => {
 
 app.use(express.static(path.join(__dirname, "dist")));
 app.get("/{*splat}", (_req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  res.type("html").send(fs.readFileSync(path.join(__dirname, "dist", "index.html")));
 });
 
 setInterval(() => {
