@@ -17,14 +17,13 @@ The login screen is deliberately bare: club crest, the heading **Admin-Bereich**
 - Authenticated routes under `/admin`, with unauthenticated visitors redirected to `/admin/login`.
 - Password authentication with hashes stored server-side (modern KDF — choose in an ADR).
 - **Password policy:** minimum 12 characters, no composition rules, no forced rotation. A small blocklist of obvious values (`password`, `alemannia`, club-name variants) is rejected at set/change time. Follows current NIST guidance.
-- **User records live in the main application database** (the Postgres-on-RDS committed in ADR 0004) — same backup, same migrations, same monitoring as the rest of the admin content. A separate auth-only store is not worth the operational overhead at this scale.
+- **User records live in the main application database** (the SQLite file committed in ADR 0007) — same backup, same migrations, same process boundary as the rest of the admin content. A separate auth-only store is not worth the operational overhead at this scale.
 - Session cookie: HTTP-only, secure, SameSite, with a sensible expiry (a week or two, idle-extending).
 - Aggressive rate limiting on the login endpoint and per-account lockout after repeated failures.
 - A working `Abmelden` action that ends the session.
 - Initial admin seeded by a one-time CLI command run during deployment.
 - Subsequent admins added by an existing admin via the dashboard. No self-serve signup.
 - Lost-password handling is operational, not technical: another admin issues a one-time reset link from the dashboard. If only one admin exists and locks themselves out, the infrastructure owner reseeds via a documented CLI script.
-- **Audit log of admin actions** (login, logout, content changes) viewable to admins, with **90-day hard-delete retention**. Long enough for post-incident review after a compromise (most are discovered within weeks); short enough to keep the DSGVO surface small. Older entries are deleted outright rather than anonymized — simpler than a two-tier retention model.
 
 That set ships the admin area without any third-party identity provider. Deliberately small surface area.
 
@@ -44,11 +43,11 @@ None of these belong in the MVP. Each one expands the operational and support su
 
 ## Open questions
 
-None gating the MVP. User store (main DB), password policy (12-char minimum, no rotation), and audit log retention (90 days, hard delete) are all settled above.
+None gating the MVP. User store (main DB) and password policy (12-char minimum, no rotation) are settled above. Admin actions are not logged in the MVP; revisit if the admin set grows or a compliance need appears.
 
 ## Architecture and security mechanics
 
-Tracked in `adr/0003-architecture-backlog.md` B3.
+Specified in ADR 0009.
 
 ## What admin auth does not do
 

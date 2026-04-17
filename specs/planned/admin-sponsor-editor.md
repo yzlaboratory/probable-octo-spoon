@@ -46,7 +46,7 @@ None gating the MVP. Colour is a fixed palette; no sponsor-facing portal is plan
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B5.
+Specified in ADR 0011.
 
 ## What the sponsor editor does not do
 

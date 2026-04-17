@@ -16,10 +16,9 @@ The admin list mirrors the public section visually — they edit the cards as th
 
 - A `/admin/vorstand` view that mirrors the public card grid, with each admin card showing a status pill (Aktiv / Verborgen), a drag handle for reordering, and a `Bearbeiten` action.
 - A create/edit dialog with: name, role/title (autocompleting against existing titles), email, phone, portrait upload (square crop, fallback to club crest if absent), status, admin-only notes.
-- An explicit DSGVO consent checkbox per member: the member's contact details cannot go public until an admin confirms the member has agreed. The list flags any member whose consent is missing.
-- Soft delete to an `Ehemalig` archive that preserves the historical record. Hard delete only from the archive, with name-typing confirmation.
-- **Consent revocation = hard erase.** When a former member requests removal under DSGVO, their record is deleted from the live roster *and* their name is scrubbed from audit-log entries (replaced with `<ehemaliges Mitglied>`) within the 90-day audit window. The club does not maintain a separate "Vorstand 2023–2026" historical archive — the simplicity is deliberate, at the cost of losing a historical record of who held which role.
-- Audit-log entry per change, retained for 90 days per `admin-auth.md`.
+- Soft delete to an `Ehemalig` archive. Hard delete only from the archive, with name-typing confirmation.
+
+The public roster publishes on the basis of legitimate interest (Art. 6(1)(f) DSGVO) for office-bearers in their representative role. The Datenschutzerklärung documents that basis and the process for lodging an Art. 21 objection. There is no per-member consent checkbox in the MVP; a member who objects is handled by the admin via a direct edit (clear the contact field or hide the member).
 
 That's enough to retire the source-edit workflow.
 
@@ -27,9 +26,9 @@ That's enough to retire the source-edit workflow.
 
 Rough order:
 
-1. **Photo crop tooling** in the upload step — only if free-form upload produces too many badly framed cards.
+1. **Explicit DSGVO consent tracking** — a per-member `Einwilligung erteilt` checkbox and a structured revocation flow, if the club decides to move off the legitimate-interest basis.
 2. **vCard download** affordance on public cards ("Kontakt speichern" → `.vcf`).
-3. **Granular consent**: separate flags for "show email" vs. "show phone."
+3. **Granular visibility flags**: separate toggles for "show email" vs. "show phone."
 4. **Photo-refresh reminders** for portraits older than a few years.
 5. **Bulk reorder helpers** ("alphabetisch sortieren," "nach Rolle gruppieren").
 6. **Bulk photo import** by filename matching.
@@ -37,11 +36,11 @@ Rough order:
 
 ## Open questions
 
-None gating the MVP. The public hover-reveal's keyboard and touch accessibility are handled as a separate concern (tracked under each individual spec's follow-ups rather than a dedicated a11y track — see `../README.md`), and the editor ships against the current public component as-is. Consent revocation is hard-erase, as above.
+None gating the MVP. The public hover-reveal's keyboard and touch accessibility are handled as a separate concern (tracked under each individual spec's follow-ups rather than a dedicated a11y track — see `../README.md`), and the editor ships against the current public component as-is. Per-member consent tracking is deferred; the roster runs on legitimate interest, as above.
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B6.
+Specified in ADR 0012.
 
 ## What the Vorstand editor does not do
 

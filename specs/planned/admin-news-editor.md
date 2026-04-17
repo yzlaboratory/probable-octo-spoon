@@ -21,7 +21,6 @@ For an existing post, the same admin opens the list, clicks `Bearbeiten` on the 
 - Image uploads stored server-side and served from a stable URL (see ADR 0002 for the S3/CloudFront pipeline). Images survive editing the post.
 - **One-time image backfill at cutover.** A migration script copies every image currently referenced by `src/data/news.json` and the `import.meta.glob` asset folder into the new image store, rewrites each article's `imageurl` to the new URL, and the build-time asset import disappears for news. Old slugs keep working; the codebase stops being a content store. No permanent legacy branching in the renderer.
 - Soft delete with a `Papierkorb` view; hard delete only after soft delete.
-- Save creates a new version; the editor exposes a short version history that an admin can roll back from.
 - A `Vorschau` action that renders the article exactly as a visitor will see it, accessible only to logged-in admins, not crawlable.
 
 That covers the actual job. Everything else is later.
@@ -30,11 +29,11 @@ That covers the actual job. Everything else is later.
 
 Roughly in order of when a real need is likely to surface:
 
-1. **Autosave of in-progress drafts** — if an admin loses work to a tab close, this pays for itself fast.
-2. **Edit-lock warning** when two admins open the same post.
-3. **Co-author attribution.**
-4. **Per-article SEO meta override fields** — only if defaults from title + summary stop being good enough.
-5. **Responsive image variants** generated on upload — pure performance win, but not visitor-blocking.
+1. **Version history** with per-save snapshots and a one-click rollback — only once an admin actually complains about losing an edit.
+2. **Autosave of in-progress drafts** — if an admin loses work to a tab close, this pays for itself fast.
+3. **Edit-lock warning** when two admins open the same post.
+4. **Co-author attribution.**
+5. **Per-article SEO meta override fields** — only if defaults from title + summary stop being good enough.
 6. **RSS feed.**
 7. **Sitemap regeneration on publish.**
 8. **Draft share link** for non-admin reviewers.
@@ -45,11 +44,11 @@ Most of these are routine improvements; none belongs in the first cut.
 
 ## Open questions
 
-None gating the MVP. Long-body is sanitized HTML, image migration is a one-time backfill, and posts age out of the visible reel rather than auto-unpublishing.
+None gating the MVP. Long-body is sanitized HTML, image migration is a one-time backfill, and posts age out of the visible reel rather than auto-unpublishing. The MVP ships without version history; rollback is deliberately absent until an admin asks for it.
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B4.
+Specified in ADR 0010.
 
 ## What the news editor does not do
 
