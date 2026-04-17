@@ -1,14 +1,10 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { shuffleSponsors, usePublicSponsors } from "../utilities/publicData";
+import { shuffleSponsors } from "../utilities/sponsors";
 import logo from "../assets/logo.svg";
 
 export default function Footer() {
-  const allSponsors = usePublicSponsors();
-  const sponsors = useMemo(
-    () => (allSponsors ? shuffleSponsors(allSponsors) : []),
-    [allSponsors],
-  );
+  const sponsors = useMemo(() => shuffleSponsors(), []);
   return (
     <div className="from-background to-dark-gray-750 border-b-primary flex min-h-[var(--container-2xl)] w-full max-w-full flex-col justify-end gap-8 border-b-8 bg-linear-to-b p-4 pb-8 text-lg text-neutral-400 lg:gap-16 lg:p-16">
       <div className="allsponsors flex w-full flex-row flex-wrap justify-center gap-3 lg:justify-start lg:gap-6">

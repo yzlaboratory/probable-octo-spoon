@@ -2,7 +2,7 @@ import { Fragment, useMemo } from "react";
 import Gallery from "./Gallery";
 import Newscard from "./Newscard";
 import Sponsorcard from "./Sponsorcard";
-import { shuffleTopSponsors, usePublicSponsors } from "../utilities/publicData";
+import { shuffleTopSponsors } from "../utilities/sponsors";
 
 interface NewsItem {
   path: string;
@@ -18,11 +18,7 @@ interface Props {
 }
 
 export default function NewsSection({ newsItems }: Props) {
-  const allSponsors = usePublicSponsors();
-  const sponsors = useMemo(
-    () => (allSponsors ? shuffleTopSponsors(allSponsors, 8) : []),
-    [allSponsors],
-  );
+  const sponsors = useMemo(() => shuffleTopSponsors(8), []);
   return (
     <Gallery
       childrenClassName="newscardcontainer"

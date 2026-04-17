@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 import Card from "@mui/material/Card";
 
+const images = import.meta.glob<{ default: string }>(
+  "/src/assets/*.{jpeg,jpg,png,svg}",
+  { eager: true },
+);
+
 interface Props {
   title: string;
   tag: string;
@@ -18,6 +23,8 @@ export default function Newscard({
   imageUrl,
   path,
 }: Props) {
+  const image = images[imageUrl];
+
   return (
     <div className="bg-background newscardcontainer flex h-auto w-9/10 shrink-0 px-2 lg:w-1/4">
       <Card
@@ -34,9 +41,9 @@ export default function Newscard({
         className="card after:bg-primary relative flex h-auto w-full shrink-0 flex-col justify-start gap-6 pb-6 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full"
       >
         <div className="flex aspect-[100/56] w-full overflow-hidden">
-          {imageUrl && (
+          {image && (
             <img
-              src={imageUrl}
+              src={image.default}
               alt="Portrait"
               className="min-w-full object-fill"
             />
