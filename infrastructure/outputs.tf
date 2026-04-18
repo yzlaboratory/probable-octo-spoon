@@ -1,34 +1,24 @@
-output "s3_bucket_name" {
-  value = aws_s3_bucket.website.id
+output "app_instance_id" {
+  description = "EC2 instance ID used by ssm:SendCommand in the deploy workflow"
+  value       = aws_instance.app.id
 }
 
-output "cloudfront_distribution_id" {
-  value = aws_cloudfront_distribution.website.id
-}
-
-output "cloudfront_domain_name" {
-  value = aws_cloudfront_distribution.website.domain_name
+output "app_public_ip" {
+  description = "Elastic IP the Route53 A records point at"
+  value       = aws_eip.app.public_ip
 }
 
 output "github_deploy_role_arn" {
-  value = aws_iam_role.github_deploy.arn
+  description = "Role the GitHub Actions deploy job assumes via OIDC"
+  value       = aws_iam_role.github_deploy.arn
 }
 
-output "api_gateway_url" {
-  value = aws_apigatewayv2_api.instagram.api_endpoint
+output "sqlite_backup_bucket" {
+  description = "S3 bucket the on-host weekly backup cron writes to"
+  value       = aws_s3_bucket.sqlite_backups.id
 }
 
-output "acm_certificate_arn" {
-  value = aws_acm_certificate.website.arn
-}
-
-output "dns_validation_records" {
-  description = "DNS records to create for ACM certificate validation"
-  value = {
-    for dvo in aws_acm_certificate.website.domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      type  = dvo.resource_record_type
-      value = dvo.resource_record_value
-    }
-  }
+output "ig_token_secret_name" {
+  description = "Name of the Secrets Manager secret the app reads for the IG token"
+  value       = aws_secretsmanager_secret.ig_token.name
 }
