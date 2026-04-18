@@ -4,7 +4,7 @@ output "app_instance_id" {
 }
 
 output "app_public_ip" {
-  description = "Elastic IP the Route53 A records point at"
+  description = "Elastic IP that the Porkbun A records for svthalexweiler.de + www point at"
   value       = aws_eip.app.public_ip
 }
 
