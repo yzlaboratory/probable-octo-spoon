@@ -3,7 +3,7 @@ interface Props {
   date: string;
   tag: string;
   imageUrl: string;
-  long: string;
+  longHtml: string;
 }
 
 export default function NewsDetail({
@@ -11,7 +11,7 @@ export default function NewsDetail({
   date,
   tag,
   imageUrl,
-  long,
+  longHtml,
 }: Props) {
   return (
     <div className="m-8 flex flex-col gap-4 text-white lg:m-16 lg:mt-32 lg:gap-16">
@@ -32,9 +32,10 @@ export default function NewsDetail({
           alt="Portrait"
           className="w-full max-h-[70vh] object-contain lg:w-2/3 lg:max-w-[66.67%] lg:min-w-[66.67%] lg:pr-8"
         />
-        <div className="flex w-full items-center justify-center text-sm font-light text-balance text-white lg:w-1/3 lg:max-w-[33.33%] lg:min-w-[33.33%] lg:pl-8 lg:text-xl">
-          {long}
-        </div>
+        <div
+          className="prose prose-invert flex w-full max-w-none items-start justify-start text-sm font-light text-balance text-white lg:w-1/3 lg:max-w-[33.33%] lg:min-w-[33.33%] lg:pl-8 lg:text-xl"
+          dangerouslySetInnerHTML={{ __html: longHtml }}
+        />
       </div>
     </div>
   );

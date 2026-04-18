@@ -3,7 +3,7 @@ import Gallery from "./Gallery";
 import Socialcard from "./Socialcard";
 import SocialcardFallback from "./SocialcardFallback";
 import Sponsorcard from "./Sponsorcard";
-import { shuffleSponsors } from "../utilities/sponsors";
+import { shuffleSponsors, usePublicSponsors } from "../utilities/publicData";
 
 interface SocialItem {
   media_url: string;
@@ -22,7 +22,11 @@ function SmallSponsors({
   animated: boolean;
   containerClassName?: string;
 }) {
-  const sponsors = useMemo(() => shuffleSponsors(), []);
+  const allSponsors = usePublicSponsors();
+  const sponsors = useMemo(
+    () => (allSponsors ? shuffleSponsors(allSponsors) : []),
+    [allSponsors],
+  );
   return (
     <Sponsorcard
       imageUrls={sponsors.map((item) => item.ImageUrl)}
