@@ -1,11 +1,9 @@
-variable "root_domain" {
-  description = "Apex domain the hosted zone is registered under"
-  type        = string
-  default     = "svthalexweiler.de"
-}
-
+# DNS records are managed at the registrar (Porkbun), not Route53 — the
+# svthalexweiler.de zone does not live in this account. The `domain_names`
+# list would have been used by the removed `aws_route53_record` resources;
+# keeping it documented here makes the Porkbun cutover checklist explicit.
 variable "domain_names" {
-  description = "All hostnames that should resolve to the EC2 instance"
+  description = "Hostnames that must be pointed at aws_eip.app at the Porkbun DNS panel"
   type        = list(string)
   default     = ["svthalexweiler.de", "www.svthalexweiler.de"]
 }
