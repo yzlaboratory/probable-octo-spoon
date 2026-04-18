@@ -27,6 +27,21 @@ provider "aws" {
   }
 }
 
+# Alias kept alive only so Terraform can manage the orphaned ACM cert in
+# us-east-1 (tied to the legacy CloudFront distribution). The final cleanup
+# apply in RUNBOOK §1 Stage C destroys both; remove this alias after.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project = "svthalexweiler"
+      Managed = "terraform"
+    }
+  }
+}
+
 data "aws_ami" "al2023_arm64" {
   most_recent = true
   owners      = ["amazon"]
