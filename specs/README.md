@@ -19,6 +19,10 @@ Each file describes what a person using the site experiences. Implementation det
 - `planned/game-schedule.md` — Next-fixtures section and `/spiele` route (shipped; file still in planned-format).
 - `planned/training-times.md` — Weekly training grid and `/training` route (shipped; file still in planned-format).
 - `planned/mobile-sponsor-visibility.md` — Phone-width rotator move (shipped remediation).
+- `planned/admin-auth.md` — Admin login for a small set of trusted board members (shipped; file still in planned-format).
+- `planned/admin-news-editor.md` — Browser-based news CRUD (shipped; file still in planned-format).
+- `planned/admin-sponsor-editor.md` — Sponsor CRUD with weight and status (shipped; file still in planned-format).
+- `planned/admin-vorstand-editor.md` — Vorstand CRUD with reordering (shipped; file still in planned-format).
 
 ## Planned (not yet implemented)
 
@@ -26,10 +30,6 @@ See `planned/README.md` for the shared shape every planned spec follows. Files:
 
 - `planned/contact-form.md` — `/kontakt` catch-all form, server-routed by topic.
 - `planned/cart.md` — Placeholder for the header cart affordance's roadmap (merch and/or membership dues).
-- `planned/admin-auth.md` — Admin login for a small set of trusted board members.
-- `planned/admin-news-editor.md` — Browser-based news CRUD.
-- `planned/admin-sponsor-editor.md` — Sponsor CRUD with weight and status.
-- `planned/admin-vorstand-editor.md` — Vorstand CRUD with reordering.
 
 ## Where architecture lives
 
