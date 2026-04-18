@@ -1,13 +1,13 @@
-variable "domain_names" {
-  description = "Domain names for the website"
-  type        = list(string)
-  default     = ["svthalexweiler.de", "www.svthalexweiler.de"]
+variable "root_domain" {
+  description = "Apex domain the hosted zone is registered under"
+  type        = string
+  default     = "svthalexweiler.de"
 }
 
-variable "bucket_name" {
-  description = "S3 bucket name for the static website"
-  type        = string
-  default     = "svthalexweiler-website"
+variable "domain_names" {
+  description = "All hostnames that should resolve to the EC2 instance"
+  type        = list(string)
+  default     = ["svthalexweiler.de", "www.svthalexweiler.de"]
 }
 
 variable "github_repo" {
@@ -17,20 +17,32 @@ variable "github_repo" {
 }
 
 variable "ig_access_token" {
-  description = "Instagram Graph API access token"
+  description = "Instagram Graph API access token (rotated by the refresh Lambda)"
   type        = string
   sensitive   = true
   default     = "placeholder"
 }
 
-variable "fupa_team_slug" {
-  description = "FuPa canonical team slug without season suffix (e.g. sv-thalexweiler-m1)"
+variable "instance_type" {
+  description = "EC2 instance type for the app host"
   type        = string
-  default     = "sv-thalexweiler-m1"
+  default     = "t4g.small"
 }
 
-variable "fupa_club_slug" {
-  description = "FuPa club slug used to highlight the club in the standings"
+variable "app_data_volume_size_gb" {
+  description = "Size in GB of the EBS data volume mounted at /var/lib/clubsoft"
+  type        = number
+  default     = 20
+}
+
+variable "root_volume_size_gb" {
+  description = "Size in GB of the root EBS volume"
+  type        = number
+  default     = 16
+}
+
+variable "backup_bucket_name" {
+  description = "S3 bucket name for SQLite weekly snapshots (ADR 0007)"
   type        = string
-  default     = "sv-thalexweiler"
+  default     = "svthalexweiler-sqlite-backups"
 }
