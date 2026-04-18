@@ -54,13 +54,20 @@ terraform output app_public_ip
 
 See §2 (host bootstrap) and §3 (first deploy). **Stop here and verify `http://<EIP>` serves the app** before touching DNS.
 
-### Stage C — cut DNS and clean up the old stack
+### Stage C — cut DNS at Porkbun, then clean up the old stack
 
-```bash
-terraform apply -target=aws_route53_record.app
-```
+DNS for `svthalexweiler.de` is managed at **Porkbun** (the registrar), not Route53. The zone does not exist in this AWS account, so there is no `terraform apply` for the DNS flip — it has to be done by hand in the Porkbun dashboard.
 
-Wait for the Route53 TTL (300 s) to expire, smoke-test `https://svthalexweiler.de/`, then tear down the rest:
+**At Porkbun (DNS Records for svthalexweiler.de):**
+
+| Host | Type | Value | Old value |
+| --- | --- | --- | --- |
+| (apex) | A | `<EIP from `terraform output -raw app_public_ip`>` | 4× CloudFront IPs |
+| `www` | A | same EIP | `d123w08vbjvbvp.cloudfront.net` (CNAME) |
+
+TTL is already 60 s, so propagation is fast. Keep the old CloudFront distribution running until you've smoke-tested `https://svthalexweiler.de/` on the new EIP — rollback is: change the records back at Porkbun.
+
+Once you're satisfied:
 
 ```bash
 # Empty the old website bucket first — Terraform won't delete a non-empty bucket.
@@ -69,6 +76,8 @@ terraform apply
 ```
 
 The final apply destroys CloudFront, the ACM cert in `us-east-1`, the API Gateway v2, and the Instagram proxy + FuPa Lambdas. The CloudFront destroy takes 5–15 min; Terraform polls until it finishes.
+
+After the destroy, remove the `aws.us_east_1` provider alias in `main.tf` (it only existed to manage the orphan cert).
 
 ### Rollback
 

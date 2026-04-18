@@ -1,142 +1,86 @@
-# NEXT — admin-MVP cutover, part 2
+# NEXT — admin-MVP cutover, part 3
 
-Resume cold from this file. Supersedes the NEXT.md on `worktree-admin-mvp` (dated 2026-04-17).
+Resume cold from this file. Supersedes the NEXT.md merged via PR #1.
 
-## Where things stand (2026-04-18)
+## Where things stand (2026-04-18, later same day)
 
-- **`main` @ `2244609`** — still the four reverts on top of `2fdca1f`. Live site is the old S3 + CloudFront stack. Unchanged since the last NEXT.
-- **`origin/worktree-admin-mvp` @ `f5dae6f`** — full admin MVP, untouched. 46 tests passing. Still the merge target once the infra lands.
-- **`origin/worktree-adr-0008-infra` @ `97f34db`** — new work. Three commits:
-  1. `c60f15e` rewrite terraform for ADR 0008 EC2 topology
-  2. `4ea08d1` pre-create traefik bind-mount targets in cloud-init
-  3. `97f34db` rewire deploy workflow to ssm:SendCommand
-- **`infrastructure/RUNBOOK.md`** — staged apply, bootstrap, deploy, backups, restore, IMDSv2 notes. Everything an operator needs end-to-end.
+- **`main`** has the full admin MVP + the ADR 0008 infra. PRs merged today: #1 (infra), #2 (SSM deploy ownership fix), #3 (admin-mvp + container persistence fix).
+- **EC2** `i-06bc80dcb02d19c7b` at EIP **`35.157.38.25`** is running the admin-mvp code. Traefik is up. SPA + admin routes respond `200` over self-signed TLS (LE can't issue until DNS is flipped).
+- **SQLite DB** initialized at `/var/lib/clubsoft/app.db` on the EBS data volume. Backfill ran: 6 news, 32 sponsors, 12 vorstand. Admin `sophisticatedmemento@proton.me` seeded with email-as-password.
+- **Legacy CloudFront stack still live.** Porkbun DNS still points `svthalexweiler.de` + `www` at the old CloudFront IPs / domain — no real user traffic has landed on the EC2 yet.
 
-## What the branch contains
+## What's left
 
-Terraform (all under `infrastructure/`, split by concern):
+Steps marked **[operator]** cannot be driven from Claude Code — they need the human in the loop.
 
-- `main.tf` — providers, AL2023 ARM AMI + Route53 zone data sources.
-- `compute.tf` — EC2 `t4g.small`, 16 GB gp3 root, 20 GB gp3 data volume at `/var/lib/clubsoft` (prevent_destroy), SG (80/443 open, 22 closed), EIP, IAM instance profile with `AmazonSSMManagedInstanceCore` + inline secrets/S3 policy, IMDSv2-only.
-- `user-data.sh.tpl` — Docker + compose plugin install, data volume format + mount, Traefik bind-mount targets, dnf-automatic for unattended security patches.
-- `dns.tf` — Route53 A records for apex + www → EIP.
-- `lambda.tf` — Instagram token refresh Lambda + EventBridge schedule + Secrets Manager (unchanged).
-- `backups.tf` — S3 bucket for SQLite weekly snapshots (12-week lifecycle, SSE-S3, BPA), DLM daily EBS snapshots (retain 7).
-- `github.tf` — GitHub OIDC deploy role, rewired for `ssm:SendCommand` instead of S3/CloudFront.
-- `outputs.tf` — `app_instance_id`, `app_public_ip`, `sqlite_backup_bucket`, `ig_token_secret_name`, `github_deploy_role_arn`.
+### 1. Rotate the seeded admin password — **[operator]**
 
-Workflow (`.github/workflows/deploy.yml`):
+Still email-as-password. Log in at `https://35.157.38.25/admin/login` (accept the self-signed warning; Host header gets rewritten by the browser if you type `svthalexweiler.de` and add the override in `/etc/hosts`). Or wait until after the DNS flip and rotate via `https://svthalexweiler.de/admin/login`.
 
-- `npm test` gate unchanged.
-- Deploy job: assume OIDC role → resolve instance by tag → `ssm:SendCommand` with `git fetch && git checkout --force <sha> && docker compose up -d --build` → poll for completion for up to 15 min.
-- Concurrency group `deploy-prod` serializes deploys (no cancel-in-progress — that would leave compose mid-flight).
+Open `/admin/admins`, issue a reset, follow the `/admin/reset?token=…` link, set a strong passphrase.
 
-Dropped from Terraform: S3 website bucket, CloudFront + OAC, ACM cert, API Gateway v2, Instagram proxy Lambda, FuPa Lambda (admin-mvp ports it into Express).
+### 2. Flip DNS at Porkbun — **[operator]**
 
-## The cutover, in order
+The zone is at the registrar, not Route53 (that's a change from the previous NEXT.md — `dns.tf` has been removed; the Terraform Route53 flow was a dead end).
 
-Steps requiring hands-on access are flagged **[operator]**. Everything else is already merged/pushed on the branch.
+In the Porkbun dashboard for `svthalexweiler.de`:
 
-### 1. Review & merge the infra branch — **[operator]**
+| Host | Type | New value | Replaces |
+| --- | --- | --- | --- |
+| (apex) | A | `35.157.38.25` | four CloudFront A records |
+| `www` | A | `35.157.38.25` | CNAME `d123w08vbjvbvp.cloudfront.net` |
 
-Open PR `worktree-adr-0008-infra` → `main` is live; do **not** merge yet. Merging auto-runs `deploy.yml`, which will fail because the EC2 does not exist yet.
-
-Options, in order of preference:
-
-- **A. Apply first, then merge.** Check out `worktree-adr-0008-infra` locally, run the staged apply per `infrastructure/RUNBOOK.md §1`, verify the EIP serves something (even just the old reverted SPA, manually deployed), then merge the PR. The first deploy after merge points the already-existing EC2 at the merge commit.
-- **B. Merge with the deploy workflow temporarily disabled.** `gh workflow disable deploy.yml` before the merge, run Terraform from `main`, re-enable.
-
-Either way, the order is: Terraform live → EC2 bootstrapped (§2 below) → merge.
-
-### 2. Bootstrap the EC2 — **[operator]**
-
-See `infrastructure/RUNBOOK.md §2`. Summary:
-
-- `aws ssm start-session --target <instance-id>` (install the session manager plugin if you don't have it).
-- Add an SSH deploy key to the repo's *Deploy keys* page, drop the private key at `/home/ec2-user/.ssh/id_ed25519`, wire `~/.ssh/config`.
-- `git clone git@github.com:yzlaboratory/probable-octo-spoon.git /opt/clubsoft`.
-- Write `/opt/clubsoft/.runtime.env` with `IG_ACCESS_TOKEN` (read from Secrets Manager), `PORT=4321`, `DB_PATH`, `MEDIA_ROOT`, `SESSION_SECRET` (random 32 bytes).
-- `docker compose up -d --build` to prove the stack boots. Traefik requests an LE cert on first HTTPS hit.
-- Verify on the EIP before DNS flips.
-
-### 3. Merge `worktree-admin-mvp` — **[operator]**
-
-Only after steps 1 and 2 are green. Prefer `git revert a2f5db8..2244609` on `main` over a reset + force push — keeps the log honest.
-
-Push triggers `deploy.yml`, which SSMs the EC2 and rebuilds the compose stack on the new SHA. Expect a short (<10 s) blip while Traefik + Express restart. On first boot of the new image, `server/db.mjs.openDb()` runs migrations inside a transaction against `/var/lib/clubsoft/app.db`.
-
-### 4. Run the backfill — **[operator]**
-
-Once the admin-mvp code is running:
+TTL is already 60 s. Once propagated, Traefik's ACME TLS-ALPN-01 challenge will succeed on first HTTPS hit and Let's Encrypt will issue certs for both hostnames. Smoke-test:
 
 ```bash
-aws ssm send-command \
-  --instance-ids <id> --region eu-central-1 \
-  --document-name AWS-RunShellScript \
-  --parameters 'commands=["cd /opt/clubsoft && DB_PATH=/var/lib/clubsoft/app.db MEDIA_ROOT=/var/lib/clubsoft/media node scripts/backfill.mjs"]'
+curl -I https://svthalexweiler.de/
+curl -I https://www.svthalexweiler.de/
 ```
 
-Expect: `news: 6 inserted`, `sponsors: 32 inserted`, `vorstand: 12 inserted`, ~43 media rows. Idempotent.
+Rollback is: restore the Porkbun records to their old values.
 
-### 5. Seed the initial admin — **[operator]**
+### 3. Destroy the legacy stack
 
-User-approved override — email as password; rotate immediately:
+Only after DNS is flipped and the new EC2 is confirmed serving real traffic. I can drive this (AWS CLI + Terraform), just give the word:
 
 ```bash
-aws ssm send-command \
-  --instance-ids <id> --region eu-central-1 \
-  --document-name AWS-RunShellScript \
-  --parameters 'commands=["cd /opt/clubsoft && DB_PATH=/var/lib/clubsoft/app.db node server/seed-admin.mjs sophisticatedmemento@proton.me sophisticatedmemento@proton.me"]'
+# empty the old website bucket (Terraform won't destroy a non-empty bucket)
+aws s3 rm s3://svthalexweiler-website --recursive
+terraform -chdir=infrastructure apply
 ```
 
-Then log in at `/admin/login`, open `/admin/admins`, issue a reset, follow the `/admin/reset?token=…` link, set a strong passphrase. Current password lives on the Impressum page.
+Current plan: `Plan: 0 to add, 1 to change, 22 to destroy.` Destroys CloudFront, the us-east-1 ACM cert, API Gateway v2, the Instagram proxy + FuPa Lambdas, and the old S3 website bucket. CloudFront destroy takes 5–15 min. After the apply, I'll drop the `aws.us_east_1` provider alias in a follow-up.
 
-### 6. Cut DNS, destroy the old stack — **[operator]**
+### 4. SQLite backup cron (ADR 0007)
 
-`terraform apply -target=aws_route53_record.app` flips apex + www to the EIP. Wait the 300 s TTL, smoke-test `https://svthalexweiler.de/` end-to-end. Then `aws s3 rm s3://svthalexweiler-website --recursive` (the bucket must be empty for Terraform to destroy it) and `terraform apply` one last time to drop CloudFront, ACM, API Gateway, and the two unused Lambdas.
-
-CloudFront destroy is 5–15 min. Terraform polls.
-
-### 7. Install the SQLite backup cron — **[operator]**
-
-See `infrastructure/RUNBOOK.md §4.1`. One-liner `/etc/cron.weekly/clubsoft-sqlite-backup`. Verify first snapshot lands in `s3://svthalexweiler-sqlite-backups/` a week later.
-
-Rehearse the restore drill (§4.3) once at commissioning.
-
-### 8. Documentation cleanup — **[can be done anytime]**
-
-- Graduate `specs/planned/admin-{auth,news-editor,sponsor-editor,vorstand-editor}.md` — either move to `specs/` or mark "shipped" in `specs/README.md` following the existing pattern.
-- Update `specs/planned/admin-auth.md` to document the email-as-password override + required rotation.
-- Delete this NEXT.md once the cutover is complete.
-
-## Known risks / things I punted on
-
-- **Private-repo auth on the EC2.** The runbook recommends an SSH deploy key; you set it up by hand during bootstrap. I didn't automate it through Secrets Manager — more moving parts than the MVP warrants.
-- **The old S3 website bucket must be emptied before `terraform apply` can destroy it.** `force_destroy` isn't set (and shouldn't be, as a safety rail). Runbook §1 Stage C includes the `aws s3 rm` command.
-- **ACM cert in `us-east-1`.** Terraform knows about it through the `aws.us_east_1` alias in the old `main.tf`. The new `main.tf` removes that alias, so the cert becomes an orphan in state. The final cleanup apply will destroy it along with CloudFront. If that fails for any reason, `aws acm delete-certificate --region us-east-1 --certificate-arn <arn>` once CloudFront is gone.
-- **IG token** is kept in Secrets Manager under the same name; the refresh Lambda still rotates it weekly. The Express app reads the secret on the EC2 at request time.
-- **CloudWatch agent / logs.** ADR 0008 calls for CPU/memory/disk/Docker metrics to CloudWatch Logs with 30 d retention. Not provisioned in this pass. Add in a follow-up — the SSM policy covers the metric publishing verb already.
-- **`/healthz` endpoint.** ADR 0008 follow-up. Not added yet. Traefik and CloudWatch can probe `/` for now.
-
-## Appendix — useful one-liners
+One-liner on the host. I can SSM this once you're ready:
 
 ```bash
-# Instance ID
-terraform -chdir=infrastructure output -raw app_instance_id
-
-# EIP
-terraform -chdir=infrastructure output -raw app_public_ip
-
-# Open an interactive shell on the host
-aws ssm start-session --region eu-central-1 \
-  --target $(terraform -chdir=infrastructure output -raw app_instance_id)
-
-# Tail the most recent SSM deploy output
-aws ssm list-commands --region eu-central-1 \
-  --instance-id $(terraform -chdir=infrastructure output -raw app_instance_id) \
-  --max-results 1 --query 'Commands[0].CommandId' --output text \
-  | xargs -I{} aws ssm get-command-invocation --region eu-central-1 \
-      --command-id {} \
-      --instance-id $(terraform -chdir=infrastructure output -raw app_instance_id) \
-      --query 'StandardOutputContent' --output text
+cat > /etc/cron.weekly/clubsoft-sqlite-backup <<'EOF'
+#!/bin/bash
+set -euo pipefail
+STAMP=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+TMP=$(mktemp -d)
+sqlite3 /var/lib/clubsoft/app.db ".backup $TMP/app.db"
+gzip -9 "$TMP/app.db"
+aws s3 cp "$TMP/app.db.gz" "s3://svthalexweiler-sqlite-backups/app-$STAMP.db.gz" \
+  --region eu-central-1
+rm -rf "$TMP"
+EOF
+chmod +x /etc/cron.weekly/clubsoft-sqlite-backup
 ```
+
+First snapshot lands next Sunday 04:02 UTC. Restore drill is RUNBOOK §4.3.
+
+### 5. Documentation cleanup — **[anytime]**
+
+- Graduate `specs/planned/admin-{auth,news-editor,sponsor-editor,vorstand-editor}.md`.
+- Document the email-as-password seed override in `specs/planned/admin-auth.md`.
+- Delete this NEXT.md.
+
+## Punted follow-ups (track in ADR 0008 backlog)
+
+- CloudWatch agent for CPU/mem/disk/Docker metrics with 30-day retention.
+- `/healthz` endpoint + Traefik healthcheck + CloudWatch synthetic.
+- Legacy GitHub repo secrets `CLOUDFRONT_DISTRIBUTION_ID`, `S3_BUCKET` — delete once §3 destroy is applied.
+- Traefik OTLP tracing config points at `localhost:4318` with nothing listening — noisy, not fatal.

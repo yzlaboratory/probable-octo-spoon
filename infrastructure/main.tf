@@ -62,11 +62,6 @@ data "aws_ami" "al2023_arm64" {
   }
 }
 
-data "aws_route53_zone" "root" {
-  name         = "${var.root_domain}."
-  private_zone = false
-}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
