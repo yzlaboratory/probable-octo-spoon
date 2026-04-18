@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import iglogo from "../assets/instagramwhite.svg";
 
@@ -25,9 +26,12 @@ export default function Header() {
           </div>
         </div>
         <div className="flex h-full w-max flex-row items-center justify-between gap-2 md:gap-6">
-          <button className="border-primary hidden border-2 border-solid px-4 py-2 text-xs hover:cursor-not-allowed hover:opacity-50 md:text-base lg:flex">
+          <Link
+            to="/admin"
+            className="border-primary hidden border-2 border-solid px-4 py-2 text-xs hover:opacity-80 md:text-base lg:flex"
+          >
             LOGIN
-          </button>
+          </Link>
           <span className="material-symbols-rounded hidden! h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50 lg:flex!">
             shopping_cart
           </span>
