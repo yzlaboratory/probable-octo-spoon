@@ -60,18 +60,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Single-string commands array — AWS-RunShellScript executes it as one
-          # bash script, so `set -e` and CWD propagate across lines.
+          # SSM AWS-RunShellScript executes as root, but /opt/clubsoft is owned
+          # by ec2-user (who also owns the docker group membership), so the
+          # git + compose block runs under `sudo -u ec2-user`. `bash -lc` gives
+          # ec2-user a login shell so PATH picks up docker + the compose plugin.
           cat > /tmp/ssm-params.json <<JSON
           {
             "commands": [
               "set -euxo pipefail",
               "if [ ! -d /opt/clubsoft/.git ]; then echo 'bootstrap /opt/clubsoft manually before first deploy'; exit 1; fi",
-              "cd /opt/clubsoft",
-              "git fetch --all --prune",
-              "git checkout --force ${SHA}",
-              "docker compose pull || true",
-              "docker compose up -d --build"
+              "sudo -u ec2-user bash -lc 'set -euxo pipefail; cd /opt/clubsoft; git fetch --all --prune; git checkout --force ${SHA}; docker compose pull || true; docker compose up -d --build'"
             ],
             "executionTimeout": ["900"]
           }
