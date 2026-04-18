@@ -3,10 +3,13 @@ WORKDIR /clubsoft-website
 
 COPY . .
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npm run build
 ENV HOST=0.0.0.0
 ENV PORT=4321
-ENV NPM_CONFIG_LOGLEVEL info
+ENV NPM_CONFIG_LOGLEVEL=info
 EXPOSE 4321
-CMD npm run serve
+# Env vars come from compose (env_file: .runtime.env) so the secret never
+# enters an image layer. `node --env-file` would require the file inside the
+# image and contradict the .dockerignore.
+CMD ["node", "server.mjs"]
