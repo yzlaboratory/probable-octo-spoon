@@ -48,8 +48,15 @@ services:
       - "traefik.http.routers.dashboard.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.users=kira:$$apr1$$jJPD/8dV$$qT02fiH3.pfzgEasFVIy3."
   clubsoft:
-    # ...
     build: .
+    env_file: .runtime.env
+    volumes:
+      # SQLite DB + admin-uploaded media persist on the EBS data volume
+      # mounted at /var/lib/clubsoft on the host. Without this bind mount,
+      # the DB lives in the container writable layer and is wiped on every
+      # `docker compose up -d --build`.
+      - /var/lib/clubsoft:/var/lib/clubsoft
+    restart: unless-stopped
     labels:
       - traefik.http.routers.clubsoft.rule=Host(`svthalexweiler.de`) || Host(`www.svthalexweiler.de`)
       - traefik.http.routers.clubsoft.tls=true
