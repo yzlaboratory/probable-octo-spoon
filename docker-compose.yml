@@ -61,5 +61,10 @@ services:
       - traefik.http.routers.clubsoft.rule=Host(`svthalexweiler.de`) || Host(`www.svthalexweiler.de`)
       - traefik.http.routers.clubsoft.tls=true
       - traefik.http.routers.clubsoft.tls.certresolver=myresolver
+      # Traefik 3.x doesn't auto-enroll every Host() branch joined by `||`
+      # with the ACME resolver. Spell the hostnames out so Let's Encrypt
+      # issues a single cert with www as a SAN.
+      - traefik.http.routers.clubsoft.tls.domains[0].main=svthalexweiler.de
+      - traefik.http.routers.clubsoft.tls.domains[0].sans=www.svthalexweiler.de
     ports:
       - "4321:4321"
