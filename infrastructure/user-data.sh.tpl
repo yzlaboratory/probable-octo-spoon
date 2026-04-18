@@ -1,7 +1,8 @@
 #!/bin/bash
 # cloud-init bootstrap for the clubsoft app host (ADR 0008).
-# Keeps responsibilities minimal: install Docker, mount the data volume,
-# prepare /opt/clubsoft. The deploy workflow ships the code and starts the app.
+# Minimal: install Docker, mount the data volume, prepare /opt/clubsoft and
+# Traefik bind-mount targets. The deploy workflow ships the code and starts
+# the compose stack.
 set -euxo pipefail
 
 # --- System packages ---------------------------------------------------------
@@ -12,7 +13,7 @@ systemctl enable --now docker
 # Docker Compose v2 plugin (AL2023 has no official package yet).
 COMPOSE_VERSION="v2.29.7"
 mkdir -p /usr/libexec/docker/cli-plugins
-curl -fsSL "https://github.com/docker/compose/releases/download/$${COMPOSE_VERSION}/docker-compose-linux-aarch64" \
+curl -fsSL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-aarch64" \
   -o /usr/libexec/docker/cli-plugins/docker-compose
 chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 
@@ -44,6 +45,15 @@ grep -q "LABEL=clubsoft-data" /etc/fstab || \
 mount -a
 mkdir -p /var/lib/clubsoft/media
 chown -R ec2-user:ec2-user /var/lib/clubsoft
+
+# --- Traefik bind-mount targets ---------------------------------------------
+# docker-compose.yml bind-mounts /home/acme.json and /var/log/traefik/*.log.
+# Pre-create them so Traefik can write, otherwise Docker creates them as
+# directories and Traefik fails to start.
+install -m 0600 /dev/null /home/acme.json
+install -d -m 0755 /var/log/traefik
+install -m 0644 /dev/null /var/log/traefik/traefik.log
+install -m 0644 /dev/null /var/log/traefik/access.log
 
 # --- App checkout area -------------------------------------------------------
 install -d -o ec2-user -g ec2-user /opt/clubsoft
