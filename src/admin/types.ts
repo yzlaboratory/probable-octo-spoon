@@ -1,11 +1,27 @@
 export type MediaVariants = Record<string, string>;
+export type MediaKind = "news" | "sponsor" | "vorstand";
 export interface Media {
   id: number;
   variants: MediaVariants;
   mimeType: string;
+  /** Uploader's original filename. Null for rows predating the Phase 3 migration. */
+  filename?: string | null;
+  /**
+   * Admin-library metadata: set by the Mediathek endpoints and by the response
+   * to a fresh upload. Omitted when Media is embedded inside a News, Sponsor,
+   * or Vorstand response.
+   */
+  kind?: MediaKind;
+  uploadedAt?: string;
+  uploadedBy?: string | null;
 }
 
-export type NewsStatus = "draft" | "scheduled" | "published" | "withdrawn" | "deleted";
+export type NewsStatus =
+  | "draft"
+  | "scheduled"
+  | "published"
+  | "withdrawn"
+  | "deleted";
 export interface News {
   id: number;
   slug: string;
@@ -21,7 +37,11 @@ export interface News {
 }
 
 export type SponsorStatus = "active" | "paused" | "archived";
-export type CardPalette = "transparent" | "purple" | "warm-neutral" | "cool-neutral";
+export type CardPalette =
+  | "transparent"
+  | "purple"
+  | "warm-neutral"
+  | "cool-neutral";
 export interface Sponsor {
   id: number;
   name: string;

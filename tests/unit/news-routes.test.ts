@@ -32,11 +32,12 @@ function app(db: any) {
 function bootstrap() {
   const db = new Database(":memory:");
   db.pragma("foreign_keys = ON");
-  const sql = fs.readFileSync(
-    path.resolve(__dirname, "../../server/schema/001_init.sql"),
-    "utf8",
-  );
-  db.exec(sql);
+  // Apply every migration in lexical order so the schema here matches prod.
+  const schemaDir = path.resolve(__dirname, "../../server/schema");
+  for (const file of fs.readdirSync(schemaDir).sort()) {
+    if (!file.endsWith(".sql")) continue;
+    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
+  }
   return db;
 }
 

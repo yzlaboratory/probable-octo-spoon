@@ -5,11 +5,25 @@ export class ApiError extends Error {
   status: number;
   code: string;
   fields?: Record<string, string[]>;
-  constructor(status: number, body: { code?: string; message?: string; fields?: Record<string, string[]> }) {
+  /**
+   * Full parsed response body. Callers that need non-standard envelope fields
+   * (e.g. `references` on a 409 from DELETE /api/media/:id) read them here.
+   */
+  data: Record<string, unknown>;
+  constructor(
+    status: number,
+    body: {
+      code?: string;
+      message?: string;
+      fields?: Record<string, string[]>;
+      [k: string]: unknown;
+    },
+  ) {
     super(body.message || `HTTP ${status}`);
     this.status = status;
     this.code = body.code || "unknown";
     this.fields = body.fields;
+    this.data = body;
   }
 }
 
@@ -23,7 +37,12 @@ export function getCsrfToken() {
 
 type Method = "GET" | "POST" | "PATCH" | "DELETE";
 
-async function request<T>(method: Method, path: string, body?: unknown, init?: RequestInit): Promise<T> {
+async function request<T>(
+  method: Method,
+  path: string,
+  body?: unknown,
+  init?: RequestInit,
+): Promise<T> {
   const headers: Record<string, string> = {
     Accept: "application/json",
     ...(init?.headers as Record<string, string> | undefined),
@@ -59,5 +78,6 @@ export const api = {
   post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
   patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
   delete: <T>(path: string, body?: unknown) => request<T>("DELETE", path, body),
-  upload: async <T>(path: string, form: FormData) => request<T>("POST", path, form),
+  upload: async <T>(path: string, form: FormData) =>
+    request<T>("POST", path, form),
 };
