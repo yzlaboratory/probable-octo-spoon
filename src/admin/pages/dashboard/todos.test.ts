@@ -81,12 +81,7 @@ describe("deriveTodos — news drafts", () => {
 
   it("excludes drafts younger than 24h", () => {
     expect(
-      deriveTodos(
-        [n({ updatedAt: "2026-04-23T08:00:00Z" })],
-        [],
-        [],
-        NOW,
-      ),
+      deriveTodos([n({ updatedAt: "2026-04-23T08:00:00Z" })], [], [], NOW),
     ).toEqual([]);
   });
 
@@ -120,7 +115,13 @@ describe("deriveTodos — sponsor expirations", () => {
   it("includes sponsors expiring within 30 days", () => {
     const items = deriveTodos(
       [],
-      [s({ id: 11, name: "Reifen Stiegler", activeUntil: "2026-04-30T00:00:00Z" })],
+      [
+        s({
+          id: 11,
+          name: "Reifen Stiegler",
+          activeUntil: "2026-04-30T00:00:00Z",
+        }),
+      ],
       [],
       NOW,
     );
@@ -158,19 +159,12 @@ describe("deriveTodos — sponsor expirations", () => {
 
   it("excludes sponsors expiring beyond 30 days", () => {
     expect(
-      deriveTodos(
-        [],
-        [s({ activeUntil: "2026-06-30T00:00:00Z" })],
-        [],
-        NOW,
-      ),
+      deriveTodos([], [s({ activeUntil: "2026-06-30T00:00:00Z" })], [], NOW),
     ).toEqual([]);
   });
 
   it("excludes sponsors with no activeUntil", () => {
-    expect(
-      deriveTodos([], [s({ activeUntil: null })], [], NOW),
-    ).toEqual([]);
+    expect(deriveTodos([], [s({ activeUntil: null })], [], NOW)).toEqual([]);
   });
 
   it("excludes paused / archived sponsors", () => {
@@ -207,7 +201,11 @@ describe("deriveTodos — vorstand portraits", () => {
   });
 
   it("excludes members with a portrait", () => {
-    const portrait = { id: 1, variants: { thumb: "/x" }, mimeType: "image/jpeg" };
+    const portrait = {
+      id: 1,
+      variants: { thumb: "/x" },
+      mimeType: "image/jpeg",
+    };
     expect(deriveTodos([], [], [v({ portrait })], NOW)).toEqual([]);
   });
 
@@ -216,7 +214,10 @@ describe("deriveTodos — vorstand portraits", () => {
       deriveTodos(
         [],
         [],
-        [v({ status: "hidden", portrait: null }), v({ status: "archived", portrait: null })],
+        [
+          v({ status: "hidden", portrait: null }),
+          v({ status: "archived", portrait: null }),
+        ],
         NOW,
       ),
     ).toEqual([]);

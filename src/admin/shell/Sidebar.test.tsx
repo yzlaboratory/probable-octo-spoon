@@ -36,26 +36,32 @@ describe("Sidebar", () => {
     expect(sponsors.className).not.toContain("active");
   });
 
-  describe.each(["Termine", "Mediathek", "Mitglieder", "Website-Vorschau", "Erscheinungsbild", "Einstellungen"])(
-    '"%s" is disabled (feature not yet shipped)',
-    (label) => {
-      it("renders as disabled button with 'bald' badge", () => {
-        const { getByText } = renderAt("/admin/news");
-        const entry = getByText(label);
-        const button = entry.closest("button")!;
-        expect(button.tagName).toBe("BUTTON");
-        expect(button.disabled).toBe(true);
-        expect(button.className).toContain("opacity-50");
-      });
-    },
-  );
+  describe.each([
+    "Termine",
+    "Mediathek",
+    "Mitglieder",
+    "Website-Vorschau",
+    "Erscheinungsbild",
+    "Einstellungen",
+  ])('"%s" is disabled (feature not yet shipped)', (label) => {
+    it("renders as disabled button with 'bald' badge", () => {
+      const { getByText } = renderAt("/admin/news");
+      const entry = getByText(label);
+      const button = entry.closest("button")!;
+      expect(button.tagName).toBe("BUTTON");
+      expect(button.disabled).toBe(true);
+      expect(button.className).toContain("opacity-50");
+    });
+  });
 
   it("links live entries to their admin routes", () => {
     const { getByText } = renderAt("/admin");
     const dashboard = getByText("Übersicht").closest("a") as HTMLAnchorElement;
     const news = getByText("News").closest("a") as HTMLAnchorElement;
     const sponsors = getByText("Sponsoren").closest("a") as HTMLAnchorElement;
-    const admins = getByText("Administratoren").closest("a") as HTMLAnchorElement;
+    const admins = getByText("Administratoren").closest(
+      "a",
+    ) as HTMLAnchorElement;
     expect(dashboard.getAttribute("href")).toBe("/admin");
     expect(news.getAttribute("href")).toBe("/admin/news");
     expect(sponsors.getAttribute("href")).toBe("/admin/sponsors");

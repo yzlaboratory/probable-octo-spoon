@@ -15,7 +15,9 @@ describe("formatLongDate", () => {
 
   it("formats a Sunday in December", () => {
     // 2025-12-21 is a Sunday.
-    expect(formatLongDate(new Date(2025, 11, 21))).toBe("Sonntag, 21. Dezember");
+    expect(formatLongDate(new Date(2025, 11, 21))).toBe(
+      "Sonntag, 21. Dezember",
+    );
   });
 });
 

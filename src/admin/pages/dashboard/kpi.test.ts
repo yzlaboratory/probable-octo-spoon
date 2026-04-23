@@ -105,7 +105,11 @@ describe("sponsorKpi", () => {
 
 describe("vorstandKpi", () => {
   it("counts active members and active members without portrait", () => {
-    const portrait = { id: 1, variants: { thumb: "/x" }, mimeType: "image/jpeg" };
+    const portrait = {
+      id: 1,
+      variants: { thumb: "/x" },
+      mimeType: "image/jpeg",
+    };
     expect(
       vorstandKpi([
         v("active", portrait),
@@ -127,21 +131,21 @@ describe("vorstandKpi", () => {
 
 describe("subline formatters", () => {
   it("newsSubline: composes geplant + Entwürfe parts", () => {
-    expect(newsSubline({ published: 5, drafts: 2, scheduled: 1, withdrawn: 0 })).toBe(
-      "+1 geplant · 2 Entwürfe",
-    );
+    expect(
+      newsSubline({ published: 5, drafts: 2, scheduled: 1, withdrawn: 0 }),
+    ).toBe("+1 geplant · 2 Entwürfe");
   });
 
   it("newsSubline: singular Entwurf when drafts === 1", () => {
-    expect(newsSubline({ published: 5, drafts: 1, scheduled: 0, withdrawn: 0 })).toBe(
-      "1 Entwurf",
-    );
+    expect(
+      newsSubline({ published: 5, drafts: 1, scheduled: 0, withdrawn: 0 }),
+    ).toBe("1 Entwurf");
   });
 
   it("newsSubline: 'Alles veröffentlicht' when nothing pending", () => {
-    expect(newsSubline({ published: 5, drafts: 0, scheduled: 0, withdrawn: 0 })).toBe(
-      "Alles veröffentlicht",
-    );
+    expect(
+      newsSubline({ published: 5, drafts: 0, scheduled: 0, withdrawn: 0 }),
+    ).toBe("Alles veröffentlicht");
   });
 
   it("sponsorSubline: shows paused + archived counts", () => {

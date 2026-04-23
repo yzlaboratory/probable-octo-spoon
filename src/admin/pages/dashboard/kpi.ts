@@ -53,7 +53,8 @@ export function vorstandKpi(vorstand: Vorstand[]): VorstandKpi {
 export function newsSubline(k: NewsKpi): string {
   const bits: string[] = [];
   if (k.scheduled > 0) bits.push(`+${k.scheduled} geplant`);
-  if (k.drafts > 0) bits.push(`${k.drafts} ${k.drafts === 1 ? "Entwurf" : "Entwürfe"}`);
+  if (k.drafts > 0)
+    bits.push(`${k.drafts} ${k.drafts === 1 ? "Entwurf" : "Entwürfe"}`);
   if (bits.length === 0) return "Alles veröffentlicht";
   return bits.join(" · ");
 }

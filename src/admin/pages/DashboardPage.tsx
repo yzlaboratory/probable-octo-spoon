@@ -4,6 +4,8 @@ import { api } from "../api";
 import type { News, Sponsor, Vorstand } from "../types";
 import { Button, PageHeader } from "../ui";
 import * as Icons from "../ui/Icons";
+import { ActivityCard } from "./dashboard/ActivityCard";
+import { mergeActivity } from "./dashboard/activity";
 import { formatLongDate, greetingFor } from "./dashboard/format";
 import { KpiStrip } from "./dashboard/KpiStrip";
 import {
@@ -14,6 +16,10 @@ import {
   type SponsorKpi,
   type VorstandKpi,
 } from "./dashboard/kpi";
+import { RecentNewsCard } from "./dashboard/RecentNewsCard";
+import { TermineCard } from "./dashboard/TermineCard";
+import { TodoCard } from "./dashboard/TodoCard";
+import { deriveTodos } from "./dashboard/todos";
 
 interface DashboardData {
   news: News[];
@@ -67,6 +73,12 @@ export default function DashboardPage() {
         vorstand: vorstandKpi(data.vorstand),
       }
     : ZERO_KPIS;
+  const todos = data
+    ? deriveTodos(data.news, data.sponsors, data.vorstand, now)
+    : [];
+  const activity = data
+    ? mergeActivity(data.news, data.sponsors, data.vorstand, 10)
+    : [];
 
   return (
     <div>
@@ -98,7 +110,7 @@ export default function DashboardPage() {
         {error && (
           <div
             role="alert"
-            className="mb-6 px-4 py-3 rounded-md text-[13px]"
+            className="mb-6 rounded-md px-4 py-3 text-[13px]"
             style={{
               background: "oklch(0.5 0.18 25 / 0.12)",
               color: "var(--accent)",
@@ -109,7 +121,22 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <KpiStrip news={kpis.news} sponsors={kpis.sponsors} vorstand={kpis.vorstand} />
+        <KpiStrip
+          news={kpis.news}
+          sponsors={kpis.sponsors}
+          vorstand={kpis.vorstand}
+        />
+
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-8 space-y-6">
+            <TodoCard items={todos} />
+            <RecentNewsCard news={data?.news ?? []} />
+          </div>
+          <div className="col-span-4 space-y-6">
+            <TermineCard />
+            <ActivityCard items={activity} now={now} />
+          </div>
+        </div>
       </div>
     </div>
   );

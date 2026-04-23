@@ -23,28 +23,34 @@ const TONE_VARS: Record<Tone, { color: string; glow: string }> = {
 function KpiCard({ label, value, sub, tone, muted = false }: KpiCardProps) {
   const t = TONE_VARS[tone];
   return (
-    <Card padded={false} className="p-5 relative overflow-hidden">
+    <Card padded={false} className="relative overflow-hidden p-5">
       <div
         aria-hidden
-        className="absolute inset-0 opacity-60 pointer-events-none"
+        className="pointer-events-none absolute inset-0 opacity-60"
         style={{
           background: `radial-gradient(circle at 0% 0%, ${t.glow}, transparent 60%)`,
         }}
       />
       <div
         aria-hidden
-        className="absolute top-0 left-0 right-0 h-[2px]"
+        className="absolute top-0 right-0 left-0 h-[2px]"
         style={{ background: t.color, boxShadow: `0 0 20px ${t.glow}` }}
       />
-      <div className="caps text-[10.5px] relative" style={{ color: "var(--ink-3)" }}>
+      <div
+        className="caps relative text-[10.5px]"
+        style={{ color: "var(--ink-3)" }}
+      >
         {label}
       </div>
       <div
-        className={`font-display text-[40px] leading-none mt-2 relative ${muted ? "opacity-60" : ""}`}
+        className={`font-display relative mt-2 text-[40px] leading-none ${muted ? "opacity-60" : ""}`}
       >
         {value}
       </div>
-      <div className="text-[12px] mt-2 relative" style={{ color: "var(--ink-3)" }}>
+      <div
+        className="relative mt-2 text-[12px]"
+        style={{ color: "var(--ink-3)" }}
+      >
         {sub}
       </div>
     </Card>
@@ -59,7 +65,7 @@ export interface KpiStripProps {
 
 export function KpiStrip({ news, sponsors, vorstand }: KpiStripProps) {
   return (
-    <div className="grid grid-cols-4 gap-4 mb-8">
+    <div className="mb-8 grid grid-cols-4 gap-4">
       <KpiCard
         label="Meldungen"
         value={news.published}

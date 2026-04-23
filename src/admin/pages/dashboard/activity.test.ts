@@ -57,7 +57,10 @@ function v(id: number, name: string, updatedAt: string): Vorstand {
 describe("mergeActivity", () => {
   it("merges and sorts newest-first across all three entity types", () => {
     const items = mergeActivity(
-      [n(1, "older news", "2026-04-20T10:00:00Z"), n(2, "newer news", "2026-04-22T09:00:00Z")],
+      [
+        n(1, "older news", "2026-04-20T10:00:00Z"),
+        n(2, "newer news", "2026-04-22T09:00:00Z"),
+      ],
       [s(1, "sponsor mid", "2026-04-21T12:00:00Z")],
       [v(1, "vorstand newest", "2026-04-23T07:00:00Z")],
     );
@@ -112,7 +115,11 @@ describe("mergeActivity", () => {
 
   it("keeps stable ordering when timestamps tie (insertion order within kind)", () => {
     const t = "2026-04-23T10:00:00Z";
-    const items = mergeActivity([n(1, "a", t), n(2, "b", t)], [s(3, "c", t)], [v(4, "d", t)]);
+    const items = mergeActivity(
+      [n(1, "a", t), n(2, "b", t)],
+      [s(3, "c", t)],
+      [v(4, "d", t)],
+    );
     // Sort is stable per spec, so original concat order (news, sponsors, vorstand) is preserved.
     expect(items.map((i) => i.title)).toEqual(["a", "b", "c", "d"]);
   });

@@ -52,7 +52,10 @@ export function formatLongDate(date: Date): string {
 }
 
 /** "23 · APR" — for the calendar tile in Termine card. */
-export function formatDayMonthShort(date: Date): { day: string; month: string } {
+export function formatDayMonthShort(date: Date): {
+  day: string;
+  month: string;
+} {
   return {
     day: String(date.getDate()).padStart(2, "0"),
     month: MONTHS_DE_SHORT[date.getMonth()],
