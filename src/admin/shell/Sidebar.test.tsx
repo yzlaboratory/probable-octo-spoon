@@ -36,7 +36,7 @@ describe("Sidebar", () => {
     expect(sponsors.className).not.toContain("active");
   });
 
-  describe.each(["Übersicht", "Termine", "Mediathek", "Mitglieder", "Website-Vorschau", "Erscheinungsbild", "Einstellungen"])(
+  describe.each(["Termine", "Mediathek", "Mitglieder", "Website-Vorschau", "Erscheinungsbild", "Einstellungen"])(
     '"%s" is disabled (feature not yet shipped)',
     (label) => {
       it("renders as disabled button with 'bald' badge", () => {
@@ -52,9 +52,11 @@ describe("Sidebar", () => {
 
   it("links live entries to their admin routes", () => {
     const { getByText } = renderAt("/admin");
+    const dashboard = getByText("Übersicht").closest("a") as HTMLAnchorElement;
     const news = getByText("News").closest("a") as HTMLAnchorElement;
     const sponsors = getByText("Sponsoren").closest("a") as HTMLAnchorElement;
     const admins = getByText("Administratoren").closest("a") as HTMLAnchorElement;
+    expect(dashboard.getAttribute("href")).toBe("/admin");
     expect(news.getAttribute("href")).toBe("/admin/news");
     expect(sponsors.getAttribute("href")).toBe("/admin/sponsors");
     expect(admins.getAttribute("href")).toBe("/admin/admins");
@@ -64,5 +66,16 @@ describe("Sidebar", () => {
     const { getByText } = renderAt("/admin/news/42");
     const link = getByText("News").closest("a")!;
     expect(link.className).toContain("active");
+  });
+
+  it("marks Übersicht active only at /admin (strict, not prefix)", () => {
+    const onDash = renderAt("/admin");
+    const dashLink = onDash.getByText("Übersicht").closest("a")!;
+    expect(dashLink.className).toContain("active");
+    onDash.unmount();
+
+    const onNews = renderAt("/admin/news");
+    const dashLink2 = onNews.getByText("Übersicht").closest("a")!;
+    expect(dashLink2.className).not.toContain("active");
   });
 });

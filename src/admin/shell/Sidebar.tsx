@@ -15,7 +15,7 @@ interface NavEntry {
 }
 
 const CONTENT_NAV: NavEntry[] = [
-  { id: "dashboard", label: "Übersicht", icon: "Dashboard", soon: true },
+  { id: "dashboard", label: "Übersicht", icon: "Dashboard", to: "/admin" },
   { id: "news", label: "News", icon: "News", to: "/admin/news" },
   { id: "events", label: "Termine", icon: "Schedule", soon: true },
   { id: "media", label: "Mediathek", icon: "Media", soon: true },
@@ -33,7 +33,14 @@ const CONFIG_NAV: NavEntry[] = [
 
 function NavItem({ entry, activePath }: { entry: NavEntry; activePath: string }) {
   const IconComponent = Icons[entry.icon];
-  const active = entry.to !== undefined && activePath.startsWith(entry.to);
+  // `/admin` is the dashboard root — it must match strictly so it doesn't
+  // light up for every nested admin route. Any other entry uses prefix match
+  // so deep paths (e.g. /admin/news/42) keep the parent crumb active.
+  const active =
+    entry.to !== undefined &&
+    (entry.to === "/admin"
+      ? activePath === "/admin" || activePath === "/admin/"
+      : activePath.startsWith(entry.to));
 
   if (entry.soon) {
     return (
