@@ -22,13 +22,35 @@ export type NewsStatus =
   | "published"
   | "withdrawn"
   | "deleted";
+
+export type CalloutTone = "primary" | "accent" | "warn";
+
+export type NewsBlock =
+  | { kind: "heading"; level: 1 | 2 | 3; text: string }
+  | { kind: "lead"; text: string }
+  | { kind: "paragraph"; text: string }
+  | {
+      kind: "image";
+      mediaId: number | null;
+      caption: string;
+      credit: string;
+      /** Set only by the legacy HTML migration; editor prompts to re-pick. */
+      srcHint?: string;
+    }
+  | { kind: "quote"; text: string; attr: string }
+  | { kind: "callout"; tone: CalloutTone; text: string };
+
+export type NewsBlockKind = NewsBlock["kind"];
+
 export interface News {
   id: number;
   slug: string;
   title: string;
   tag: string;
   short: string;
+  /** Server-rendered HTML derived from `blocks`. Public render source. */
   longHtml: string;
+  blocks: NewsBlock[];
   status: NewsStatus;
   publishAt: string | null;
   hero: Media | null;
