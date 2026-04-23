@@ -241,6 +241,124 @@ describe("MediaListPage — delete", () => {
   });
 });
 
+describe("MediaListPage — upload", () => {
+  it("opens the upload dialog from the toolbar button and from the grid tile", async () => {
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+
+    // Toolbar button
+    fireEvent.click(screen.getByTestId("media-upload-open"));
+    expect(screen.getByTestId("media-upload-dialog")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("upload-cancel"));
+    expect(screen.queryByTestId("media-upload-dialog")).toBeNull();
+
+    // Dashed dropzone tile (grid view only)
+    fireEvent.click(screen.getByTestId("media-upload-tile"));
+    expect(screen.getByTestId("media-upload-dialog")).toBeInTheDocument();
+  });
+
+  it("uploads a file and prepends the returned media to the list", async () => {
+    const newMedia: Media = {
+      id: 99,
+      kind: "news",
+      variants: { "400w": "/media/news/99/400w.webp" },
+      mimeType: "image/webp",
+      filename: "fresh.webp",
+      uploadedAt: "2025-04-23T09:00:00.000Z",
+      uploadedBy: "admin@example.org",
+    };
+    const uploadSpy = vi
+      .spyOn(api, "upload")
+      .mockResolvedValue(newMedia as unknown as never);
+
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+
+    fireEvent.click(screen.getByTestId("media-upload-open"));
+    const file = new File(["content"], "fresh.webp", { type: "image/webp" });
+    fireEvent.change(screen.getByTestId("upload-file"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(screen.getByTestId("upload-submit"));
+
+    await waitFor(() => expect(uploadSpy).toHaveBeenCalledTimes(1));
+    const [path, form] = uploadSpy.mock.calls[0];
+    expect(path).toBe("/api/media");
+    expect((form as FormData).get("kind")).toBe("news");
+    expect((form as FormData).get("file")).toBeInstanceOf(File);
+
+    // New row shows up, dialog closes, new row is auto-selected in the panel.
+    await waitFor(() => screen.getByTestId("media-cell-99"));
+    expect(screen.queryByTestId("media-upload-dialog")).toBeNull();
+    expect(screen.getByTestId("media-detail-name")).toHaveTextContent(
+      "fresh.webp",
+    );
+  });
+
+  it("uses the selected kind when uploading a sponsor logo", async () => {
+    const newMedia: Media = {
+      id: 100,
+      kind: "sponsor",
+      variants: { "200w": "/media/sponsors/100/200w.webp" },
+      mimeType: "image/png",
+      filename: "new-logo.png",
+      uploadedAt: "2025-04-23T10:00:00.000Z",
+      uploadedBy: "admin@example.org",
+    };
+    const uploadSpy = vi
+      .spyOn(api, "upload")
+      .mockResolvedValue(newMedia as unknown as never);
+
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+
+    fireEvent.click(screen.getByTestId("media-upload-open"));
+    fireEvent.click(screen.getByTestId("upload-kind-sponsor"));
+    const file = new File(["x"], "new-logo.png", { type: "image/png" });
+    fireEvent.change(screen.getByTestId("upload-file"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(screen.getByTestId("upload-submit"));
+
+    await waitFor(() => expect(uploadSpy).toHaveBeenCalledTimes(1));
+    const [, form] = uploadSpy.mock.calls[0];
+    expect((form as FormData).get("kind")).toBe("sponsor");
+  });
+
+  it("surfaces server rejection (too-large) without closing the dialog", async () => {
+    vi.spyOn(api, "upload").mockRejectedValue(
+      new ApiError(413, {
+        code: "too_large",
+        message: "Datei überschreitet die Größenbeschränkung.",
+      }),
+    );
+
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-upload-open"));
+    fireEvent.change(screen.getByTestId("upload-file"), {
+      target: {
+        files: [new File(["x"], "huge.webp", { type: "image/webp" })],
+      },
+    });
+    fireEvent.click(screen.getByTestId("upload-submit"));
+
+    await screen.findByText(/Größenbeschränkung/);
+    expect(screen.getByTestId("media-upload-dialog")).toBeInTheDocument();
+  });
+
+  it("blocks submission when no file is chosen", async () => {
+    const spy = vi.spyOn(api, "upload");
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-upload-open"));
+    // Submit button is disabled when no file is picked.
+    const submit = screen.getByTestId("upload-submit") as HTMLButtonElement;
+    expect(submit.disabled).toBe(true);
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
 describe("MediaListPage — copy link", () => {
   it("copies the largest variant URL to the clipboard", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -279,7 +397,7 @@ describe("MediaListPage — unhappy paths", () => {
     renderPage();
     await waitFor(() => screen.getByText("Leer"));
     expect(
-      screen.getByText(/Noch keine Medien hochgeladen/i),
+      screen.getByText(/Noch keine Medien in der Mediathek/i),
     ).toBeInTheDocument();
   });
 });

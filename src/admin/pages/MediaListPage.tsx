@@ -4,6 +4,7 @@ import type { Media } from "../types";
 import { Button, Card, PageHeader } from "../ui";
 import * as Icons from "../ui/Icons";
 import { DetailPanel } from "./media/DetailPanel";
+import { UploadDialog } from "./media/UploadDialog";
 import {
   KIND_LABEL,
   displayName,
@@ -79,9 +80,38 @@ interface ListProps {
   onSelect: (m: Media) => void;
 }
 
-function Grid({ items, selectedId, onSelect }: ListProps) {
+interface GridProps extends ListProps {
+  onUpload: () => void;
+}
+
+function UploadTile({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-testid="media-upload-tile"
+      className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg"
+      style={{
+        border: "1.5px dashed var(--rule-2)",
+        background: "var(--paper-2)",
+        color: "var(--ink-3)",
+      }}
+    >
+      <div
+        className="flex h-10 w-10 items-center justify-center rounded-full"
+        style={{ background: "var(--paper-3)" }}
+      >
+        <Icons.Upload size={16} stroke="var(--ink-2)" />
+      </div>
+      <span className="text-[11.5px]">Datei hochladen</span>
+    </button>
+  );
+}
+
+function Grid({ items, selectedId, onSelect, onUpload }: GridProps) {
   return (
     <div className="grid grid-cols-3 gap-3" data-testid="media-grid">
+      <UploadTile onClick={onUpload} />
       {items.map((m) => {
         const active = selectedId === m.id;
         return (
@@ -198,6 +228,7 @@ export default function MediaListPage() {
   const [kind, setKind] = useState<KindFilter>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Media | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -239,6 +270,14 @@ export default function MediaListPage() {
     setSelected(null);
   }, []);
 
+  const onUploaded = useCallback((m: Media) => {
+    // Prepend so the freshly-uploaded row sits at the top of the list even
+    // when the user has scrolled away, and auto-select it so the detail panel
+    // confirms the upload visually.
+    setItems((prev) => [m, ...prev]);
+    setSelected(m);
+  }, []);
+
   return (
     <div>
       <PageHeader
@@ -246,7 +285,12 @@ export default function MediaListPage() {
         title="Bilder & Logos."
         subtitle="Zentrale Ablage für alle Medien. Einmal hochladen, in News, Sponsoren und Vorstand wiederverwenden."
         right={
-          <Button kind="ghost" leading={<Icons.Upload size={14} />} disabled>
+          <Button
+            kind="primary"
+            leading={<Icons.Upload size={14} />}
+            onClick={() => setUploadOpen(true)}
+            data-testid="media-upload-open"
+          >
             Hochladen
           </Button>
         }
@@ -370,7 +414,7 @@ export default function MediaListPage() {
             </div>
             <p className="mt-2 text-[13px]" style={{ color: "var(--ink-2)" }}>
               {items.length === 0
-                ? "Noch keine Medien hochgeladen. Lade dein erstes Bild in einer News-, Sponsor- oder Vorstandskarte hoch."
+                ? "Noch keine Medien in der Mediathek. Lade eine erste Datei über die Schaltfläche oben rechts hoch."
                 : "Kein Medium entspricht dem aktuellen Filter."}
             </p>
           </Card>
@@ -386,6 +430,7 @@ export default function MediaListPage() {
                   items={visible}
                   selectedId={selected?.id ?? null}
                   onSelect={setSelected}
+                  onUpload={() => setUploadOpen(true)}
                 />
               ) : (
                 <List
@@ -399,6 +444,12 @@ export default function MediaListPage() {
           </div>
         )}
       </div>
+
+      <UploadDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onUploaded={onUploaded}
+      />
     </div>
   );
 }
