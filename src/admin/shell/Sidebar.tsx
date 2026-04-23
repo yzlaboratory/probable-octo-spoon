@@ -1,0 +1,193 @@
+import { NavLink, useLocation } from "react-router-dom";
+import * as Icons from "../ui/Icons";
+import type { IconName } from "../ui/Icons";
+import logo from "../../assets/logo.svg";
+import { CLUB_SHORT, CLUB_DOMAIN, CLUB_NAME } from "./club";
+
+interface NavEntry {
+  id: string;
+  label: string;
+  icon: IconName;
+  to?: string;
+  count?: number;
+  /** Feature not yet shipped. Renders at half opacity with a "bald" chip. */
+  soon?: boolean;
+}
+
+const CONTENT_NAV: NavEntry[] = [
+  { id: "dashboard", label: "Übersicht", icon: "Dashboard", soon: true },
+  { id: "news", label: "News", icon: "News", to: "/admin/news" },
+  { id: "events", label: "Termine", icon: "Schedule", soon: true },
+  { id: "media", label: "Mediathek", icon: "Media", soon: true },
+  { id: "sponsors", label: "Sponsoren", icon: "Sponsors", to: "/admin/sponsors" },
+  { id: "vorstand", label: "Vorstand", icon: "Vorstand", to: "/admin/vorstand" },
+  { id: "members", label: "Mitglieder", icon: "Vorstand", soon: true },
+];
+
+const CONFIG_NAV: NavEntry[] = [
+  { id: "public", label: "Website-Vorschau", icon: "Globe", soon: true },
+  { id: "theme", label: "Erscheinungsbild", icon: "Theme", soon: true },
+  { id: "admins", label: "Administratoren", icon: "Vorstand", to: "/admin/admins" },
+  { id: "settings", label: "Einstellungen", icon: "Settings", soon: true },
+];
+
+function NavItem({ entry, activePath }: { entry: NavEntry; activePath: string }) {
+  const IconComponent = Icons[entry.icon];
+  const active = entry.to !== undefined && activePath.startsWith(entry.to);
+
+  if (entry.soon) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="nav-item opacity-50 cursor-not-allowed"
+        aria-disabled="true"
+      >
+        <IconComponent className="nav-icon" />
+        <span className="flex-1">{entry.label}</span>
+        <span
+          className="caps text-[10px]"
+          style={{ color: "var(--ink-4)" }}
+        >
+          bald
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <NavLink
+      to={entry.to!}
+      className={`nav-item ${active ? "active" : ""}`.trim()}
+      end={entry.to === "/admin"}
+    >
+      <IconComponent className="nav-icon" />
+      <span className="flex-1">{entry.label}</span>
+      {entry.count != null && (
+        <span
+          className="font-mono text-[11px]"
+          style={{ color: active ? "var(--paper-3)" : "var(--ink-3)" }}
+        >
+          {entry.count}
+        </span>
+      )}
+    </NavLink>
+  );
+}
+
+export default function Sidebar() {
+  const { pathname } = useLocation();
+
+  return (
+    <aside
+      className="w-[248px] shrink-0 h-screen sticky top-0 flex flex-col z-10"
+      style={{
+        background: "color-mix(in oklab, var(--paper-2) 70%, transparent)",
+        borderRight: "1px solid var(--rule)",
+        backdropFilter: "blur(20px)",
+      }}
+    >
+      {/* Club wordmark */}
+      <div className="px-5 py-5 rule-b">
+        <div className="flex items-center gap-3 select-none">
+          <img
+            src={logo}
+            alt=""
+            className="w-9 h-9 rounded-md"
+            style={{ boxShadow: "0 0 16px var(--glow)" }}
+          />
+          <div className="min-w-0 flex-1 leading-tight">
+            <div
+              className="font-display text-[17px] truncate"
+              style={{ letterSpacing: "-0.02em", color: "var(--ink)" }}
+              title={CLUB_NAME}
+            >
+              {CLUB_SHORT}
+            </div>
+            <div
+              className="text-[11px] truncate"
+              style={{ color: "var(--ink-3)" }}
+            >
+              {CLUB_DOMAIN}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav className="px-3 flex-1 overflow-auto" aria-label="Hauptnavigation">
+        <div
+          className="caps text-[10px] px-3 pt-4 pb-2"
+          style={{ color: "var(--ink-3)" }}
+        >
+          Inhalte
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {CONTENT_NAV.map((n) => (
+            <NavItem key={n.id} entry={n} activePath={pathname} />
+          ))}
+        </div>
+
+        <div
+          className="caps text-[10px] px-3 pt-5 pb-2"
+          style={{ color: "var(--ink-3)" }}
+        >
+          Konfiguration
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {CONFIG_NAV.map((n) => (
+            <NavItem key={n.id} entry={n} activePath={pathname} />
+          ))}
+        </div>
+      </nav>
+
+      {/* Season card */}
+      <div className="p-3 rule-t">
+        <div
+          className="rounded-lg p-3 relative overflow-hidden"
+          style={{
+            background: "var(--paper-3)",
+            border: "1px solid var(--rule-2)",
+          }}
+        >
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              background:
+                "radial-gradient(circle at 100% 0%, var(--glow), transparent 60%)",
+            }}
+          />
+          <div className="flex items-center gap-1.5 relative">
+            <span
+              className="live-dot w-1.5 h-1.5 rounded-full"
+              style={{ background: "var(--accent)" }}
+            />
+            <span
+              className="caps text-[10px]"
+              style={{ color: "var(--ink-3)" }}
+            >
+              Saison 2025 / 26
+            </span>
+          </div>
+          <div
+            className="font-display text-[17px] mt-1 leading-tight relative"
+            style={{ color: "var(--ink)" }}
+          >
+            Rückrunde läuft
+          </div>
+          <div
+            className="text-[11px] mt-0.5 relative"
+            style={{ color: "var(--ink-3)" }}
+          >
+            Noch Spieltage bis zur Sommerpause.
+          </div>
+        </div>
+        <div
+          className="flex items-center justify-between mt-3 px-1 text-[11px]"
+          style={{ color: "var(--ink-3)" }}
+        >
+          <span>admin · svthalexweiler</span>
+        </div>
+      </div>
+    </aside>
+  );
+}

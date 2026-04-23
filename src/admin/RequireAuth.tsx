@@ -1,13 +1,14 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import "../styles/admin.css";
 
 export default function RequireAuth() {
   const { admin, loading } = useAuth();
   const loc = useLocation();
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#121212] text-neutral-500">
-        Lade…
+      <div className="admin-shell flex min-h-screen items-center justify-center">
+        <span style={{ color: "var(--ink-3)" }}>Lade…</span>
       </div>
     );
   }

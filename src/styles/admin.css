@@ -1,0 +1,357 @@
+/*
+ * Admin-scoped design tokens and helpers.
+ *
+ * Everything here is wrapped in `.admin-shell` so it does NOT leak into the
+ * public website (which keeps its existing warm/Material look from global.css).
+ *
+ * Derived from design/design_source/clubsoft.html. Names normalized from the
+ * prototype's legacy palette (forest→primary, rust→accent, ochre→warn,
+ * plum→tertiary) so later refactors aren't blocked by misleading names.
+ */
+
+.admin-shell {
+  --paper: #0e0e12;
+  --paper-2: #16161c;
+  --paper-3: #1e1e26;
+
+  --ink: #f2f1ee;
+  --ink-2: #c9c8c2;
+  --ink-3: #7a7985;
+  --ink-4: #4a4955;
+
+  --rule: #25252e;
+  --rule-2: #35353f;
+
+  --primary: oklch(0.62 0.22 290);
+  --primary-2: oklch(0.7 0.22 290);
+  --accent: oklch(0.72 0.19 25);
+  --accent-2: oklch(0.78 0.19 25);
+  --warn: oklch(0.78 0.16 85);
+  --tertiary: oklch(0.58 0.22 330);
+  --moss: oklch(0.68 0.18 250);
+  --glow: oklch(0.62 0.22 290 / 0.35);
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family:
+    "Geist", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings:
+    "ss01",
+    "cv11";
+  min-height: 100vh;
+  position: relative;
+}
+
+.admin-shell .font-display {
+  font-family: "Newsreader", Georgia, serif;
+  font-feature-settings:
+    "liga",
+    "dlig";
+  letter-spacing: -0.01em;
+}
+.admin-shell .font-mono {
+  font-family: "Geist Mono", ui-monospace, monospace;
+}
+.admin-shell .font-ui {
+  font-family:
+    "Geist", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* Ambient dark-UI glow behind content. Pointer-events none so nothing intercepts clicks. */
+.admin-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 0;
+  background-image:
+    radial-gradient(
+      ellipse 800px 500px at 15% 0%,
+      oklch(0.45 0.2 290 / 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 900px 600px at 100% 100%,
+      oklch(0.5 0.18 25 / 0.1),
+      transparent 60%
+    );
+}
+/* Subtle noise grain for tactile depth. */
+.admin-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+  mix-blend-mode: overlay;
+}
+.admin-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-shell ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.admin-shell ::-webkit-scrollbar-thumb {
+  background: var(--rule-2);
+  border-radius: 999px;
+}
+.admin-shell ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Focus ring used by interactive elements. */
+.admin-shell .cs-focus:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.admin-shell .caps {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-feature-settings: "ss01";
+}
+
+/* Hairline rules. */
+.admin-shell .rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+.admin-shell .rule-t {
+  border-top: 1px solid var(--rule);
+}
+.admin-shell .rule-r {
+  border-right: 1px solid var(--rule);
+}
+.admin-shell .rule-l {
+  border-left: 1px solid var(--rule);
+}
+
+/* Buttons. Primary gets the glow; ghost leans on borders. */
+.admin-shell .btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 8px 24px -10px var(--glow);
+}
+.admin-shell .btn-primary:hover {
+  background: var(--primary-2);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 10px 30px -8px var(--glow);
+}
+.admin-shell .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.admin-shell .btn-ghost {
+  background: var(--paper-2);
+  color: var(--ink);
+  border: 1px solid var(--rule-2);
+}
+.admin-shell .btn-ghost:hover {
+  background: var(--paper-3);
+  border-color: var(--ink-4);
+}
+.admin-shell .btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+.admin-shell .btn-accent:hover {
+  background: var(--accent-2);
+}
+.admin-shell .btn-danger {
+  background: transparent;
+  color: oklch(0.7 0.18 25);
+  border: 1px solid oklch(0.5 0.15 25 / 0.4);
+}
+.admin-shell .btn-danger:hover {
+  background: oklch(0.5 0.18 25 / 0.15);
+  border-color: oklch(0.6 0.18 25 / 0.6);
+}
+
+/* Chip / pill. Colors set inline by <Pill>. */
+.admin-shell .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.admin-shell .chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Inputs. */
+.admin-shell .cs-input {
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 100%;
+  color: var(--ink);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.admin-shell .cs-input::placeholder {
+  color: var(--ink-4);
+}
+.admin-shell .cs-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+/* Sidebar nav items. Active state uses a left rail + soft gradient. */
+.admin-shell .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.admin-shell .nav-item:hover {
+  background: var(--paper-3);
+  color: var(--ink);
+}
+.admin-shell .nav-item.active {
+  background: linear-gradient(
+    180deg,
+    oklch(0.62 0.22 290 / 0.15),
+    oklch(0.62 0.22 290 / 0.05)
+  );
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--rule-2) inset;
+}
+.admin-shell .nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  box-shadow: 0 0 12px var(--glow);
+}
+.admin-shell .nav-item.active .nav-icon {
+  color: var(--primary-2);
+}
+.admin-shell .nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--ink-3);
+}
+
+/* Keyboard hint pill, used in search input. */
+.admin-shell kbd {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  padding: 1px 5px;
+  background: var(--paper-3);
+  border: 1px solid var(--rule-2);
+  border-radius: 4px;
+  color: var(--ink-2);
+}
+
+/* Card. Consumed via <Card> but also usable directly. */
+.admin-shell .cs-card {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+/* Row hover for dense tables. */
+.admin-shell .row-hover {
+  transition: background 0.15s;
+}
+.admin-shell .row-hover:hover {
+  background: var(--paper-3);
+}
+
+/* Striped placeholder (used for drag/portrait/media backgrounds). */
+.admin-shell .stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04) 0 8px,
+    transparent 8px 16px
+  );
+}
+.admin-shell .stripes-accent {
+  background-image: repeating-linear-gradient(
+    135deg,
+    oklch(0.72 0.19 25 / 0.18) 0 8px,
+    transparent 8px 16px
+  );
+  background-color: oklch(0.72 0.19 25 / 0.06);
+}
+.admin-shell .stripes-primary {
+  background-image: repeating-linear-gradient(
+    135deg,
+    oklch(0.62 0.22 290 / 0.22) 0 8px,
+    transparent 8px 16px
+  );
+  background-color: oklch(0.62 0.22 290 / 0.08);
+}
+
+/* Drag-handle dot pattern. */
+.admin-shell .drag-dots {
+  background-image: radial-gradient(var(--ink-4) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* Page enter fade. */
+.admin-shell .page-enter {
+  animation: adminPageIn 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes adminPageIn {
+  from {
+    opacity: 0.4;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Blinking status dot (e.g. "live" in sidebar footer). */
+.admin-shell .live-dot {
+  animation: adminTick 1.6s ease-in-out infinite;
+}
+@keyframes adminTick {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import slug from "slug";
 import { api, ApiError } from "../api";
 import type { News, NewsStatus, Media } from "../types";
 import RichTextEditor from "../components/RichTextEditor";
 import MediaUploader from "../components/MediaUploader";
+import { Button, Card, PageHeader } from "../ui";
+import * as Icons from "../ui/Icons";
 
 type ScheduleMode = "draft" | "publish-now" | "schedule";
 
@@ -30,11 +32,8 @@ export default function NewsEditPage() {
   useEffect(() => {
     if (!editing) return;
     api
-      .get<News>(`/api/news/public/${id}`)
-      .catch(() => null)
-      .then(async () => {
-        // Fetch via admin list + filter is cleaner; simpler: admin GET /api/news, find by id.
-        const all = await api.get<News[]>(`/api/news`);
+      .get<News[]>(`/api/news`)
+      .then((all) => {
         const n = all.find((x) => x.id === Number(id));
         if (!n) {
           setError("Beitrag nicht gefunden.");
@@ -51,7 +50,11 @@ export default function NewsEditPage() {
         setStatus(n.status);
         setPublishAt(n.publishAt?.slice(0, 16) ?? "");
         setScheduleMode(
-          n.status === "scheduled" ? "schedule" : n.status === "published" ? "publish-now" : "draft",
+          n.status === "scheduled"
+            ? "schedule"
+            : n.status === "published"
+              ? "publish-now"
+              : "draft",
         );
         setLoading(false);
       })
@@ -73,7 +76,11 @@ export default function NewsEditPage() {
       slug: slugVal || undefined,
       heroMediaId: hero?.id ?? null,
       status:
-        scheduleMode === "draft" ? "draft" : scheduleMode === "publish-now" ? "published" : "scheduled",
+        scheduleMode === "draft"
+          ? "draft"
+          : scheduleMode === "publish-now"
+            ? "published"
+            : "scheduled",
       publishAt:
         scheduleMode === "schedule" && publishAt
           ? new Date(publishAt).toISOString()
@@ -81,8 +88,8 @@ export default function NewsEditPage() {
             ? new Date().toISOString()
             : null,
     };
-    // When editing an existing post, keep withdrawn state if selected.
-    if (editing && status === "withdrawn" && scheduleMode === "draft") payload.status = "withdrawn";
+    if (editing && status === "withdrawn" && scheduleMode === "draft")
+      payload.status = "withdrawn";
     try {
       if (editing) {
         await api.patch(`/api/news/${id}`, payload);
@@ -96,135 +103,244 @@ export default function NewsEditPage() {
     }
   }
 
-  if (loading) return <div className="text-neutral-500">Lade…</div>;
+  if (loading) {
+    return (
+      <div
+        className="px-10 py-20 text-center"
+        style={{ color: "var(--ink-3)" }}
+      >
+        Lade…
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{editing ? "Meldung bearbeiten" : "Neue Meldung"}</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setPreview((p) => !p)}
-            className="rounded-sm border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800"
-          >
-            {preview ? "Bearbeiten" : "Vorschau"}
-          </button>
-          <Link to="/admin/news" className="rounded-sm border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800">
-            Abbrechen
-          </Link>
-        </div>
-      </div>
-
-      {preview ? (
-        <article className="rounded-sm border border-neutral-800 bg-neutral-950 p-8">
-          {hero && (
-            <img
-              src={hero.variants["1600w"] || hero.variants["800w"] || hero.variants.fallbackJpg}
-              alt=""
-              className="mb-6 w-full rounded-sm"
-            />
-          )}
-          <div className="mb-1 text-xs uppercase tracking-wider text-primary">{tag}</div>
-          <h2 className="text-3xl font-bold">{title}</h2>
-          <p className="mt-2 text-neutral-400">{short}</p>
-          <div
-            className="prose prose-invert mt-6 max-w-none"
-            dangerouslySetInnerHTML={{ __html: longHtml }}
-          />
-        </article>
-      ) : (
-        <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-          <div className="space-y-4">
-            <label className="block">
-              <span className="mb-1 block text-xs text-neutral-400">Titel</span>
-              <input
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-xs text-neutral-400">Tag</span>
-              <input
-                required
-                value={tag}
-                onChange={(e) => setTag(e.target.value)}
-                className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-xs text-neutral-400">Kurzfassung</span>
-              <textarea
-                required
-                rows={3}
-                value={short}
-                onChange={(e) => setShort(e.target.value)}
-                className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm"
-              />
-            </label>
-            <div>
-              <div className="mb-1 text-xs text-neutral-400">Langtext</div>
-              <RichTextEditor value={longHtml} onChange={setLongHtml} />
-            </div>
-          </div>
-
-          <aside className="space-y-4">
-            <MediaUploader kind="news" value={hero} onChange={setHero} label="Titelbild" />
-            <label className="block">
-              <span className="mb-1 block text-xs text-neutral-400">Slug</span>
-              <input
-                value={slugVal}
-                onChange={(e) => {
-                  setSlugVal(e.target.value);
-                  setSlugEdited(true);
-                }}
-                className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm font-mono"
-              />
-            </label>
-            <fieldset className="rounded-sm border border-neutral-800 p-3">
-              <legend className="px-2 text-xs text-neutral-400">Status</legend>
-              {(
-                [
-                  { v: "draft" as ScheduleMode, label: "Entwurf" },
-                  { v: "publish-now" as ScheduleMode, label: "Sofort veröffentlichen" },
-                  { v: "schedule" as ScheduleMode, label: "Planen" },
-                ] as const
-              ).map((o) => (
-                <label key={o.v} className="mb-1 flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="schedule"
-                    checked={scheduleMode === o.v}
-                    onChange={() => setScheduleMode(o.v)}
-                  />
-                  {o.label}
-                </label>
-              ))}
-              {scheduleMode === "schedule" && (
-                <input
-                  type="datetime-local"
-                  required
-                  value={publishAt}
-                  onChange={(e) => setPublishAt(e.target.value)}
-                  className="mt-2 w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm"
-                />
-              )}
-            </fieldset>
-            {error && (
-              <div role="alert" className="rounded-sm border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-200">
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
-              className="w-full rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
+      <PageHeader
+        eyebrow={editing ? "Bearbeiten" : "Neu"}
+        title={editing ? title || "Meldung bearbeiten" : "Neue Meldung"}
+        subtitle={
+          editing
+            ? "Änderungen werden beim Speichern übernommen."
+            : "Titel und Text sind erforderlich."
+        }
+        right={
+          <>
+            <Button
+              kind="ghost"
+              size="md"
+              leading={
+                preview ? <Icons.EyeOff size={13} /> : <Icons.Eye size={13} />
+              }
+              onClick={() => setPreview((p) => !p)}
             >
-              Speichern
-            </button>
-          </aside>
-        </form>
-      )}
+              {preview ? "Bearbeiten" : "Vorschau"}
+            </Button>
+            <Button kind="ghost" size="md" onClick={() => nav("/admin/news")}>
+              Abbrechen
+            </Button>
+          </>
+        }
+      />
+
+      <div className="px-10 pb-10">
+        {preview ? (
+          <Card>
+            {hero && (
+              <img
+                src={
+                  hero.variants["1600w"] ||
+                  hero.variants["800w"] ||
+                  hero.variants.fallbackJpg
+                }
+                alt=""
+                className="mb-6 w-full rounded"
+              />
+            )}
+            <div
+              className="caps text-[10.5px] mb-1"
+              style={{ color: "var(--accent)" }}
+            >
+              {tag}
+            </div>
+            <h2
+              className="font-display text-[36px]"
+              style={{ letterSpacing: "-0.01em" }}
+            >
+              {title}
+            </h2>
+            <p className="mt-2" style={{ color: "var(--ink-2)" }}>
+              {short}
+            </p>
+            <div
+              className="prose prose-invert mt-6 max-w-none"
+              style={{ color: "var(--ink)" }}
+              dangerouslySetInnerHTML={{ __html: longHtml }}
+            />
+          </Card>
+        ) : (
+          <form
+            onSubmit={onSubmit}
+            className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]"
+          >
+            <div className="space-y-4">
+              <Card>
+                <label className="block mb-3">
+                  <span
+                    className="mb-1 block text-[11px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Titel
+                  </span>
+                  <input
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="cs-input"
+                  />
+                </label>
+                <label className="block mb-3">
+                  <span
+                    className="mb-1 block text-[11px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Tag
+                  </span>
+                  <input
+                    required
+                    value={tag}
+                    onChange={(e) => setTag(e.target.value)}
+                    className="cs-input"
+                  />
+                </label>
+                <label className="block">
+                  <span
+                    className="mb-1 block text-[11px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Kurzfassung
+                  </span>
+                  <textarea
+                    required
+                    rows={3}
+                    value={short}
+                    onChange={(e) => setShort(e.target.value)}
+                    className="cs-input"
+                  />
+                </label>
+              </Card>
+              <Card>
+                <div
+                  className="caps text-[10.5px] mb-2"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Langtext
+                </div>
+                <RichTextEditor value={longHtml} onChange={setLongHtml} />
+              </Card>
+            </div>
+
+            <aside className="space-y-4">
+              <Card>
+                <div
+                  className="caps text-[10.5px] mb-2"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Titelbild
+                </div>
+                <MediaUploader
+                  kind="news"
+                  value={hero}
+                  onChange={setHero}
+                  label=""
+                />
+              </Card>
+              <Card>
+                <label className="block mb-3">
+                  <span
+                    className="mb-1 block text-[11px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Slug
+                  </span>
+                  <input
+                    value={slugVal}
+                    onChange={(e) => {
+                      setSlugVal(e.target.value);
+                      setSlugEdited(true);
+                    }}
+                    className="cs-input font-mono"
+                  />
+                </label>
+                <fieldset
+                  className="rounded-md p-3"
+                  style={{ border: "1px solid var(--rule-2)" }}
+                >
+                  <legend
+                    className="px-2 text-[10.5px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Status
+                  </legend>
+                  {(
+                    [
+                      { v: "draft" as ScheduleMode, label: "Entwurf" },
+                      {
+                        v: "publish-now" as ScheduleMode,
+                        label: "Sofort veröffentlichen",
+                      },
+                      { v: "schedule" as ScheduleMode, label: "Planen" },
+                    ] as const
+                  ).map((o) => (
+                    <label
+                      key={o.v}
+                      className="mb-1 flex items-center gap-2 text-[13px]"
+                    >
+                      <input
+                        type="radio"
+                        name="schedule"
+                        checked={scheduleMode === o.v}
+                        onChange={() => setScheduleMode(o.v)}
+                      />
+                      {o.label}
+                    </label>
+                  ))}
+                  {scheduleMode === "schedule" && (
+                    <input
+                      type="datetime-local"
+                      required
+                      value={publishAt}
+                      onChange={(e) => setPublishAt(e.target.value)}
+                      className="cs-input mt-2"
+                    />
+                  )}
+                </fieldset>
+              </Card>
+              {error && (
+                <div
+                  role="alert"
+                  className="rounded-md px-3 py-2 text-[12px]"
+                  style={{
+                    border: "1px solid oklch(0.5 0.15 25 / 0.5)",
+                    background: "oklch(0.25 0.15 25 / 0.25)",
+                    color: "oklch(0.85 0.12 25)",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+              <Button
+                type="submit"
+                kind="primary"
+                size="lg"
+                className="w-full justify-center"
+              >
+                Speichern
+              </Button>
+            </aside>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

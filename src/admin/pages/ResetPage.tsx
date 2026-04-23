@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../api";
+import { Button } from "../ui";
 import logo from "../../assets/logo.svg";
+import { CLUB_NAME } from "../shell/club";
+import "../../styles/admin.css";
 
 export default function ResetPage() {
   const [params] = useSearchParams();
@@ -20,7 +23,10 @@ export default function ResetPage() {
       return;
     }
     try {
-      await api.post("/api/auth/reset-consume", { token, newPassword: password });
+      await api.post("/api/auth/reset-consume", {
+        token,
+        newPassword: password,
+      });
       setDone(true);
       setTimeout(() => nav("/admin/login", { replace: true }), 1500);
     } catch (e2) {
@@ -29,34 +35,92 @@ export default function ResetPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#121212] text-neutral-100">
-      <form onSubmit={onSubmit} className="w-full max-w-sm rounded-sm border border-neutral-800 bg-neutral-900 p-8">
-        <div className="mb-6 flex flex-col items-center">
-          <img src={logo} alt="Clubwappen" className="mb-3 h-16 w-16" />
-          <h1 className="text-xl font-bold tracking-wide">Passwort zurücksetzen</h1>
+    <div className="admin-shell flex min-h-screen items-center justify-center p-4">
+      <form onSubmit={onSubmit} className="cs-card w-full max-w-sm p-8 relative">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <img
+            src={logo}
+            alt=""
+            className="mb-4 w-16 h-16 rounded-lg"
+            style={{ boxShadow: "0 0 24px var(--glow)" }}
+          />
+          <div
+            className="caps text-[10.5px]"
+            style={{ color: "var(--ink-3)" }}
+          >
+            {CLUB_NAME}
+          </div>
+          <h1
+            className="font-display text-[28px] mt-1"
+            style={{ letterSpacing: "-0.015em" }}
+          >
+            Passwort zurücksetzen
+          </h1>
         </div>
         {done ? (
-          <div className="rounded-sm border border-emerald-800 bg-emerald-950 px-3 py-2 text-xs text-emerald-200">
+          <div
+            className="rounded-md px-3 py-2 text-[12.5px]"
+            style={{
+              border: "1px solid oklch(0.5 0.16 160 / 0.5)",
+              background: "oklch(0.25 0.14 160 / 0.25)",
+              color: "oklch(0.88 0.1 160)",
+            }}
+          >
             Passwort gesetzt. Weiterleitung zur Anmeldung…
           </div>
         ) : (
           <>
             <label className="mb-3 block">
-              <span className="mb-1 block text-xs text-neutral-400">Neues Passwort (min. 12 Zeichen)</span>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
+              <span
+                className="mb-1 block text-[11px] caps"
+                style={{ color: "var(--ink-3)" }}
+              >
+                Neues Passwort (min. 12 Zeichen)
+              </span>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="cs-input"
+              />
             </label>
             <label className="mb-6 block">
-              <span className="mb-1 block text-xs text-neutral-400">Bestätigung</span>
-              <input type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
+              <span
+                className="mb-1 block text-[11px] caps"
+                style={{ color: "var(--ink-3)" }}
+              >
+                Bestätigung
+              </span>
+              <input
+                type="password"
+                required
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="cs-input"
+              />
             </label>
             {error && (
-              <div role="alert" className="mb-4 rounded-sm border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-200">
+              <div
+                role="alert"
+                className="mb-4 rounded-md px-3 py-2 text-[12px]"
+                style={{
+                  border: "1px solid oklch(0.5 0.15 25 / 0.5)",
+                  background: "oklch(0.25 0.15 25 / 0.25)",
+                  color: "oklch(0.85 0.12 25)",
+                }}
+              >
                 {error}
               </div>
             )}
-            <button type="submit" className="w-full rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white">
+            <Button
+              type="submit"
+              kind="primary"
+              size="lg"
+              className="w-full justify-center"
+            >
               Passwort speichern
-            </button>
+            </Button>
           </>
         )}
       </form>

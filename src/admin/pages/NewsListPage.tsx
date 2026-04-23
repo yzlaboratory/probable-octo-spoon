@@ -1,29 +1,77 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import type { News, NewsStatus } from "../types";
+import { Button, Card, PageHeader, Pill } from "../ui";
+import type { PillTone } from "../ui/Pill";
+import * as Icons from "../ui/Icons";
 
-const FILTERS: Array<{ key: string; label: string; query: string }> = [
-  { key: "all", label: "Alle", query: "" },
-  { key: "draft", label: "Entwurf", query: "?status=draft" },
-  { key: "scheduled", label: "Geplant", query: "?status=scheduled" },
-  { key: "published", label: "Veröffentlicht", query: "?status=published" },
-  { key: "withdrawn", label: "Zurückgezogen", query: "?status=withdrawn" },
-  { key: "deleted", label: "Papierkorb", query: "?status=deleted" },
+interface FilterSpec {
+  key: string;
+  label: string;
+  query: string;
+  status: NewsStatus | null;
+}
+
+const FILTERS: FilterSpec[] = [
+  { key: "all", label: "Alle", query: "", status: null },
+  { key: "draft", label: "Entwurf", query: "?status=draft", status: "draft" },
+  {
+    key: "scheduled",
+    label: "Geplant",
+    query: "?status=scheduled",
+    status: "scheduled",
+  },
+  {
+    key: "published",
+    label: "Veröffentlicht",
+    query: "?status=published",
+    status: "published",
+  },
+  {
+    key: "withdrawn",
+    label: "Zurückgezogen",
+    query: "?status=withdrawn",
+    status: "withdrawn",
+  },
+  {
+    key: "deleted",
+    label: "Papierkorb",
+    query: "?status=deleted",
+    status: "deleted",
+  },
 ];
 
-const statusColor: Record<NewsStatus, string> = {
-  draft: "bg-neutral-700 text-neutral-200",
-  scheduled: "bg-amber-900 text-amber-200",
-  published: "bg-emerald-900 text-emerald-200",
-  withdrawn: "bg-neutral-800 text-neutral-400",
-  deleted: "bg-red-950 text-red-300",
+const STATUS_TONES: Record<NewsStatus, PillTone> = {
+  draft: "neutral",
+  scheduled: "warn",
+  published: "primary",
+  withdrawn: "mute",
+  deleted: "accent",
 };
 
+const STATUS_LABELS: Record<NewsStatus, string> = {
+  draft: "Entwurf",
+  scheduled: "Geplant",
+  published: "Veröffentlicht",
+  withdrawn: "Zurückgezogen",
+  deleted: "Papierkorb",
+};
+
+const ROW_COLS = "80px 1fr 140px 120px 140px 72px";
+
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  return iso.slice(0, 10);
+}
+
 export default function NewsListPage() {
+  const nav = useNavigate();
   const [filter, setFilter] = useState("all");
   const [items, setItems] = useState<News[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   async function load(key: string) {
     setLoading(true);
@@ -33,131 +81,261 @@ export default function NewsListPage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(filter); }, [filter]);
-
-  async function toggleStatus(n: News, nextStatus: NewsStatus) {
-    await api.patch(`/api/news/${n.id}`, { status: nextStatus });
-    load(filter);
+  async function loadCounts() {
+    try {
+      const all = await api.get<News[]>(`/api/news`);
+      const bucket: Record<string, number> = { all: all.length };
+      for (const status of [
+        "draft",
+        "scheduled",
+        "published",
+        "withdrawn",
+        "deleted",
+      ] as NewsStatus[]) {
+        bucket[status] = all.filter((n) => n.status === status).length;
+      }
+      setCounts(bucket);
+    } catch {
+      /* nice-to-have */
+    }
   }
+
+  useEffect(() => {
+    load(filter);
+  }, [filter]);
+  useEffect(() => {
+    loadCounts();
+  }, []);
 
   async function softDelete(n: News) {
     if (!confirm(`„${n.title}" in den Papierkorb verschieben?`)) return;
     await api.delete(`/api/news/${n.id}`);
     load(filter);
+    loadCounts();
   }
 
   async function hardDelete(n: News) {
     if (!confirm(`„${n.title}" endgültig löschen?`)) return;
     await api.delete(`/api/news/${n.id}`);
     load(filter);
+    loadCounts();
   }
+
+  const visible = useMemo(() => {
+    if (!search.trim()) return items;
+    const q = search.toLowerCase();
+    return items.filter(
+      (n) =>
+        n.title.toLowerCase().includes(q) ||
+        n.tag.toLowerCase().includes(q) ||
+        n.short.toLowerCase().includes(q),
+    );
+  }, [items, search]);
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">News</h1>
-        <Link
-          to="/admin/news/new"
-          className="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
-        >
-          + Neue Meldung
-        </Link>
-      </div>
-      <div className="mb-4 flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`rounded-full px-3 py-1 text-xs ${
-              filter === f.key ? "bg-primary text-white" : "bg-neutral-800 text-neutral-300"
-            }`}
+      <PageHeader
+        eyebrow="Redaktion"
+        title="News"
+        subtitle="Meldungen, geplante Veröffentlichungen und Archiv."
+        right={
+          <Button
+            kind="primary"
+            size="md"
+            leading={<Icons.Plus size={14} />}
+            onClick={() => nav("/admin/news/new")}
           >
-            {f.label}
-          </button>
-        ))}
-      </div>
-      <div className="overflow-hidden rounded-sm border border-neutral-800">
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-900 text-left text-xs uppercase text-neutral-400">
-            <tr>
-              <th className="px-4 py-2">Datum</th>
-              <th className="px-4 py-2">Titel</th>
-              <th className="px-4 py-2">Tag</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2 text-right">Aktionen</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
-                  Lade…
-                </td>
-              </tr>
-            )}
-            {!loading && items.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
-                  Keine Einträge.
-                </td>
-              </tr>
-            )}
-            {items.map((n) => (
-              <tr key={n.id} className="border-t border-neutral-800 hover:bg-neutral-900/50">
-                <td className="px-4 py-3 text-neutral-400">
-                  {n.publishAt?.slice(0, 10) ?? n.createdAt.slice(0, 10)}
-                </td>
-                <td className="px-4 py-3 font-medium">{n.title}</td>
-                <td className="px-4 py-3 text-neutral-400">{n.tag}</td>
-                <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${statusColor[n.status]}`}>
-                    {n.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right text-xs">
-                  <Link
-                    to={`/admin/news/${n.id}`}
-                    className="mx-1 text-neutral-300 hover:text-white"
+            Neue Meldung
+          </Button>
+        }
+      />
+
+      <div className="px-10 pb-10">
+        <Card padded={false} className="overflow-hidden">
+          <div
+            className="flex items-center gap-2 p-3 rule-b flex-wrap"
+            style={{ minHeight: 56 }}
+          >
+            <div className="flex flex-wrap items-center gap-1">
+              {FILTERS.map((f) => {
+                const active = filter === f.key;
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => setFilter(f.key)}
+                    className="cs-focus inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] transition"
+                    style={{
+                      background: active ? "var(--paper-3)" : "transparent",
+                      color: active ? "var(--ink)" : "var(--ink-2)",
+                      border: `1px solid ${active ? "var(--rule-2)" : "transparent"}`,
+                      boxShadow: active
+                        ? "0 0 0 1px var(--rule-2) inset, 0 8px 24px -14px var(--glow)"
+                        : undefined,
+                    }}
+                    aria-pressed={active}
                   >
-                    Bearbeiten
-                  </Link>
-                  {n.status !== "deleted" && (
+                    <span>{f.label}</span>
+                    {counts[f.key] != null && (
+                      <span
+                        className="font-mono text-[10.5px]"
+                        style={{ color: "var(--ink-3)" }}
+                      >
+                        {counts[f.key]}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex-1" />
+            <label
+              className="flex items-center gap-2 h-9 w-[260px] px-3 rounded-md"
+              style={{
+                background: "var(--paper)",
+                border: "1px solid var(--rule-2)",
+              }}
+            >
+              <Icons.Search size={14} stroke="var(--ink-3)" />
+              <input
+                type="search"
+                placeholder="Suchen…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-[12.5px]"
+                style={{ color: "var(--ink)" }}
+              />
+            </label>
+          </div>
+
+          <div
+            className="grid text-[10.5px] caps rule-b"
+            style={{
+              gridTemplateColumns: ROW_COLS,
+              color: "var(--ink-3)",
+            }}
+          >
+            <div className="px-4 py-2.5">Bild</div>
+            <div className="px-4 py-2.5">Titel</div>
+            <div className="px-4 py-2.5">Tag</div>
+            <div className="px-4 py-2.5">Status</div>
+            <div className="px-4 py-2.5">Datum</div>
+            <div className="px-4 py-2.5 text-right"></div>
+          </div>
+
+          {loading ? (
+            <div
+              className="px-4 py-12 text-center"
+              style={{ color: "var(--ink-3)" }}
+            >
+              Lade…
+            </div>
+          ) : visible.length === 0 ? (
+            <div
+              className="px-4 py-12 text-center"
+              style={{ color: "var(--ink-3)" }}
+            >
+              {search.trim()
+                ? `Keine Treffer für „${search}".`
+                : "Keine Einträge."}
+            </div>
+          ) : (
+            visible.map((n) => (
+              <div
+                key={n.id}
+                role="link"
+                tabIndex={0}
+                onClick={() => nav(`/admin/news/${n.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    nav(`/admin/news/${n.id}`);
+                  }
+                }}
+                className="row-hover group grid cs-focus cursor-pointer"
+                style={{
+                  gridTemplateColumns: ROW_COLS,
+                  borderBottom: "1px solid var(--rule)",
+                }}
+              >
+                <div className="px-4 py-3 flex items-center">
+                  {n.hero?.variants["320w"] || n.hero?.variants["160w"] ? (
+                    <img
+                      src={n.hero.variants["320w"] || n.hero.variants["160w"]}
+                      alt=""
+                      className="w-12 h-12 rounded object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="w-12 h-12 rounded stripes"
+                      style={{ background: "var(--paper-3)" }}
+                    />
+                  )}
+                </div>
+                <div className="px-4 py-3 min-w-0">
+                  <div
+                    className="text-[13.5px] font-medium truncate"
+                    style={{ color: "var(--ink)" }}
+                  >
+                    {n.title}
+                  </div>
+                  <div
+                    className="text-[12px] mt-0.5 truncate"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    {n.short}
+                  </div>
+                </div>
+                <div
+                  className="px-4 py-3 text-[12.5px] flex items-center"
+                  style={{ color: "var(--ink-2)" }}
+                >
+                  {n.tag}
+                </div>
+                <div className="px-4 py-3 flex items-center">
+                  <Pill tone={STATUS_TONES[n.status]}>
+                    {STATUS_LABELS[n.status]}
+                  </Pill>
+                </div>
+                <div
+                  className="px-4 py-3 font-mono text-[12px] flex items-center"
+                  style={{ color: "var(--ink-2)" }}
+                >
+                  {formatDate(n.publishAt ?? n.createdAt)}
+                </div>
+                <div className="px-4 py-3 flex items-center justify-end">
+                  {n.status === "deleted" ? (
                     <button
-                      onClick={() => softDelete(n)}
-                      className="mx-1 text-neutral-300 hover:text-white"
+                      type="button"
+                      aria-label="Endgültig löschen"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        hardDelete(n);
+                      }}
+                      className="cs-focus opacity-0 group-hover:opacity-100 transition p-1 rounded"
+                      style={{ color: "oklch(0.7 0.18 25)" }}
                     >
-                      Löschen
+                      <Icons.Trash size={14} />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label="In Papierkorb verschieben"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        softDelete(n);
+                      }}
+                      className="cs-focus opacity-0 group-hover:opacity-100 transition p-1 rounded"
+                      style={{ color: "var(--ink-3)" }}
+                    >
+                      <Icons.Trash size={14} />
                     </button>
                   )}
-                  {n.status === "deleted" && (
-                    <button
-                      onClick={() => hardDelete(n)}
-                      className="mx-1 text-red-400 hover:text-red-200"
-                    >
-                      Endgültig löschen
-                    </button>
-                  )}
-                  {n.status === "published" && (
-                    <button
-                      onClick={() => toggleStatus(n, "withdrawn")}
-                      className="mx-1 text-neutral-300 hover:text-white"
-                    >
-                      Zurückziehen
-                    </button>
-                  )}
-                  {(n.status === "withdrawn" || n.status === "draft") && (
-                    <button
-                      onClick={() => toggleStatus(n, "published")}
-                      className="mx-1 text-neutral-300 hover:text-white"
-                    >
-                      Veröffentlichen
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            ))
+          )}
+        </Card>
       </div>
     </div>
   );

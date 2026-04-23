@@ -1,22 +1,35 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import type { CardPalette, Media, Sponsor, SponsorStatus } from "../types";
 import MediaUploader from "../components/MediaUploader";
+import { Button, Card, PageHeader } from "../ui";
 
-const PALETTES: Array<{ key: CardPalette; label: string; preview: string }> = [
-  { key: "transparent", label: "Transparent", preview: "bg-transparent border-dashed border-neutral-600" },
-  { key: "purple", label: "Clubviolett", preview: "bg-primary/70" },
-  { key: "warm-neutral", label: "Warm", preview: "bg-amber-100" },
-  { key: "cool-neutral", label: "Kühl", preview: "bg-slate-200" },
+const PALETTES: Array<{
+  key: CardPalette;
+  label: string;
+  previewClass: string;
+}> = [
+  {
+    key: "transparent",
+    label: "Transparent",
+    previewClass: "bg-transparent border-dashed",
+  },
+  { key: "purple", label: "Clubviolett", previewClass: "" },
+  { key: "warm-neutral", label: "Warm", previewClass: "bg-amber-100" },
+  { key: "cool-neutral", label: "Kühl", previewClass: "bg-slate-200" },
 ];
 
 function paletteBg(p: CardPalette) {
   switch (p) {
-    case "purple": return "bg-primary/70";
-    case "warm-neutral": return "bg-amber-100";
-    case "cool-neutral": return "bg-slate-200";
-    default: return "bg-transparent";
+    case "purple":
+      return { background: "var(--primary)" };
+    case "warm-neutral":
+      return { background: "#fef3c7" };
+    case "cool-neutral":
+      return { background: "#e2e8f0" };
+    default:
+      return { background: "transparent" };
   }
 }
 
@@ -93,131 +106,320 @@ export default function SponsorEditPage() {
     }
   }
 
-  if (loading) return <div className="text-neutral-500">Lade…</div>;
+  if (loading) {
+    return (
+      <div
+        className="px-10 py-20 text-center"
+        style={{ color: "var(--ink-3)" }}
+      >
+        Lade…
+      </div>
+    );
+  }
 
-  const logoSrc = logo?.variants["400w"] || logo?.variants["200w"] || logo?.variants.svg;
+  const logoSrc =
+    logo?.variants["400w"] || logo?.variants["200w"] || logo?.variants.svg;
+  const bgStyle = paletteBg(cardPalette);
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{editing ? "Sponsor bearbeiten" : "Neuer Sponsor"}</h1>
-        <Link to="/admin/sponsors" className="rounded-sm border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800">
-          Abbrechen
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow={editing ? "Bearbeiten" : "Neu"}
+        title={editing ? name || "Sponsor bearbeiten" : "Neuer Sponsor"}
+        subtitle="Name, Logo, Gewichtung und Zeitraum der Einblendung."
+        right={
+          <Button kind="ghost" size="md" onClick={() => nav("/admin/sponsors")}>
+            Abbrechen
+          </Button>
+        }
+      />
 
-      <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-4">
-          <label className="block">
-            <span className="mb-1 block text-xs text-neutral-400">Name</span>
-            <input required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs text-neutral-400">Untertitel (optional)</span>
-            <input value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs text-neutral-400">Link</span>
-            <input type="url" required value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
-          </label>
-          <MediaUploader kind="sponsor" value={logo} onChange={setLogo} label="Logo" helper="PNG, JPEG oder SVG — max. 2 MB." />
-
-          <div>
-            <div className="mb-1 text-xs text-neutral-400">Kartenhintergrund</div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {PALETTES.map((p) => (
-                <button
-                  key={p.key}
-                  type="button"
-                  onClick={() => setCardPalette(p.key)}
-                  className={`rounded-sm border-2 p-3 text-xs ${
-                    cardPalette === p.key ? "border-primary" : "border-neutral-800"
-                  } ${p.preview}`}
+      <div className="px-10 pb-10">
+        <form
+          onSubmit={onSubmit}
+          className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]"
+        >
+          <div className="space-y-4">
+            <Card>
+              <label className="block mb-3">
+                <span
+                  className="mb-1 block text-[11px] caps"
+                  style={{ color: "var(--ink-3)" }}
                 >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={logoHasOwnBackground}
-              onChange={(e) => setLogoHasOwnBackground(e.target.checked)}
-            />
-            Logo hat einen eigenen Hintergrund
-          </label>
-
-          <label className="block">
-            <span className="mb-1 block text-xs text-neutral-400">Gewicht (1–100)</span>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={weight}
-              onChange={(e) => setWeight(Number(e.target.value))}
-              className="w-32 rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm"
-            />
-            <p className="mt-1 text-xs text-neutral-500">
-              Niedrig = seltene Einblendung. Mittel (~50) = Standard. Hoch = Headliner-Platzierung.
-            </p>
-          </label>
-
-          <div className="grid grid-cols-2 gap-4">
-            <label className="block">
-              <span className="mb-1 block text-xs text-neutral-400">Aktiv ab (optional)</span>
-              <input type="datetime-local" value={activeFrom} onChange={(e) => setActiveFrom(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-xs text-neutral-400">Aktiv bis (optional)</span>
-              <input type="datetime-local" value={activeUntil} onChange={(e) => setActiveUntil(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
-            </label>
-          </div>
-
-          <label className="block">
-            <span className="mb-1 block text-xs text-neutral-400">Interne Notizen</span>
-            <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm" />
-          </label>
-        </div>
-
-        <aside className="space-y-4">
-          <div>
-            <div className="mb-2 text-xs text-neutral-400">Vorschau</div>
-            <div className="rounded-sm border border-neutral-800 bg-neutral-950 p-4">
-              <div className="mb-2 text-xs text-neutral-500">News-Karussell</div>
-              <div className={`mb-4 flex h-24 items-center justify-center rounded-sm ${paletteBg(cardPalette)}`}>
-                {logoSrc && <img src={logoSrc} alt="" className="max-h-16 object-contain" />}
-              </div>
-              <div className="mb-2 text-xs text-neutral-500">Social-Karussell</div>
-              <div className={`mb-4 flex h-24 items-center justify-center rounded-sm ${paletteBg(cardPalette)} grayscale`}>
-                {logoSrc && <img src={logoSrc} alt="" className="max-h-16 object-contain" />}
-              </div>
-              <div className="mb-2 text-xs text-neutral-500">Footer-Kachel</div>
-              <div className={`flex h-20 items-center justify-center rounded-sm ${paletteBg(cardPalette)}`}>
-                {logoSrc && <img src={logoSrc} alt="" className="max-h-12 object-contain" />}
-              </div>
-            </div>
-          </div>
-          <fieldset className="rounded-sm border border-neutral-800 p-3">
-            <legend className="px-2 text-xs text-neutral-400">Status</legend>
-            {(["active", "paused", "archived"] as const).map((s) => (
-              <label key={s} className="mb-1 flex items-center gap-2 text-sm">
-                <input type="radio" name="status" checked={status === s} onChange={() => setStatus(s)} />
-                {s}
+                  Name
+                </span>
+                <input
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="cs-input"
+                />
               </label>
-            ))}
-          </fieldset>
-          {error && (
-            <div role="alert" className="rounded-sm border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-200">
-              {error}
-            </div>
-          )}
-          <button type="submit" className="w-full rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white">
-            Speichern
-          </button>
-        </aside>
-      </form>
+              <label className="block mb-3">
+                <span
+                  className="mb-1 block text-[11px] caps"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Untertitel (optional)
+                </span>
+                <input
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  className="cs-input"
+                />
+              </label>
+              <label className="block">
+                <span
+                  className="mb-1 block text-[11px] caps"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Link
+                </span>
+                <input
+                  type="url"
+                  required
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  className="cs-input"
+                />
+              </label>
+            </Card>
+
+            <Card>
+              <div
+                className="caps text-[10.5px] mb-2"
+                style={{ color: "var(--ink-3)" }}
+              >
+                Logo
+              </div>
+              <MediaUploader
+                kind="sponsor"
+                value={logo}
+                onChange={setLogo}
+                label=""
+                helper="PNG, JPEG oder SVG — max. 2 MB."
+              />
+            </Card>
+
+            <Card>
+              <div
+                className="caps text-[10.5px] mb-2"
+                style={{ color: "var(--ink-3)" }}
+              >
+                Kartenhintergrund
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {PALETTES.map((p) => (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => setCardPalette(p.key)}
+                    className={`rounded-md p-3 text-[12px] transition ${p.previewClass}`}
+                    style={{
+                      border: `2px solid ${cardPalette === p.key ? "var(--primary)" : "var(--rule-2)"}`,
+                      color: ["warm-neutral", "cool-neutral"].includes(p.key)
+                        ? "#111"
+                        : "var(--ink)",
+                      background:
+                        p.key === "purple"
+                          ? "color-mix(in oklab, var(--primary) 70%, transparent)"
+                          : undefined,
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <label className="mt-3 flex items-center gap-2 text-[13px]">
+                <input
+                  type="checkbox"
+                  checked={logoHasOwnBackground}
+                  onChange={(e) => setLogoHasOwnBackground(e.target.checked)}
+                />
+                Logo hat einen eigenen Hintergrund
+              </label>
+            </Card>
+
+            <Card>
+              <label className="block mb-3">
+                <span
+                  className="mb-1 block text-[11px] caps"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Gewicht (1–100)
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={weight}
+                  onChange={(e) => setWeight(Number(e.target.value))}
+                  className="cs-input max-w-[120px] font-mono"
+                />
+                <p
+                  className="mt-1 text-[12px]"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Niedrig = seltene Einblendung. Mittel (~50) = Standard. Hoch
+                  = Headliner-Platzierung.
+                </p>
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className="block">
+                  <span
+                    className="mb-1 block text-[11px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Aktiv ab (optional)
+                  </span>
+                  <input
+                    type="datetime-local"
+                    value={activeFrom}
+                    onChange={(e) => setActiveFrom(e.target.value)}
+                    className="cs-input"
+                  />
+                </label>
+                <label className="block">
+                  <span
+                    className="mb-1 block text-[11px] caps"
+                    style={{ color: "var(--ink-3)" }}
+                  >
+                    Aktiv bis (optional)
+                  </span>
+                  <input
+                    type="datetime-local"
+                    value={activeUntil}
+                    onChange={(e) => setActiveUntil(e.target.value)}
+                    className="cs-input"
+                  />
+                </label>
+              </div>
+            </Card>
+
+            <Card>
+              <label className="block">
+                <span
+                  className="mb-1 block text-[11px] caps"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Interne Notizen
+                </span>
+                <textarea
+                  rows={3}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="cs-input"
+                />
+              </label>
+            </Card>
+          </div>
+
+          <aside className="space-y-4">
+            <Card>
+              <div
+                className="caps text-[10.5px] mb-3"
+                style={{ color: "var(--ink-3)" }}
+              >
+                Vorschau
+              </div>
+              <div
+                className="mb-2 text-[11px] caps"
+                style={{ color: "var(--ink-4)" }}
+              >
+                News-Karussell
+              </div>
+              <div
+                className="mb-4 flex h-24 items-center justify-center rounded-md"
+                style={bgStyle}
+              >
+                {logoSrc && (
+                  <img src={logoSrc} alt="" className="max-h-16 object-contain" />
+                )}
+              </div>
+              <div
+                className="mb-2 text-[11px] caps"
+                style={{ color: "var(--ink-4)" }}
+              >
+                Social-Karussell
+              </div>
+              <div
+                className="mb-4 flex h-24 items-center justify-center rounded-md grayscale"
+                style={bgStyle}
+              >
+                {logoSrc && (
+                  <img src={logoSrc} alt="" className="max-h-16 object-contain" />
+                )}
+              </div>
+              <div
+                className="mb-2 text-[11px] caps"
+                style={{ color: "var(--ink-4)" }}
+              >
+                Footer-Kachel
+              </div>
+              <div
+                className="flex h-20 items-center justify-center rounded-md"
+                style={bgStyle}
+              >
+                {logoSrc && (
+                  <img src={logoSrc} alt="" className="max-h-12 object-contain" />
+                )}
+              </div>
+            </Card>
+            <Card>
+              <fieldset
+                className="rounded-md p-3"
+                style={{ border: "1px solid var(--rule-2)" }}
+              >
+                <legend
+                  className="px-2 text-[10.5px] caps"
+                  style={{ color: "var(--ink-3)" }}
+                >
+                  Status
+                </legend>
+                {(["active", "paused", "archived"] as const).map((s) => (
+                  <label
+                    key={s}
+                    className="mb-1 flex items-center gap-2 text-[13px]"
+                  >
+                    <input
+                      type="radio"
+                      name="status"
+                      checked={status === s}
+                      onChange={() => setStatus(s)}
+                    />
+                    {s === "active"
+                      ? "Aktiv"
+                      : s === "paused"
+                        ? "Pausiert"
+                        : "Archiviert"}
+                  </label>
+                ))}
+              </fieldset>
+            </Card>
+            {error && (
+              <div
+                role="alert"
+                className="rounded-md px-3 py-2 text-[12px]"
+                style={{
+                  border: "1px solid oklch(0.5 0.15 25 / 0.5)",
+                  background: "oklch(0.25 0.15 25 / 0.25)",
+                  color: "oklch(0.85 0.12 25)",
+                }}
+              >
+                {error}
+              </div>
+            )}
+            <Button
+              type="submit"
+              kind="primary"
+              size="lg"
+              className="w-full justify-center"
+            >
+              Speichern
+            </Button>
+          </aside>
+        </form>
+      </div>
     </div>
   );
 }

@@ -45,6 +45,9 @@
     "tailwindcss": "^4.0.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cookie-parser": "^1.4.10",
     "@types/multer": "^2.1.0",
@@ -52,6 +55,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@vitejs/plugin-react": "^4.7.0",
     "cypress": "^15.12.0",
+    "jsdom": "^29.0.2",
     "prettier": "^3.4.2",
     "supertest": "^7.2.2",
     "typescript": "^5.9.3",

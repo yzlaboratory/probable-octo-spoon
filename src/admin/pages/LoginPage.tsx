@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { ApiError } from "../api";
+import { Button } from "../ui";
 import logo from "../../assets/logo.svg";
+import { CLUB_NAME } from "../shell/club";
+import "../../styles/admin.css";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -31,49 +34,85 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#121212] text-neutral-100">
+    <div className="admin-shell flex min-h-screen items-center justify-center p-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-sm border border-neutral-800 bg-neutral-900 p-8"
+        className="cs-card w-full max-w-sm p-8 relative"
       >
-        <div className="mb-6 flex flex-col items-center">
-          <img src={logo} alt="Clubwappen" className="mb-3 h-16 w-16" />
-          <h1 className="text-xl font-bold tracking-wide">Admin-Bereich</h1>
+        <div className="mb-6 flex flex-col items-center text-center">
+          <img
+            src={logo}
+            alt=""
+            className="mb-4 w-16 h-16 rounded-lg"
+            style={{ boxShadow: "0 0 24px var(--glow)" }}
+          />
+          <div
+            className="caps text-[10.5px]"
+            style={{ color: "var(--ink-3)" }}
+          >
+            {CLUB_NAME}
+          </div>
+          <h1
+            className="font-display text-[28px] mt-1"
+            style={{ letterSpacing: "-0.015em" }}
+          >
+            Admin-Bereich
+          </h1>
         </div>
         <label className="mb-4 block">
-          <span className="mb-1 block text-xs text-neutral-400">E-Mail</span>
+          <span
+            className="mb-1 block text-[11px] caps"
+            style={{ color: "var(--ink-3)" }}
+          >
+            E-Mail
+          </span>
           <input
             type="email"
             required
             autoComplete="username"
-            className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm outline-none focus:border-primary"
+            className="cs-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </label>
         <label className="mb-6 block">
-          <span className="mb-1 block text-xs text-neutral-400">Passwort</span>
+          <span
+            className="mb-1 block text-[11px] caps"
+            style={{ color: "var(--ink-3)" }}
+          >
+            Passwort
+          </span>
           <input
             type="password"
             required
             autoComplete="current-password"
-            className="w-full rounded-sm border border-neutral-700 bg-black px-3 py-2 text-sm outline-none focus:border-primary"
+            className="cs-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
         {error && (
-          <div role="alert" className="mb-4 rounded-sm border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-200">
+          <div
+            role="alert"
+            className="mb-4 rounded-md px-3 py-2 text-[12px]"
+            style={{
+              border: "1px solid oklch(0.5 0.15 25 / 0.5)",
+              background: "oklch(0.25 0.15 25 / 0.25)",
+              color: "oklch(0.85 0.12 25)",
+            }}
+          >
             {error}
           </div>
         )}
-        <button
+        <Button
           type="submit"
+          kind="primary"
+          size="lg"
           disabled={submitting}
-          className="w-full rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+          className="w-full justify-center"
         >
           {submitting ? "Anmelden…" : "Anmelden"}
-        </button>
+        </Button>
       </form>
     </div>
   );
