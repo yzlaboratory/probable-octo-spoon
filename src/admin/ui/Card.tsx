@@ -8,6 +8,7 @@ export interface CardProps {
   as?: ElementType;
   /** When false, no padding is applied — useful when the card wraps a table. */
   padded?: boolean;
+  "data-testid"?: string;
 }
 
 export function Card({
@@ -16,11 +17,13 @@ export function Card({
   style,
   as: Tag = "div",
   padded = true,
+  "data-testid": testId,
 }: CardProps) {
   return (
     <Tag
       className={`cs-card ${padded ? "p-5" : ""} ${className}`.trim()}
       style={style}
+      data-testid={testId}
     >
       {children}
     </Tag>

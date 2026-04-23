@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import MediaListPage from "./MediaListPage";
-import { api } from "../api";
+import { api, ApiError } from "../api";
 import type { Media } from "../types";
 
 function m(over: Partial<Media> & { id: number; kind?: Media["kind"] }): Media {
@@ -132,6 +132,134 @@ describe("MediaListPage — happy path", () => {
       target: { value: "absolutely-nothing-matches" },
     });
     expect(screen.getByText("Keine Treffer")).toBeInTheDocument();
+  });
+});
+
+describe("MediaListPage — selection and detail panel", () => {
+  it("starts with the 'keine Auswahl' placeholder and reveals the detail card on click", async () => {
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+
+    expect(screen.getByTestId("media-detail-empty")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+    expect(screen.queryByTestId("media-detail-empty")).toBeNull();
+    expect(screen.getByTestId("media-detail-name")).toHaveTextContent(
+      "training-camp.webp",
+    );
+  });
+
+  it("swaps the preview when a different cell is clicked", async () => {
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-cell-2"));
+    expect(screen.getByTestId("media-detail-name")).toHaveTextContent(
+      "acme-logo.svg",
+    );
+  });
+
+  it("clears the selection when a kind filter hides the selected row", async () => {
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-cell-1")); // news
+    expect(screen.getByTestId("media-detail")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("kind-sponsor"));
+    // The news row is gone from the list, and the panel falls back to empty.
+    expect(screen.queryByTestId("media-cell-1")).toBeNull();
+    expect(screen.getByTestId("media-detail-empty")).toBeInTheDocument();
+  });
+
+  it("keeps the selection if the selected row is still visible after filtering", async () => {
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-2"));
+    fireEvent.click(screen.getByTestId("media-cell-2")); // sponsor
+
+    fireEvent.click(screen.getByTestId("kind-sponsor"));
+    expect(screen.getByTestId("media-detail-name")).toHaveTextContent(
+      "acme-logo.svg",
+    );
+  });
+});
+
+describe("MediaListPage — delete", () => {
+  it("calls DELETE and removes the row after confirmation", async () => {
+    const spy = vi
+      .spyOn(api, "delete")
+      .mockResolvedValue(undefined as unknown as never);
+
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+
+    fireEvent.click(screen.getByTestId("media-detail-delete"));
+    // Inline confirmation buttons appear.
+    expect(
+      screen.getByTestId("media-detail-delete-confirm"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("media-detail-delete-confirm"));
+    await waitFor(() => expect(spy).toHaveBeenCalledWith("/api/media/1"));
+    await waitFor(() => {
+      expect(screen.queryByTestId("media-cell-1")).toBeNull();
+    });
+    expect(screen.getByTestId("media-detail-empty")).toBeInTheDocument();
+  });
+
+  it("shows blocking references when the server responds 409", async () => {
+    vi.spyOn(api, "delete").mockRejectedValue(
+      new ApiError(409, {
+        code: "in_use",
+        message: "Medium ist noch verknüpft.",
+        references: [{ kind: "news", id: 42, label: "Jugendturnier" }],
+      }),
+    );
+
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-detail-delete"));
+    fireEvent.click(screen.getByTestId("media-detail-delete-confirm"));
+
+    const refs = await screen.findByTestId("media-detail-refs");
+    expect(refs).toHaveTextContent("Jugendturnier");
+    // Row is still in the list — delete never happened.
+    expect(screen.getByTestId("media-cell-1")).toBeInTheDocument();
+  });
+
+  it("cancels the delete confirmation without calling the API", async () => {
+    const spy = vi.spyOn(api, "delete");
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-detail-delete"));
+    fireEvent.click(screen.getByTestId("media-detail-delete-cancel"));
+    expect(screen.queryByTestId("media-detail-delete-confirm")).toBeNull();
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe("MediaListPage — copy link", () => {
+  it("copies the largest variant URL to the clipboard", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    // `navigator.clipboard` is undefined in jsdom; define a minimal stub.
+    Object.defineProperty(window.navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("media-detail-copy"));
+
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith(
+        expect.stringContaining("/media/x/1/400w.webp"),
+      ),
+    );
   });
 });
 

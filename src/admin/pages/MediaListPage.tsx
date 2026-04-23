@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import type { Media } from "../types";
 import { Button, Card, PageHeader } from "../ui";
 import * as Icons from "../ui/Icons";
+import { DetailPanel } from "./media/DetailPanel";
 import {
   KIND_LABEL,
   displayName,
@@ -72,55 +73,64 @@ function MediaThumb({ media }: { media: Media }) {
   );
 }
 
-interface GridProps {
+interface ListProps {
   items: Media[];
+  selectedId: number | null;
+  onSelect: (m: Media) => void;
 }
 
-function Grid({ items }: GridProps) {
+function Grid({ items, selectedId, onSelect }: ListProps) {
   return (
-    <div className="grid grid-cols-4 gap-3" data-testid="media-grid">
-      {items.map((m) => (
-        <div
-          key={m.id}
-          data-testid={`media-cell-${m.id}`}
-          className="group relative aspect-square overflow-hidden rounded-lg text-left"
-          style={{
-            background: "var(--paper-2)",
-            border: "1px solid var(--rule)",
-          }}
-        >
-          <MediaThumb media={m} />
-          <div
-            aria-hidden
-            className="absolute right-0 bottom-0 left-0 p-2"
+    <div className="grid grid-cols-3 gap-3" data-testid="media-grid">
+      {items.map((m) => {
+        const active = selectedId === m.id;
+        return (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onSelect(m)}
+            data-testid={`media-cell-${m.id}`}
+            aria-pressed={active}
+            className="group relative aspect-square overflow-hidden rounded-lg text-left transition"
             style={{
-              background:
-                "linear-gradient(180deg, transparent, rgba(14,14,18,.9))",
+              background: "var(--paper-2)",
+              border: `1px solid ${active ? "var(--primary)" : "var(--rule)"}`,
+              boxShadow: active ? "0 0 0 2px var(--glow)" : "none",
             }}
           >
+            <MediaThumb media={m} />
             <div
-              className="truncate font-mono text-[11px]"
-              style={{ color: "var(--ink)" }}
-              title={displayName(m)}
+              aria-hidden
+              className="absolute right-0 bottom-0 left-0 p-2"
+              style={{
+                background:
+                  "linear-gradient(180deg, transparent, rgba(14,14,18,.9))",
+              }}
             >
-              {displayName(m)}
+              <div
+                className="truncate font-mono text-[11px]"
+                style={{ color: "var(--ink)" }}
+                title={displayName(m)}
+              >
+                {displayName(m)}
+              </div>
+              <div
+                className="flex items-center gap-2 text-[10px]"
+                style={{ color: "var(--ink-3)" }}
+              >
+                <span>{mimeLabel(m.mimeType)}</span>
+                <span>·</span>
+                <span>{m.kind ? KIND_LABEL[m.kind] : "?"}</span>
+              </div>
             </div>
-            <div
-              className="flex items-center gap-2 text-[10px]"
-              style={{ color: "var(--ink-3)" }}
-            >
-              <span>{mimeLabel(m.mimeType)}</span>
-              <span>·</span>
-              <span>{m.kind ? KIND_LABEL[m.kind] : "?"}</span>
-            </div>
-          </div>
-        </div>
-      ))}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function List({ items }: { items: Media[] }) {
+function List({ items, selectedId, onSelect }: ListProps) {
   return (
     <Card padded={false}>
       <div
@@ -138,37 +148,44 @@ function List({ items }: { items: Media[] }) {
         <div>Verwendung</div>
         <div>Upload</div>
       </div>
-      {items.map((m) => (
-        <div
-          key={m.id}
-          data-testid={`media-row-${m.id}`}
-          className="row-hover grid cursor-default items-center gap-3 px-4 py-2.5"
-          style={{
-            gridTemplateColumns: LIST_COLS,
-            borderBottom: "1px solid var(--rule)",
-          }}
-        >
-          <div className="h-10 w-12 overflow-hidden rounded-md">
-            <MediaThumb media={m} />
-          </div>
-          <div
-            className="truncate font-mono text-[12.5px]"
-            title={displayName(m)}
+      {items.map((m) => {
+        const active = selectedId === m.id;
+        return (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onSelect(m)}
+            data-testid={`media-row-${m.id}`}
+            aria-pressed={active}
+            className="row-hover grid w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left"
+            style={{
+              gridTemplateColumns: LIST_COLS,
+              borderBottom: "1px solid var(--rule)",
+              background: active ? "var(--paper-3)" : undefined,
+            }}
           >
-            {displayName(m)}
-          </div>
-          <div className="text-[12px]" style={{ color: "var(--ink-2)" }}>
-            {mimeLabel(m.mimeType)}
-          </div>
-          <div className="text-[12px]" style={{ color: "var(--ink-2)" }}>
-            {m.kind ? KIND_LABEL[m.kind] : "—"}
-          </div>
-          <div className="text-[11.5px]" style={{ color: "var(--ink-3)" }}>
-            {m.uploadedBy ? `${m.uploadedBy} · ` : ""}
-            {formatDate(m.uploadedAt)}
-          </div>
-        </div>
-      ))}
+            <div className="h-10 w-12 overflow-hidden rounded-md">
+              <MediaThumb media={m} />
+            </div>
+            <div
+              className="truncate font-mono text-[12.5px]"
+              title={displayName(m)}
+            >
+              {displayName(m)}
+            </div>
+            <div className="text-[12px]" style={{ color: "var(--ink-2)" }}>
+              {mimeLabel(m.mimeType)}
+            </div>
+            <div className="text-[12px]" style={{ color: "var(--ink-2)" }}>
+              {m.kind ? KIND_LABEL[m.kind] : "—"}
+            </div>
+            <div className="text-[11.5px]" style={{ color: "var(--ink-3)" }}>
+              {m.uploadedBy ? `${m.uploadedBy} · ` : ""}
+              {formatDate(m.uploadedAt)}
+            </div>
+          </button>
+        );
+      })}
     </Card>
   );
 }
@@ -180,6 +197,7 @@ export default function MediaListPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [kind, setKind] = useState<KindFilter>("all");
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Media | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -205,6 +223,21 @@ export default function MediaListPage() {
     () => filterMedia(items, kind, query),
     [items, kind, query],
   );
+
+  // Keep selection stable across list refreshes, but drop it when the user
+  // changes filters such that the selected row is no longer visible — the
+  // panel pointing at a hidden row is disorienting.
+  useEffect(() => {
+    if (!selected) return;
+    if (!visible.some((m) => m.id === selected.id)) {
+      setSelected(null);
+    }
+  }, [selected, visible]);
+
+  const onDeleted = useCallback((id: number) => {
+    setItems((prev) => prev.filter((m) => m.id !== id));
+    setSelected(null);
+  }, []);
 
   return (
     <div>
@@ -341,10 +374,29 @@ export default function MediaListPage() {
                 : "Kein Medium entspricht dem aktuellen Filter."}
             </p>
           </Card>
-        ) : view === "grid" ? (
-          <Grid items={visible} />
         ) : (
-          <List items={visible} />
+          <div
+            className="grid gap-6"
+            style={{ gridTemplateColumns: "1fr 340px" }}
+            data-testid="media-content"
+          >
+            <div>
+              {view === "grid" ? (
+                <Grid
+                  items={visible}
+                  selectedId={selected?.id ?? null}
+                  onSelect={setSelected}
+                />
+              ) : (
+                <List
+                  items={visible}
+                  selectedId={selected?.id ?? null}
+                  onSelect={setSelected}
+                />
+              )}
+            </div>
+            <DetailPanel selected={selected} onDeleted={onDeleted} />
+          </div>
         )}
       </div>
     </div>
