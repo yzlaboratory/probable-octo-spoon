@@ -13,6 +13,7 @@ function n(
     tag: "Allgemein",
     short: "",
     longHtml: "",
+    blocks: [],
     publishAt: null,
     hero: null,
     createdAt: over.updatedAt,

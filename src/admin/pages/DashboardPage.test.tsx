@@ -12,6 +12,7 @@ function n(over: Partial<News> & { id: number }): News {
     tag: "Allgemein",
     short: "",
     longHtml: "",
+    blocks: [],
     status: "published",
     publishAt: null,
     hero: null,

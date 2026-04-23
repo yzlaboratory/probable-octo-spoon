@@ -17,6 +17,7 @@ function n(status: News["status"], rest: Partial<News> = {}): News {
     tag: "x",
     short: "",
     longHtml: "",
+    blocks: [],
     status,
     publishAt: null,
     hero: null,
