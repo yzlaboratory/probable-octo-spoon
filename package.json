@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "cypress run",
-    "test:e2e:open": "cypress open"
+    "test:e2e:open": "cypress open",
+    "test:admin": "bash -c 'set -a; . ~/.credentials; set +a; CYPRESS_ADMIN_EMAIL=\"$CLUBSOFT_ADMIN_EMAIL\" CYPRESS_ADMIN_PASSWORD=\"$CLUBSOFT_ADMIN_PASSWORD\" cypress run --spec cypress/e2e/admin-login.cy.ts'",
+    "test:admin:prod": "bash -c 'set -a; . ~/.credentials; set +a; CYPRESS_ADMIN_EMAIL=\"$CLUBSOFT_ADMIN_EMAIL\" CYPRESS_ADMIN_PASSWORD=\"$CLUBSOFT_ADMIN_PASSWORD\" CYPRESS_BASE_URL=https://svthalexweiler.de cypress run --spec cypress/e2e/admin-login.cy.ts'"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
