@@ -38,7 +38,6 @@ describe("Sidebar", () => {
 
   describe.each([
     "Termine",
-    "Mediathek",
     "Mitglieder",
     "Website-Vorschau",
     "Erscheinungsbild",
@@ -58,14 +57,22 @@ describe("Sidebar", () => {
     const { getByText } = renderAt("/admin");
     const dashboard = getByText("Übersicht").closest("a") as HTMLAnchorElement;
     const news = getByText("News").closest("a") as HTMLAnchorElement;
+    const media = getByText("Mediathek").closest("a") as HTMLAnchorElement;
     const sponsors = getByText("Sponsoren").closest("a") as HTMLAnchorElement;
     const admins = getByText("Administratoren").closest(
       "a",
     ) as HTMLAnchorElement;
     expect(dashboard.getAttribute("href")).toBe("/admin");
     expect(news.getAttribute("href")).toBe("/admin/news");
+    expect(media.getAttribute("href")).toBe("/admin/media");
     expect(sponsors.getAttribute("href")).toBe("/admin/sponsors");
     expect(admins.getAttribute("href")).toBe("/admin/admins");
+  });
+
+  it("marks Mediathek active at /admin/media", () => {
+    const { getByText } = renderAt("/admin/media");
+    const link = getByText("Mediathek").closest("a")!;
+    expect(link.className).toContain("active");
   });
 
   it("keeps nested edit paths marked under the parent section", () => {

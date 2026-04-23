@@ -18,7 +18,7 @@ const CONTENT_NAV: NavEntry[] = [
   { id: "dashboard", label: "Übersicht", icon: "Dashboard", to: "/admin" },
   { id: "news", label: "News", icon: "News", to: "/admin/news" },
   { id: "events", label: "Termine", icon: "Schedule", soon: true },
-  { id: "media", label: "Mediathek", icon: "Media", soon: true },
+  { id: "media", label: "Mediathek", icon: "Media", to: "/admin/media" },
   {
     id: "sponsors",
     label: "Sponsoren",

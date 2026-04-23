@@ -14,6 +14,7 @@ import ResetPage from "./admin/pages/ResetPage";
 import DashboardPage from "./admin/pages/DashboardPage";
 import NewsListPage from "./admin/pages/NewsListPage";
 import NewsEditPage from "./admin/pages/NewsEditPage";
+import MediaListPage from "./admin/pages/MediaListPage";
 import SponsorListPage from "./admin/pages/SponsorListPage";
 import SponsorEditPage from "./admin/pages/SponsorEditPage";
 import VorstandPage from "./admin/pages/VorstandPage";
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/admin/news" element={<NewsListPage />} />
             <Route path="/admin/news/new" element={<NewsEditPage />} />
             <Route path="/admin/news/:id" element={<NewsEditPage />} />
+            <Route path="/admin/media" element={<MediaListPage />} />
             <Route path="/admin/sponsors" element={<SponsorListPage />} />
             <Route path="/admin/sponsors/new" element={<SponsorEditPage />} />
             <Route path="/admin/sponsors/:id" element={<SponsorEditPage />} />
