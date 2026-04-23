@@ -22,9 +22,18 @@ function toPublic(row, media) {
 
 function loadPortrait(db, id) {
   if (!id) return null;
-  const row = db.prepare("SELECT variants_json, mime_type FROM media WHERE id = ?").get(id);
+  const row = db
+    .prepare(
+      "SELECT variants_json, mime_type, original_filename FROM media WHERE id = ?",
+    )
+    .get(id);
   if (!row) return null;
-  return { id, variants: JSON.parse(row.variants_json), mimeType: row.mime_type };
+  return {
+    id,
+    variants: JSON.parse(row.variants_json),
+    mimeType: row.mime_type,
+    filename: row.original_filename ?? null,
+  };
 }
 
 export default function vorstandRoutes(db) {
@@ -41,25 +50,45 @@ export default function vorstandRoutes(db) {
   });
 
   router.get("/", requireAuth, (req, res) => {
-    const status = typeof req.query.status === "string" ? req.query.status : null;
+    const status =
+      typeof req.query.status === "string" ? req.query.status : null;
     const rows = STATUSES.includes(status)
-      ? db.prepare("SELECT * FROM vorstand WHERE status = ? ORDER BY display_order, id").all(status)
+      ? db
+          .prepare(
+            "SELECT * FROM vorstand WHERE status = ? ORDER BY display_order, id",
+          )
+          .all(status)
       : db.prepare("SELECT * FROM vorstand ORDER BY display_order, id").all();
-    res.json(rows.map((r) => toPublic(r, loadPortrait(db, r.portrait_media_id))));
+    res.json(
+      rows.map((r) => toPublic(r, loadPortrait(db, r.portrait_media_id))),
+    );
   });
 
   router.get("/public", (_req, res) => {
     const rows = db
-      .prepare("SELECT * FROM vorstand WHERE status = 'active' ORDER BY display_order, id")
+      .prepare(
+        "SELECT * FROM vorstand WHERE status = 'active' ORDER BY display_order, id",
+      )
       .all();
-    res.json(rows.map((r) => toPublic(r, loadPortrait(db, r.portrait_media_id))));
+    res.json(
+      rows.map((r) => toPublic(r, loadPortrait(db, r.portrait_media_id))),
+    );
   });
 
   router.post("/", requireAuth, requireCsrf, (req, res) => {
     const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return errorEnvelope(res, 400, "bad_request", "Ungültige Eingabe.", parsed.error.flatten().fieldErrors);
+    if (!parsed.success)
+      return errorEnvelope(
+        res,
+        400,
+        "bad_request",
+        "Ungültige Eingabe.",
+        parsed.error.flatten().fieldErrors,
+      );
     const d = parsed.data;
-    const maxOrder = db.prepare("SELECT MAX(display_order) AS m FROM vorstand").get();
+    const maxOrder = db
+      .prepare("SELECT MAX(display_order) AS m FROM vorstand")
+      .get();
     const now = new Date().toISOString();
     const info = db
       .prepare(
@@ -80,16 +109,28 @@ export default function vorstandRoutes(db) {
         now,
         now,
       );
-    const row = db.prepare("SELECT * FROM vorstand WHERE id = ?").get(info.lastInsertRowid);
-    res.status(201).json(toPublic(row, loadPortrait(db, row.portrait_media_id)));
+    const row = db
+      .prepare("SELECT * FROM vorstand WHERE id = ?")
+      .get(info.lastInsertRowid);
+    res
+      .status(201)
+      .json(toPublic(row, loadPortrait(db, row.portrait_media_id)));
   });
 
   router.patch("/:id", requireAuth, requireCsrf, (req, res) => {
     const id = Number(req.params.id);
     const row = db.prepare("SELECT * FROM vorstand WHERE id = ?").get(id);
-    if (!row) return errorEnvelope(res, 404, "not_found", "Mitglied nicht gefunden.");
+    if (!row)
+      return errorEnvelope(res, 404, "not_found", "Mitglied nicht gefunden.");
     const parsed = schema.partial().safeParse(req.body);
-    if (!parsed.success) return errorEnvelope(res, 400, "bad_request", "Ungültige Eingabe.", parsed.error.flatten().fieldErrors);
+    if (!parsed.success)
+      return errorEnvelope(
+        res,
+        400,
+        "bad_request",
+        "Ungültige Eingabe.",
+        parsed.error.flatten().fieldErrors,
+      );
     const d = parsed.data;
     const now = new Date().toISOString();
     db.prepare(
@@ -102,7 +143,9 @@ export default function vorstandRoutes(db) {
       d.role ?? row.role,
       "email" in d ? (d.email ?? null) : row.email,
       "phone" in d ? (d.phone ?? null) : row.phone,
-      "portraitMediaId" in d ? (d.portraitMediaId ?? null) : row.portrait_media_id,
+      "portraitMediaId" in d
+        ? (d.portraitMediaId ?? null)
+        : row.portrait_media_id,
       "notes" in d ? (d.notes ?? null) : row.notes,
       d.status ?? row.status,
       now,
@@ -115,9 +158,15 @@ export default function vorstandRoutes(db) {
   router.delete("/:id", requireAuth, requireCsrf, (req, res) => {
     const id = Number(req.params.id);
     const row = db.prepare("SELECT status FROM vorstand WHERE id = ?").get(id);
-    if (!row) return errorEnvelope(res, 404, "not_found", "Mitglied nicht gefunden.");
+    if (!row)
+      return errorEnvelope(res, 404, "not_found", "Mitglied nicht gefunden.");
     if (row.status !== "archived") {
-      return errorEnvelope(res, 409, "not_archived", "Mitglied muss erst archiviert werden.");
+      return errorEnvelope(
+        res,
+        409,
+        "not_archived",
+        "Mitglied muss erst archiviert werden.",
+      );
     }
     db.prepare("DELETE FROM vorstand WHERE id = ?").run(id);
     res.json({ ok: true });
@@ -129,15 +178,22 @@ export default function vorstandRoutes(db) {
 
   router.post("/reorder", requireAuth, requireCsrf, (req, res) => {
     const parsed = reorderSchema.safeParse(req.body);
-    if (!parsed.success) return errorEnvelope(res, 400, "bad_request", "Ungültige Reihenfolge.");
-    const stmt = db.prepare("UPDATE vorstand SET display_order = ?, updated_at = ? WHERE id = ?");
+    if (!parsed.success)
+      return errorEnvelope(res, 400, "bad_request", "Ungültige Reihenfolge.");
+    const stmt = db.prepare(
+      "UPDATE vorstand SET display_order = ?, updated_at = ? WHERE id = ?",
+    );
     const now = new Date().toISOString();
     const tx = db.transaction((ids) => {
       ids.forEach((id, idx) => stmt.run(idx + 1, now, id));
     });
     tx(parsed.data.orderedIds);
-    const rows = db.prepare("SELECT * FROM vorstand ORDER BY display_order, id").all();
-    res.json(rows.map((r) => toPublic(r, loadPortrait(db, r.portrait_media_id))));
+    const rows = db
+      .prepare("SELECT * FROM vorstand ORDER BY display_order, id")
+      .all();
+    res.json(
+      rows.map((r) => toPublic(r, loadPortrait(db, r.portrait_media_id))),
+    );
   });
 
   return router;
