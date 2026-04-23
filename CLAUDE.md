@@ -17,7 +17,33 @@ npm test               # Run Vitest unit tests once
 npm run test:watch     # Vitest watch mode
 npm run test:e2e       # Run Cypress end-to-end tests headless
 npm run test:e2e:open  # Open Cypress UI
+npm run test:admin     # Run admin-login Cypress specs (needs local server, see below)
+npm run test:admin:prod # Run admin-login specs against https://svthalexweiler.de
 ```
+
+### Local admin e2e setup
+
+The admin specs talk to the Express server, not the Vite dev server, and hit a real SQLite DB. First-time setup:
+
+```bash
+# 1. Build the SPA
+npm run build
+
+# 2. Serve with a writable local data dir (default /var/lib/clubsoft isn't on a dev box)
+mkdir -p /tmp/clubsoft-e2e/media
+DB_PATH=/tmp/clubsoft-e2e/app.db MEDIA_ROOT=/tmp/clubsoft-e2e/media \
+  node --env-file=.runtime.env server.mjs
+
+# 3. In another shell, seed the admin user once (creds come from ~/.credentials)
+set -a; . ~/.credentials; set +a
+DB_PATH=/tmp/clubsoft-e2e/app.db node server/seed-admin.mjs \
+  "$CLUBSOFT_ADMIN_EMAIL" "$CLUBSOFT_ADMIN_PASSWORD"
+
+# 4. Run the specs
+npm run test:admin
+```
+
+`test:admin` and `test:admin:prod` both source `~/.credentials` and forward `CLUBSOFT_ADMIN_EMAIL`/`CLUBSOFT_ADMIN_PASSWORD` into `CYPRESS_ADMIN_EMAIL`/`CYPRESS_ADMIN_PASSWORD`. Specs skip cleanly when those vars are missing, so CI without secrets stays green.
 
 ## Architecture
 
