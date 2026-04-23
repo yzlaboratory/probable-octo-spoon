@@ -15,40 +15,65 @@ interface NavEntry {
 }
 
 const CONTENT_NAV: NavEntry[] = [
-  { id: "dashboard", label: "Übersicht", icon: "Dashboard", soon: true },
+  { id: "dashboard", label: "Übersicht", icon: "Dashboard", to: "/admin" },
   { id: "news", label: "News", icon: "News", to: "/admin/news" },
   { id: "events", label: "Termine", icon: "Schedule", soon: true },
   { id: "media", label: "Mediathek", icon: "Media", soon: true },
-  { id: "sponsors", label: "Sponsoren", icon: "Sponsors", to: "/admin/sponsors" },
-  { id: "vorstand", label: "Vorstand", icon: "Vorstand", to: "/admin/vorstand" },
+  {
+    id: "sponsors",
+    label: "Sponsoren",
+    icon: "Sponsors",
+    to: "/admin/sponsors",
+  },
+  {
+    id: "vorstand",
+    label: "Vorstand",
+    icon: "Vorstand",
+    to: "/admin/vorstand",
+  },
   { id: "members", label: "Mitglieder", icon: "Vorstand", soon: true },
 ];
 
 const CONFIG_NAV: NavEntry[] = [
   { id: "public", label: "Website-Vorschau", icon: "Globe", soon: true },
   { id: "theme", label: "Erscheinungsbild", icon: "Theme", soon: true },
-  { id: "admins", label: "Administratoren", icon: "Vorstand", to: "/admin/admins" },
+  {
+    id: "admins",
+    label: "Administratoren",
+    icon: "Vorstand",
+    to: "/admin/admins",
+  },
   { id: "settings", label: "Einstellungen", icon: "Settings", soon: true },
 ];
 
-function NavItem({ entry, activePath }: { entry: NavEntry; activePath: string }) {
+function NavItem({
+  entry,
+  activePath,
+}: {
+  entry: NavEntry;
+  activePath: string;
+}) {
   const IconComponent = Icons[entry.icon];
-  const active = entry.to !== undefined && activePath.startsWith(entry.to);
+  // `/admin` is the dashboard root — it must match strictly so it doesn't
+  // light up for every nested admin route. Any other entry uses prefix match
+  // so deep paths (e.g. /admin/news/42) keep the parent crumb active.
+  const active =
+    entry.to !== undefined &&
+    (entry.to === "/admin"
+      ? activePath === "/admin" || activePath === "/admin/"
+      : activePath.startsWith(entry.to));
 
   if (entry.soon) {
     return (
       <button
         type="button"
         disabled
-        className="nav-item opacity-50 cursor-not-allowed"
+        className="nav-item cursor-not-allowed opacity-50"
         aria-disabled="true"
       >
         <IconComponent className="nav-icon" />
         <span className="flex-1">{entry.label}</span>
-        <span
-          className="caps text-[10px]"
-          style={{ color: "var(--ink-4)" }}
-        >
+        <span className="caps text-[10px]" style={{ color: "var(--ink-4)" }}>
           bald
         </span>
       </button>
@@ -80,7 +105,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-[248px] shrink-0 h-screen sticky top-0 flex flex-col z-10"
+      className="sticky top-0 z-10 flex h-screen w-[248px] shrink-0 flex-col"
       style={{
         background: "color-mix(in oklab, var(--paper-2) 70%, transparent)",
         borderRight: "1px solid var(--rule)",
@@ -88,24 +113,24 @@ export default function Sidebar() {
       }}
     >
       {/* Club wordmark */}
-      <div className="px-5 py-5 rule-b">
+      <div className="rule-b px-5 py-5">
         <div className="flex items-center gap-3 select-none">
           <img
             src={logo}
             alt=""
-            className="w-9 h-9 rounded-md"
+            className="h-9 w-9 rounded-md"
             style={{ boxShadow: "0 0 16px var(--glow)" }}
           />
           <div className="min-w-0 flex-1 leading-tight">
             <div
-              className="font-display text-[17px] truncate"
+              className="font-display truncate text-[17px]"
               style={{ letterSpacing: "-0.02em", color: "var(--ink)" }}
               title={CLUB_NAME}
             >
               {CLUB_SHORT}
             </div>
             <div
-              className="text-[11px] truncate"
+              className="truncate text-[11px]"
               style={{ color: "var(--ink-3)" }}
             >
               {CLUB_DOMAIN}
@@ -114,9 +139,9 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="px-3 flex-1 overflow-auto" aria-label="Hauptnavigation">
+      <nav className="flex-1 overflow-auto px-3" aria-label="Hauptnavigation">
         <div
-          className="caps text-[10px] px-3 pt-4 pb-2"
+          className="caps px-3 pt-4 pb-2 text-[10px]"
           style={{ color: "var(--ink-3)" }}
         >
           Inhalte
@@ -128,7 +153,7 @@ export default function Sidebar() {
         </div>
 
         <div
-          className="caps text-[10px] px-3 pt-5 pb-2"
+          className="caps px-3 pt-5 pb-2 text-[10px]"
           style={{ color: "var(--ink-3)" }}
         >
           Konfiguration
@@ -141,9 +166,9 @@ export default function Sidebar() {
       </nav>
 
       {/* Season card */}
-      <div className="p-3 rule-t">
+      <div className="rule-t p-3">
         <div
-          className="rounded-lg p-3 relative overflow-hidden"
+          className="relative overflow-hidden rounded-lg p-3"
           style={{
             background: "var(--paper-3)",
             border: "1px solid var(--rule-2)",
@@ -156,9 +181,9 @@ export default function Sidebar() {
                 "radial-gradient(circle at 100% 0%, var(--glow), transparent 60%)",
             }}
           />
-          <div className="flex items-center gap-1.5 relative">
+          <div className="relative flex items-center gap-1.5">
             <span
-              className="live-dot w-1.5 h-1.5 rounded-full"
+              className="live-dot h-1.5 w-1.5 rounded-full"
               style={{ background: "var(--accent)" }}
             />
             <span
@@ -169,20 +194,20 @@ export default function Sidebar() {
             </span>
           </div>
           <div
-            className="font-display text-[17px] mt-1 leading-tight relative"
+            className="font-display relative mt-1 text-[17px] leading-tight"
             style={{ color: "var(--ink)" }}
           >
             Rückrunde läuft
           </div>
           <div
-            className="text-[11px] mt-0.5 relative"
+            className="relative mt-0.5 text-[11px]"
             style={{ color: "var(--ink-3)" }}
           >
             Noch Spieltage bis zur Sommerpause.
           </div>
         </div>
         <div
-          className="flex items-center justify-between mt-3 px-1 text-[11px]"
+          className="mt-3 flex items-center justify-between px-1 text-[11px]"
           style={{ color: "var(--ink-3)" }}
         >
           <span>admin · svthalexweiler</span>

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import HomePage from "./pages/HomePage";
 import ImpressumPage from "./pages/ImpressumPage";
@@ -11,6 +11,7 @@ import RequireAuth from "./admin/RequireAuth";
 import AdminLayout from "./admin/AdminLayout";
 import LoginPage from "./admin/pages/LoginPage";
 import ResetPage from "./admin/pages/ResetPage";
+import DashboardPage from "./admin/pages/DashboardPage";
 import NewsListPage from "./admin/pages/NewsListPage";
 import NewsEditPage from "./admin/pages/NewsEditPage";
 import SponsorListPage from "./admin/pages/SponsorListPage";
@@ -35,7 +36,7 @@ export default function App() {
         <Route path="/admin/reset" element={<ResetPage />} />
         <Route element={<RequireAuth />}>
           <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<Navigate to="/admin/news" replace />} />
+            <Route path="/admin" element={<DashboardPage />} />
             <Route path="/admin/news" element={<NewsListPage />} />
             <Route path="/admin/news/new" element={<NewsEditPage />} />
             <Route path="/admin/news/:id" element={<NewsEditPage />} />
