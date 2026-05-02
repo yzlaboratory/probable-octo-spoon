@@ -94,13 +94,16 @@ describe("news crud", () => {
         title: "Jugendturnier",
         tag: "Event",
         short: "Wir laden ein.",
-        longHtml: "<p>Kommt vorbei!</p><script>alert(1)</script>",
+        blocks: [{ kind: "paragraph", text: "Kommt vorbei!" }],
         heroMediaId: heroId,
         status: "published",
       });
     expect(created.status).toBe(201);
     expect(created.body.slug).toBe("jugendturnier");
-    expect(created.body.longHtml).not.toMatch(/<script/i);
+    expect(created.body.blocks).toEqual([
+      { kind: "paragraph", text: "Kommt vorbei!" },
+    ]);
+    expect(created.body.longHtml).toBe("<p>Kommt vorbei!</p>");
 
     const list = await request(srv).get("/api/news").set("Cookie", auth.cookie);
     expect(list.status).toBe(200);
@@ -151,6 +154,112 @@ describe("news crud", () => {
       .set("x-csrf-token", auth.csrf)
       .send({ title: "x", tag: "x", short: "x", status: "draft" });
     expect(res.status).toBe(401);
+  });
+
+  it("round-trips a mixed-block article and recompiles html on edit", async () => {
+    const request = (await import("supertest")).default;
+    const heroId = seedMedia(db, "news");
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Kreisligaderby",
+        tag: "Fußball",
+        short: "Später Siegtreffer.",
+        blocks: [
+          { kind: "heading", level: 2, text: "Doppelschlag" },
+          { kind: "paragraph", text: "Nach 0:1 dreht die Erste." },
+          { kind: "quote", text: "Wir bleiben dran.", attr: "Trainer" },
+          { kind: "image", mediaId: heroId, caption: "Jubel", credit: "" },
+          { kind: "callout", tone: "accent", text: "Heimspiel Samstag." },
+        ],
+        status: "published",
+      });
+    expect(created.status).toBe(201);
+    expect(created.body.blocks).toHaveLength(5);
+    expect(created.body.longHtml).toMatch(/<h2>Doppelschlag<\/h2>/);
+    expect(created.body.longHtml).toMatch(/<blockquote>.*<cite>Trainer<\/cite>/);
+    expect(created.body.longHtml).toMatch(/<aside class="callout callout-accent"/);
+    expect(created.body.longHtml).toMatch(/<figure><img/);
+
+    const patched = await request(srv)
+      .patch(`/api/news/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        blocks: [{ kind: "paragraph", text: "Kurzfassung." }],
+      });
+    expect(patched.status).toBe(200);
+    expect(patched.body.blocks).toEqual([
+      { kind: "paragraph", text: "Kurzfassung." },
+    ]);
+    expect(patched.body.longHtml).toBe("<p>Kurzfassung.</p>");
+  });
+
+  it("escapes script tags smuggled inside block text", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "XSS test",
+        tag: "x",
+        short: "x",
+        blocks: [
+          { kind: "paragraph", text: "<script>alert(1)</script>" },
+          { kind: "heading", level: 2, text: "<img src=x onerror=alert(1)>" },
+        ],
+        status: "draft",
+      });
+    expect(created.status).toBe(201);
+    // No live script or img tags — just escaped text.
+    expect(created.body.longHtml).not.toMatch(/<script/i);
+    expect(created.body.longHtml).not.toMatch(/<img\b/i);
+    expect(created.body.longHtml).toContain("&lt;script&gt;");
+    expect(created.body.longHtml).toContain("&lt;img");
+  });
+
+  it("rejects invalid block payloads with 400", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "t",
+        tag: "t",
+        short: "s",
+        blocks: [{ kind: "video", url: "nope" }],
+        status: "draft",
+      });
+    expect(res.status).toBe(400);
+  });
+
+  it("preserves long_html when editing metadata without sending blocks", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Original",
+        tag: "t",
+        short: "s",
+        blocks: [{ kind: "paragraph", text: "body" }],
+        status: "draft",
+      });
+    const before = created.body.longHtml;
+    const patched = await request(srv)
+      .patch(`/api/news/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ title: "Neuer Titel" });
+    expect(patched.body.longHtml).toBe(before);
+    expect(patched.body.blocks).toEqual([
+      { kind: "paragraph", text: "body" },
+    ]);
   });
 });
 

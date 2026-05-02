@@ -10,6 +10,7 @@ function n(id: number, title: string, updatedAt: string): News {
     tag: "x",
     short: "",
     longHtml: "",
+    blocks: [],
     status: "published",
     publishAt: null,
     hero: null,

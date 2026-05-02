@@ -2,10 +2,37 @@ import sanitizeHtml from "sanitize-html";
 import { optimize } from "svgo";
 
 export const NEWS_SANITIZE_OPTIONS = {
-  allowedTags: ["p", "h2", "h3", "strong", "em", "ul", "ol", "li", "a", "blockquote", "img"],
+  allowedTags: [
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "strong",
+    "em",
+    "ul",
+    "ol",
+    "li",
+    "a",
+    "blockquote",
+    "cite",
+    "img",
+    "figure",
+    "figcaption",
+    "aside",
+    "span",
+    "br",
+  ],
   allowedAttributes: {
     a: ["href", "rel", "target"],
     img: ["src", "alt", "width", "height"],
+    p: ["class"],
+    aside: ["class"],
+    span: ["class"],
+  },
+  allowedClasses: {
+    p: ["lead"],
+    aside: ["callout", "callout-primary", "callout-accent", "callout-warn"],
+    span: ["credit"],
   },
   allowedSchemes: ["http", "https", "mailto"],
   allowedSchemesAppliedToAttributes: ["href", "src"],
