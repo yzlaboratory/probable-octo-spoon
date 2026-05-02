@@ -61,11 +61,13 @@ describe("Admin news block editor", () => {
 
     // Soft-delete via the news list so the spec is idempotent. The hard
     // delete lives behind the "Papierkorb" filter and needs a confirm prompt;
-    // soft delete is enough to keep the active list clean for reruns.
+    // soft delete is enough to keep the active list clean for reruns. Row
+    // lives in a grid of role=link divs; the trash button is hover-only,
+    // so click with force rather than fake a mouseover.
     cy.visit("/admin/news");
     cy.contains(title)
-      .parents("tr")
+      .parentsUntil("body", '[role="link"]')
       .find('[aria-label="In Papierkorb verschieben"]')
-      .click();
+      .click({ force: true });
   });
 });
