@@ -38,7 +38,10 @@ export function helmetMiddleware() {
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: ["'self'"],
-        frameAncestors: ["'none'"],
+        // Same-origin embedding is required by /admin/public, which iframes
+        // the live public site for editor preview. Cross-origin clickjacking
+        // is still blocked because every other origin remains forbidden.
+        frameAncestors: ["'self'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
         fontSrc: ["'self'", "data:", "https:"],

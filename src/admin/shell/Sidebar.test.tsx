@@ -36,21 +36,19 @@ describe("Sidebar", () => {
     expect(sponsors.className).not.toContain("active");
   });
 
-  describe.each([
-    "Termine",
-    "Mitglieder",
-    "Website-Vorschau",
-    "Einstellungen",
-  ])('"%s" is disabled (feature not yet shipped)', (label) => {
-    it("renders as disabled button with 'bald' badge", () => {
-      const { getByText } = renderAt("/admin/news");
-      const entry = getByText(label);
-      const button = entry.closest("button")!;
-      expect(button.tagName).toBe("BUTTON");
-      expect(button.disabled).toBe(true);
-      expect(button.className).toContain("opacity-50");
-    });
-  });
+  describe.each(["Termine", "Mitglieder", "Einstellungen"])(
+    '"%s" is disabled (feature not yet shipped)',
+    (label) => {
+      it("renders as disabled button with 'bald' badge", () => {
+        const { getByText } = renderAt("/admin/news");
+        const entry = getByText(label);
+        const button = entry.closest("button")!;
+        expect(button.tagName).toBe("BUTTON");
+        expect(button.disabled).toBe(true);
+        expect(button.className).toContain("opacity-50");
+      });
+    },
+  );
 
   it("links live entries to their admin routes", () => {
     const { getByText } = renderAt("/admin");
@@ -64,12 +62,16 @@ describe("Sidebar", () => {
     const theme = getByText("Erscheinungsbild").closest(
       "a",
     ) as HTMLAnchorElement;
+    const publicPreview = getByText("Website-Vorschau").closest(
+      "a",
+    ) as HTMLAnchorElement;
     expect(dashboard.getAttribute("href")).toBe("/admin");
     expect(news.getAttribute("href")).toBe("/admin/news");
     expect(media.getAttribute("href")).toBe("/admin/media");
     expect(sponsors.getAttribute("href")).toBe("/admin/sponsors");
     expect(admins.getAttribute("href")).toBe("/admin/admins");
     expect(theme.getAttribute("href")).toBe("/admin/theme");
+    expect(publicPreview.getAttribute("href")).toBe("/admin/public");
   });
 
   it("marks Mediathek active at /admin/media", () => {
