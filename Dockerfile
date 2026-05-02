@@ -17,6 +17,8 @@ RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 COPY --from=builder /clubsoft-website/dist ./dist
 COPY server.mjs ./server.mjs
 COPY server ./server
+# server.mjs imports the FuPa Lambda handler directly to back /api/fupa/*
+COPY infrastructure/lambda/fupa.mjs ./infrastructure/lambda/fupa.mjs
 ENV HOST=0.0.0.0
 ENV PORT=4321
 ENV NPM_CONFIG_LOGLEVEL=info
