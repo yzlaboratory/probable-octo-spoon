@@ -36,7 +36,12 @@ const CONTENT_NAV: NavEntry[] = [
 
 const CONFIG_NAV: NavEntry[] = [
   { id: "public", label: "Website-Vorschau", icon: "Globe", soon: true },
-  { id: "theme", label: "Erscheinungsbild", icon: "Theme", soon: true },
+  {
+    id: "theme",
+    label: "Erscheinungsbild",
+    icon: "Theme",
+    to: "/admin/theme",
+  },
   {
     id: "admins",
     label: "Administratoren",
