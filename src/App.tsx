@@ -19,6 +19,7 @@ import SponsorListPage from "./admin/pages/SponsorListPage";
 import SponsorEditPage from "./admin/pages/SponsorEditPage";
 import VorstandPage from "./admin/pages/VorstandPage";
 import AdminsPage from "./admin/pages/AdminsPage";
+import ThemePage from "./admin/pages/ThemePage";
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/admin/sponsors/:id" element={<SponsorEditPage />} />
             <Route path="/admin/vorstand" element={<VorstandPage />} />
             <Route path="/admin/admins" element={<AdminsPage />} />
+            <Route path="/admin/theme" element={<ThemePage />} />
           </Route>
         </Route>
       </Routes>

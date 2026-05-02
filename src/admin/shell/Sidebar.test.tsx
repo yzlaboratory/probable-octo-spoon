@@ -40,7 +40,6 @@ describe("Sidebar", () => {
     "Termine",
     "Mitglieder",
     "Website-Vorschau",
-    "Erscheinungsbild",
     "Einstellungen",
   ])('"%s" is disabled (feature not yet shipped)', (label) => {
     it("renders as disabled button with 'bald' badge", () => {
@@ -62,11 +61,15 @@ describe("Sidebar", () => {
     const admins = getByText("Administratoren").closest(
       "a",
     ) as HTMLAnchorElement;
+    const theme = getByText("Erscheinungsbild").closest(
+      "a",
+    ) as HTMLAnchorElement;
     expect(dashboard.getAttribute("href")).toBe("/admin");
     expect(news.getAttribute("href")).toBe("/admin/news");
     expect(media.getAttribute("href")).toBe("/admin/media");
     expect(sponsors.getAttribute("href")).toBe("/admin/sponsors");
     expect(admins.getAttribute("href")).toBe("/admin/admins");
+    expect(theme.getAttribute("href")).toBe("/admin/theme");
   });
 
   it("marks Mediathek active at /admin/media", () => {
