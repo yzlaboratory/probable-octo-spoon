@@ -1,34 +1,67 @@
-import Footer from "../components/Footer";
-import LeagueStandingsSection from "../components/LeagueStandingsSection";
-import NewsSection from "../components/NewsSection";
-import NextFixturesSection from "../components/NextFixturesSection";
-import SocialsSection from "../components/SocialsSection";
-import TrainingSection from "../components/TrainingSection";
-import VorstandSection from "../components/VorstandSection";
+import HomeFixturesStrip from "../components/HomeFixturesStrip";
+import HomeHero from "../components/HomeHero";
+import HomeNewsGrid from "../components/HomeNewsGrid";
+import HomeSponsorRibbon from "../components/HomeSponsorRibbon";
 import { usePublicNews } from "../utilities/publicData";
 
 export default function HomePage() {
   const news = usePublicNews();
-  const newsItems = (news ?? []).map((item) => ({
-    path: item.path,
-    title: item.title,
-    tag: item.tag,
-    short: item.short,
-    date: new Date(item.date).toLocaleDateString(),
-    imageurl: item.imageurl,
-  }));
+  const items = news ?? [];
+  const [hero, ...rest] = items;
+  const grid = rest.slice(0, 6);
 
   return (
-    <div className="flex flex-1 flex-col justify-start overflow-auto">
-      <div className="mt-30 flex w-full flex-col gap-30">
-        <NewsSection newsItems={newsItems} />
-        <NextFixturesSection />
-        <LeagueStandingsSection />
-        <TrainingSection />
-        <SocialsSection />
-        <VorstandSection />
-        <Footer />
-      </div>
+    <div>
+      {hero ? (
+        <HomeHero
+          tag={hero.tag}
+          title={hero.title}
+          short={hero.short}
+          date={new Date(hero.date).toLocaleDateString("de-DE", {
+            day: "2-digit",
+            month: "long",
+          })}
+          imageUrl={hero.imageurl}
+          path={hero.path}
+        />
+      ) : (
+        <section
+          style={{
+            padding: "80px 24px",
+            borderBottom: "1px solid var(--p-rule)",
+          }}
+        >
+          <div className="mx-auto w-full max-w-6xl">
+            <h1
+              className="font-display"
+              style={{
+                fontSize: "clamp(40px, 6vw, 62px)",
+                letterSpacing: "-0.02em",
+                margin: 0,
+              }}
+            >
+              SV Alemannia{" "}
+              <span style={{ fontStyle: "italic" }}>Thalexweiler</span>
+            </h1>
+            <p
+              className="font-serif"
+              style={{
+                marginTop: 16,
+                fontSize: 17,
+                color: "var(--p-ink-2)",
+                maxWidth: 540,
+              }}
+            >
+              Sportverein im Saarland, gegründet 1947. Hier erfahren Sie alles
+              rund um Spielplan, Mannschaften und Vereinsleben.
+            </p>
+          </div>
+        </section>
+      )}
+
+      <HomeNewsGrid items={grid} />
+      <HomeFixturesStrip />
+      <HomeSponsorRibbon />
     </div>
   );
 }
