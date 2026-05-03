@@ -97,6 +97,41 @@ export interface Vorstand {
   updatedAt: string;
 }
 
+export type TrainingDay =
+  | "Montag"
+  | "Dienstag"
+  | "Mittwoch"
+  | "Donnerstag"
+  | "Freitag"
+  | "Samstag"
+  | "Sonntag";
+
+export type TrainingVisibility =
+  | "offen für Gäste"
+  | "Anmeldung erforderlich"
+  | "nur Mitglieder";
+
+export type TrainingStatus = "active" | "hidden" | "archived";
+
+export interface TrainingSlot {
+  id: number;
+  group: string;
+  day: TrainingDay;
+  timeFrom: string;
+  timeTo: string;
+  trainer: string;
+  phone: string;
+  visibility: TrainingVisibility;
+  status: TrainingStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingBanner {
+  message: string | null;
+  updatedAt: string | null;
+}
+
 export interface Admin {
   id: number;
   email: string;

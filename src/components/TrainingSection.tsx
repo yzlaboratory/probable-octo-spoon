@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
 import Frontpageheader from "./Frontpageheader";
 import {
-  seasonalBanner,
   slotsForDay,
   telHref,
   trainingDaysInOrder,
+  type SeasonalBanner,
   type TrainingSlot,
   type TrainingVisibility,
 } from "../data/training";
@@ -35,6 +36,11 @@ const VISIBILITY_TONE: Record<TrainingVisibility, ChipSpec> = {
     dot: "var(--ink-3)",
   },
 };
+
+interface PublicResponse {
+  slots: TrainingSlot[];
+  banner: SeasonalBanner;
+}
 
 function VisibilityChip({ value }: { value: TrainingVisibility }) {
   const t = VISIBILITY_TONE[value];
@@ -97,11 +103,32 @@ interface Props {
 }
 
 export default function TrainingSection({ hideHeading = false }: Props) {
+  const [slots, setSlots] = useState<TrainingSlot[]>([]);
+  const [banner, setBanner] = useState<SeasonalBanner>({ message: null });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/training/public")
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+      .then((data: PublicResponse) => {
+        if (cancelled) return;
+        setSlots(data.slots ?? []);
+        setBanner(data.banner ?? { message: null });
+      })
+      .catch(() => {
+        // Silent fail keeps the section's empty state instead of crashing
+        // the homepage if the API blips. Same convention as Instagram.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section className="trainingsection flex w-full flex-col">
       {!hideHeading && <Frontpageheader text="TRAINING" />}
 
-      {seasonalBanner.message && (
+      {banner.message && (
         <div
           className="trainingbanner mx-4 mb-6 flex items-start gap-2 rounded-md p-3 text-[13px] md:mx-20"
           role="status"
@@ -115,14 +142,14 @@ export default function TrainingSection({ hideHeading = false }: Props) {
             className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
             style={{ background: "var(--warn)" }}
           />
-          <span>{seasonalBanner.message}</span>
+          <span>{banner.message}</span>
         </div>
       )}
 
       <div className="hidescrollbar flex w-full flex-row overflow-x-auto px-4 md:px-20">
         <div className="grid w-full min-w-[56rem] grid-cols-7 gap-3">
           {trainingDaysInOrder.map((day) => {
-            const slots = slotsForDay(day);
+            const daySlots = slotsForDay(slots, day);
             return (
               <div
                 key={day}
@@ -140,7 +167,7 @@ export default function TrainingSection({ hideHeading = false }: Props) {
                 >
                   {day}
                 </h2>
-                {slots.length === 0 ? (
+                {daySlots.length === 0 ? (
                   <div
                     className="rounded-md border border-dashed py-3 text-center text-[11px]"
                     style={{
@@ -151,7 +178,7 @@ export default function TrainingSection({ hideHeading = false }: Props) {
                     —
                   </div>
                 ) : (
-                  slots.map((slot) => <SlotCard key={slot.id} slot={slot} />)
+                  daySlots.map((slot) => <SlotCard key={slot.id} slot={slot} />)
                 )}
               </div>
             );

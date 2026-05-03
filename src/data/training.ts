@@ -1,7 +1,6 @@
-// Temporäre hardgecodete Trainingsdaten.
-// Per specs/planned/training-times.md MVP: "If the data source can't be
-// admin-editable yet, ship it as a hardcoded list and treat that as a
-// temporary state." Ersetzen, sobald der Admin-Editor (planned/admin-*) live ist.
+// Public types + small pure helpers for the training schedule. The actual
+// slots and the seasonal banner are admin-edited and fetched at runtime
+// from /api/training/public — see components/TrainingSection.tsx.
 
 export type TrainingVisibility =
   | "offen für Gäste"
@@ -18,14 +17,18 @@ export type TrainingDay =
   | "Sonntag";
 
 export interface TrainingSlot {
-  id: string;
+  id: number;
   group: string;
   day: TrainingDay;
   timeFrom: string; // "HH:MM"
   timeTo: string; // "HH:MM"
   trainer: string;
-  phone: string; // display + tel: link
+  phone: string;
   visibility: TrainingVisibility;
+}
+
+export interface SeasonalBanner {
+  message: string | null;
 }
 
 export const trainingDaysInOrder: TrainingDay[] = [
@@ -38,72 +41,11 @@ export const trainingDaysInOrder: TrainingDay[] = [
   "Sonntag",
 ];
 
-// PLATZHALTER — echte Zeiten bitte vom Geschäftsführer einsetzen.
-// AH-Eintrag bleibt auf "offen für Gäste" per spec-Anweisung.
-export const trainingSlots: TrainingSlot[] = [
-  {
-    id: "bambini-di",
-    group: "Bambini (U7)",
-    day: "Dienstag",
-    timeFrom: "17:00",
-    timeTo: "18:00",
-    trainer: "N.N.",
-    phone: "0151 0000 0000",
-    visibility: "offen für Gäste",
-  },
-  {
-    id: "f-jugend-mi",
-    group: "F-Jugend (U9)",
-    day: "Mittwoch",
-    timeFrom: "17:00",
-    timeTo: "18:30",
-    trainer: "N.N.",
-    phone: "0151 0000 0000",
-    visibility: "Anmeldung erforderlich",
-  },
-  {
-    id: "herren-di",
-    group: "Herrenmannschaft",
-    day: "Dienstag",
-    timeFrom: "19:00",
-    timeTo: "20:30",
-    trainer: "N.N.",
-    phone: "0151 0000 0000",
-    visibility: "nur Mitglieder",
-  },
-  {
-    id: "herren-do",
-    group: "Herrenmannschaft",
-    day: "Donnerstag",
-    timeFrom: "19:00",
-    timeTo: "20:30",
-    trainer: "N.N.",
-    phone: "0151 0000 0000",
-    visibility: "nur Mitglieder",
-  },
-  {
-    id: "ah-fr",
-    group: "Alte Herren",
-    day: "Freitag",
-    timeFrom: "19:30",
-    timeTo: "21:00",
-    trainer: "N.N.",
-    phone: "0151 0000 0000",
-    visibility: "offen für Gäste",
-  },
-];
-
-export interface SeasonalBanner {
-  // null = no banner; a non-empty string shows above the grid.
-  message: string | null;
-}
-
-export const seasonalBanner: SeasonalBanner = {
-  message: null,
-};
-
-export function slotsForDay(day: TrainingDay): TrainingSlot[] {
-  return trainingSlots
+export function slotsForDay(
+  slots: TrainingSlot[],
+  day: TrainingDay,
+): TrainingSlot[] {
+  return slots
     .filter((slot) => slot.day === day)
     .sort((a, b) => a.timeFrom.localeCompare(b.timeFrom));
 }
