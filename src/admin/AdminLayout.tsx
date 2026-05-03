@@ -10,7 +10,7 @@ export default function AdminLayout() {
   return (
     <div className="admin-shell flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 min-w-0 relative">
+      <main className="flex-1 min-w-0 relative h-screen overflow-y-auto">
         <Topbar />
         <div key={pathname} className="page-enter">
           <Outlet />
