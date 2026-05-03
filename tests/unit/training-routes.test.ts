@@ -44,9 +44,13 @@ async function seedAdmin(db: any, email: string, password: string) {
 
 async function login(srv: any, email: string, password: string) {
   const request = (await import("supertest")).default;
-  const res = await request(srv).post("/api/auth/login").send({ email, password });
+  const res = await request(srv)
+    .post("/api/auth/login")
+    .send({ email, password });
   const setCookie = res.headers["set-cookie"] as unknown as string[];
-  const sid = setCookie.find((c) => c.startsWith("clubsoft_sid"))!.split(";")[0];
+  const sid = setCookie
+    .find((c) => c.startsWith("clubsoft_sid"))!
+    .split(";")[0];
   const csrfCookie = setCookie
     .find((c) => c.startsWith("clubsoft_csrf"))!
     .split(";")[0];
@@ -73,7 +77,11 @@ describe("training routes", () => {
     db = bootstrap();
     srv = app(db);
     await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
-    auth = await login(srv, "admin@example.org", "correct horse battery staple !!");
+    auth = await login(
+      srv,
+      "admin@example.org",
+      "correct horse battery staple !!",
+    );
   });
 
   it("GET /public returns seeded slots and a banner shape", async () => {
@@ -96,7 +104,7 @@ describe("training routes", () => {
     expect(res.status).toBe(401);
   });
 
-  it("creates, lists, patches, archives, hard-deletes a slot", async () => {
+  it("creates, lists, patches, deletes a slot", async () => {
     const request = (await import("supertest")).default;
 
     const created = await request(srv)
@@ -122,24 +130,18 @@ describe("training routes", () => {
     expect(patched.status).toBe(200);
     expect(patched.body.trainer).toBe("Erika Beispiel");
 
-    // Cannot hard-delete unless archived.
-    const blocked = await request(srv)
-      .delete(`/api/training/${id}`)
-      .set("Cookie", auth.cookie)
-      .set("x-csrf-token", auth.csrf);
-    expect(blocked.status).toBe(409);
-
-    await request(srv)
-      .patch(`/api/training/${id}`)
-      .set("Cookie", auth.cookie)
-      .set("x-csrf-token", auth.csrf)
-      .send({ status: "archived" });
-
+    // Delete works directly on an active slot — the previous archive-first
+    // requirement was dropped together with the Archivieren UI affordance.
     const removed = await request(srv)
       .delete(`/api/training/${id}`)
       .set("Cookie", auth.cookie)
       .set("x-csrf-token", auth.csrf);
     expect(removed.status).toBe(200);
+
+    const after = await request(srv)
+      .get("/api/training")
+      .set("Cookie", auth.cookie);
+    expect(after.body.find((s: any) => s.id === id)).toBeUndefined();
   });
 
   it("rejects timeTo earlier than timeFrom on POST", async () => {
@@ -194,7 +196,9 @@ describe("training routes", () => {
       .set("x-csrf-token", auth.csrf)
       .send({ status: "hidden" });
     const pub = await request(srv).get("/api/training/public");
-    expect(pub.body.slots.find((s: any) => s.id === created.body.id)).toBeUndefined();
+    expect(
+      pub.body.slots.find((s: any) => s.id === created.body.id),
+    ).toBeUndefined();
   });
 
   it("banner: empty/whitespace string clears the message", async () => {

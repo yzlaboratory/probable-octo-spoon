@@ -87,7 +87,9 @@ export default function trainingRoutes(db) {
       )
       .all();
     const banner = db
-      .prepare("SELECT banner_message, updated_at FROM training_settings WHERE id = 1")
+      .prepare(
+        "SELECT banner_message, updated_at FROM training_settings WHERE id = 1",
+      )
       .get();
     res.json({
       slots: rows.map(toPublic),
@@ -175,9 +177,7 @@ export default function trainingRoutes(db) {
 
   router.patch("/:id", requireAuth, requireCsrf, (req, res) => {
     const id = Number(req.params.id);
-    const row = db
-      .prepare("SELECT * FROM training_slots WHERE id = ?")
-      .get(id);
+    const row = db.prepare("SELECT * FROM training_slots WHERE id = ?").get(id);
     if (!row)
       return errorEnvelope(
         res,
@@ -233,7 +233,7 @@ export default function trainingRoutes(db) {
   router.delete("/:id", requireAuth, requireCsrf, (req, res) => {
     const id = Number(req.params.id);
     const row = db
-      .prepare("SELECT status FROM training_slots WHERE id = ?")
+      .prepare("SELECT id FROM training_slots WHERE id = ?")
       .get(id);
     if (!row)
       return errorEnvelope(
@@ -242,14 +242,6 @@ export default function trainingRoutes(db) {
         "not_found",
         "Trainingseintrag nicht gefunden.",
       );
-    if (row.status !== "archived") {
-      return errorEnvelope(
-        res,
-        409,
-        "not_archived",
-        "Eintrag muss erst archiviert werden.",
-      );
-    }
     db.prepare("DELETE FROM training_slots WHERE id = ?").run(id);
     res.json({ ok: true });
   });

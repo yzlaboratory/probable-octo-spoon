@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { api, ApiError } from "../api";
 import type {
   TrainingBanner,
@@ -27,27 +28,28 @@ const VISIBILITIES: TrainingVisibility[] = [
   "nur Mitglieder",
 ];
 
+// "archived" still exists in the DB enum so legacy rows don't break, but it is
+// not exposed in the admin UI any more — Löschen is offered directly instead.
+type EditableStatus = Exclude<TrainingStatus, "archived">;
+
 interface FilterSpec {
-  key: TrainingStatus;
+  key: EditableStatus;
   label: string;
 }
 
 const FILTERS: FilterSpec[] = [
   { key: "active", label: "Aktiv" },
   { key: "hidden", label: "Verborgen" },
-  { key: "archived", label: "Ehemalig" },
 ];
 
-const STATUS_TONES: Record<TrainingStatus, PillTone> = {
+const STATUS_TONES: Record<EditableStatus, PillTone> = {
   active: "primary",
   hidden: "warn",
-  archived: "mute",
 };
 
-const STATUS_LABELS: Record<TrainingStatus, string> = {
+const STATUS_LABELS: Record<EditableStatus, string> = {
   active: "Aktiv",
   hidden: "Verborgen",
-  archived: "Ehemalig",
 };
 
 const VISIBILITY_TONES: Record<TrainingVisibility, PillTone> = {
@@ -59,10 +61,12 @@ const VISIBILITY_TONES: Record<TrainingVisibility, PillTone> = {
 function SlotRow(props: {
   slot: TrainingSlot;
   onEdit: () => void;
-  onChangeStatus: (s: TrainingStatus) => void;
+  onChangeStatus: (s: EditableStatus) => void;
   onHardDelete: () => void;
 }) {
   const { slot, onEdit, onChangeStatus, onHardDelete } = props;
+  const tone = STATUS_TONES[slot.status as EditableStatus] ?? "mute";
+  const label = STATUS_LABELS[slot.status as EditableStatus] ?? slot.status;
   return (
     <div
       className="flex flex-wrap items-center gap-3 rounded-md p-3"
@@ -72,28 +76,28 @@ function SlotRow(props: {
       }}
     >
       <div
-        className="font-mono text-[12px] tabular-nums shrink-0"
+        className="shrink-0 font-mono text-[12px] tabular-nums"
         style={{ color: "var(--ink-2)", minWidth: 92 }}
       >
         {slot.timeFrom}–{slot.timeTo}
       </div>
       <div className="min-w-0 flex-1">
         <div
-          className="font-display text-[15px] truncate"
+          className="font-display truncate text-[15px]"
           style={{ color: "var(--ink)" }}
           title={slot.group}
         >
           {slot.group}
         </div>
         <div
-          className="text-[11.5px] truncate"
+          className="truncate text-[11.5px]"
           style={{ color: "var(--ink-3)" }}
         >
           {slot.trainer} · {slot.phone}
         </div>
       </div>
       <Pill tone={VISIBILITY_TONES[slot.visibility]}>{slot.visibility}</Pill>
-      <Pill tone={STATUS_TONES[slot.status]}>{STATUS_LABELS[slot.status]}</Pill>
+      <Pill tone={tone}>{label}</Pill>
       <div className="flex flex-wrap gap-1">
         <Button kind="ghost" size="sm" onClick={onEdit}>
           Bearbeiten
@@ -116,20 +120,9 @@ function SlotRow(props: {
             Anzeigen
           </Button>
         )}
-        {slot.status !== "archived" && (
-          <Button
-            kind="ghost"
-            size="sm"
-            onClick={() => onChangeStatus("archived")}
-          >
-            Archivieren
-          </Button>
-        )}
-        {slot.status === "archived" && (
-          <Button kind="danger" size="sm" onClick={onHardDelete}>
-            Löschen
-          </Button>
-        )}
+        <Button kind="danger" size="sm" onClick={onHardDelete}>
+          Löschen
+        </Button>
       </div>
     </div>
   );
@@ -169,10 +162,10 @@ function BannerEditor(props: {
 
   return (
     <Card>
-      <div className="flex items-start justify-between gap-4 mb-3">
+      <div className="mb-3 flex items-start justify-between gap-4">
         <div>
           <div
-            className="caps text-[10.5px] mb-1"
+            className="caps mb-1 text-[10.5px]"
             style={{ color: "var(--ink-3)" }}
           >
             Saisonbanner
@@ -211,7 +204,12 @@ function BannerEditor(props: {
       )}
       <div className="mt-3 flex items-center justify-end gap-2">
         {banner.message && (
-          <Button kind="ghost" size="sm" onClick={() => save(null)} disabled={saving}>
+          <Button
+            kind="ghost"
+            size="sm"
+            onClick={() => save(null)}
+            disabled={saving}
+          >
             Banner ausblenden
           </Button>
         )}
@@ -229,7 +227,7 @@ function BannerEditor(props: {
 }
 
 export default function TrainingPage() {
-  const [filter, setFilter] = useState<TrainingStatus>("active");
+  const [filter, setFilter] = useState<EditableStatus>("active");
   const [all, setAll] = useState<TrainingSlot[]>([]);
   const [banner, setBanner] = useState<TrainingBanner>({
     message: null,
@@ -259,11 +257,12 @@ export default function TrainingPage() {
     () => ({
       active: all.filter((s) => s.status === "active").length,
       hidden: all.filter((s) => s.status === "hidden").length,
-      archived: all.filter((s) => s.status === "archived").length,
     }),
     [all],
   );
 
+  // Legacy archived rows are still hidden from both filter tabs; admin can
+  // delete them via the API directly if needed.
   const visible = all.filter((s) => s.status === filter);
 
   const byDay: Record<TrainingDay, TrainingSlot[]> = useMemo(() => {
@@ -277,9 +276,13 @@ export default function TrainingPage() {
     return grouped;
   }, [visible]);
 
-  async function changeStatus(slot: TrainingSlot, status: TrainingStatus) {
-    await api.patch(`/api/training/${slot.id}`, { status });
-    load();
+  async function changeStatus(slot: TrainingSlot, status: EditableStatus) {
+    // Optimistic local update — full reload here makes the entire grid flash
+    // through its "Lade…" placeholder while the PATCH round-trips.
+    const updated = await api.patch<TrainingSlot>(`/api/training/${slot.id}`, {
+      status,
+    });
+    setAll((prev) => prev.map((s) => (s.id === slot.id ? updated : s)));
   }
 
   async function hardDelete(slot: TrainingSlot) {
@@ -288,7 +291,7 @@ export default function TrainingPage() {
     );
     if (typed !== slot.group) return;
     await api.delete(`/api/training/${slot.id}`);
-    load();
+    setAll((prev) => prev.filter((s) => s.id !== slot.id));
   }
 
   return (
@@ -309,11 +312,11 @@ export default function TrainingPage() {
         }
       />
 
-      <div className="px-10 pb-10 space-y-6">
+      <div className="space-y-6 px-10 pb-10">
         <BannerEditor banner={banner} onSaved={(b) => setBanner(b)} />
 
         <Card padded={false}>
-          <div className="flex items-center gap-1 p-3 rule-b flex-wrap">
+          <div className="rule-b flex flex-wrap items-center gap-1 p-3">
             {FILTERS.map((f) => {
               const active = filter === f.key;
               return (
@@ -321,7 +324,7 @@ export default function TrainingPage() {
                   key={f.key}
                   type="button"
                   onClick={() => setFilter(f.key)}
-                  className="cs-focus inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] transition"
+                  className="cs-focus inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[12.5px] transition"
                   style={{
                     background: active ? "var(--paper-3)" : "transparent",
                     color: active ? "var(--ink)" : "var(--ink-2)",
@@ -359,14 +362,14 @@ export default function TrainingPage() {
                   return (
                     <section key={day}>
                       <div
-                        className="caps text-[10.5px] mb-2 px-1"
+                        className="caps mb-2 px-1 text-[10.5px]"
                         style={{ color: "var(--ink-3)" }}
                       >
                         {day}
                       </div>
                       {slots.length === 0 ? (
                         <div
-                          className="rounded-md border border-dashed py-3 px-3 text-[12px]"
+                          className="rounded-md border border-dashed px-3 py-3 text-[12px]"
                           style={{
                             borderColor: "var(--rule)",
                             color: "var(--ink-4)",
@@ -402,9 +405,15 @@ export default function TrainingPage() {
         <SlotDialog
           initial={dialog.mode === "edit" ? dialog.slot : null}
           onClose={() => setDialog(null)}
-          onSaved={() => {
+          onSaved={(saved) => {
             setDialog(null);
-            load();
+            setAll((prev) => {
+              const idx = prev.findIndex((s) => s.id === saved.id);
+              if (idx === -1) return [...prev, saved];
+              const next = prev.slice();
+              next[idx] = saved;
+              return next;
+            });
           }}
         />
       )}
@@ -415,7 +424,7 @@ export default function TrainingPage() {
 function SlotDialog(props: {
   initial: TrainingSlot | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (slot: TrainingSlot) => void;
 }) {
   const { initial, onClose, onSaved } = props;
   const [group, setGroup] = useState(initial?.group ?? "");
@@ -427,11 +436,30 @@ function SlotDialog(props: {
   const [visibility, setVisibility] = useState<TrainingVisibility>(
     initial?.visibility ?? "offen für Gäste",
   );
-  const [status, setStatus] = useState<TrainingStatus>(
-    initial?.status ?? "active",
-  );
+  // Editing a legacy archived row: keep its status so saving doesn't silently
+  // re-activate it. New rows are always active; the dialog no longer exposes
+  // a status picker.
+  const [status] = useState<TrainingStatus>(initial?.status ?? "active");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Lock the page behind the modal from scrolling while it's open.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  // Close on Escape — matches the click-outside affordance.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -452,9 +480,10 @@ function SlotDialog(props: {
       status,
     };
     try {
-      if (initial) await api.patch(`/api/training/${initial.id}`, payload);
-      else await api.post("/api/training", payload);
-      onSaved();
+      const saved = initial
+        ? await api.patch<TrainingSlot>(`/api/training/${initial.id}`, payload)
+        : await api.post<TrainingSlot>("/api/training", payload);
+      onSaved(saved);
     } catch (e2) {
       if (e2 instanceof ApiError) setError(e2.message);
       else setError("Speichern fehlgeschlagen.");
@@ -463,19 +492,39 @@ function SlotDialog(props: {
     }
   }
 
-  return (
+  // Render to <body> so the modal escapes <main>'s `overflow-y-auto` and the
+  // admin-shell wrapper's `position: relative` (the latter sits in an
+  // unlayered stylesheet and would otherwise win over Tailwind's `.fixed`
+  // utility, which is why an earlier in-place version of this dialog rendered
+  // in flow below the table instead of overlaying it).
+  return createPortal(
     <div
-      className="admin-shell fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,.7)", backdropFilter: "blur(4px)" }}
-      onClick={onClose}
+      className="admin-shell"
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+        background: "rgba(0,0,0,.7)",
+        backdropFilter: "blur(4px)",
+        overflowY: "auto",
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <form
         onSubmit={onSubmit}
-        onClick={(e) => e.stopPropagation()}
-        className="cs-card w-full max-w-lg p-6 max-h-[90vh] overflow-auto"
+        className="cs-card w-full max-w-lg p-6"
+        style={{ maxHeight: "calc(100vh - 2rem)", overflowY: "auto" }}
       >
         <h2
-          className="font-display text-[24px] mb-4"
+          className="font-display mb-4 text-[24px]"
           style={{ letterSpacing: "-0.01em" }}
         >
           {initial ? "Trainingseintrag bearbeiten" : "Neuer Trainingseintrag"}
@@ -483,7 +532,7 @@ function SlotDialog(props: {
         <div className="space-y-3">
           <label className="block">
             <span
-              className="mb-1 block text-[11px] caps"
+              className="caps mb-1 block text-[11px]"
               style={{ color: "var(--ink-3)" }}
             >
               Gruppe
@@ -498,7 +547,7 @@ function SlotDialog(props: {
           </label>
           <label className="block">
             <span
-              className="mb-1 block text-[11px] caps"
+              className="caps mb-1 block text-[11px]"
               style={{ color: "var(--ink-3)" }}
             >
               Wochentag
@@ -518,7 +567,7 @@ function SlotDialog(props: {
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span
-                className="mb-1 block text-[11px] caps"
+                className="caps mb-1 block text-[11px]"
                 style={{ color: "var(--ink-3)" }}
               >
                 Beginn
@@ -533,7 +582,7 @@ function SlotDialog(props: {
             </label>
             <label className="block">
               <span
-                className="mb-1 block text-[11px] caps"
+                className="caps mb-1 block text-[11px]"
                 style={{ color: "var(--ink-3)" }}
               >
                 Ende
@@ -549,7 +598,7 @@ function SlotDialog(props: {
           </div>
           <label className="block">
             <span
-              className="mb-1 block text-[11px] caps"
+              className="caps mb-1 block text-[11px]"
               style={{ color: "var(--ink-3)" }}
             >
               Trainer*in
@@ -563,7 +612,7 @@ function SlotDialog(props: {
           </label>
           <label className="block">
             <span
-              className="mb-1 block text-[11px] caps"
+              className="caps mb-1 block text-[11px]"
               style={{ color: "var(--ink-3)" }}
             >
               Telefon
@@ -581,7 +630,7 @@ function SlotDialog(props: {
             style={{ border: "1px solid var(--rule-2)" }}
           >
             <legend
-              className="px-2 text-[10.5px] caps"
+              className="caps px-2 text-[10.5px]"
               style={{ color: "var(--ink-3)" }}
             >
               Sichtbarkeit
@@ -598,31 +647,6 @@ function SlotDialog(props: {
                   onChange={() => setVisibility(v)}
                 />
                 {v}
-              </label>
-            ))}
-          </fieldset>
-          <fieldset
-            className="rounded-md p-3"
-            style={{ border: "1px solid var(--rule-2)" }}
-          >
-            <legend
-              className="px-2 text-[10.5px] caps"
-              style={{ color: "var(--ink-3)" }}
-            >
-              Status
-            </legend>
-            {(["active", "hidden", "archived"] as const).map((s) => (
-              <label
-                key={s}
-                className="mb-1 flex items-center gap-2 text-[13.5px]"
-              >
-                <input
-                  type="radio"
-                  name="status"
-                  checked={status === s}
-                  onChange={() => setStatus(s)}
-                />
-                {STATUS_LABELS[s]}
               </label>
             ))}
           </fieldset>
@@ -649,6 +673,7 @@ function SlotDialog(props: {
           </Button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
