@@ -1,0 +1,229 @@
+/*
+ * Public-site design tokens and helpers.
+ *
+ * Everything is scoped under `.public-shell` so the warm-editorial palette
+ * never leaks into the admin (which has its own dark `.admin-shell` scope in
+ * admin.css). Mirrors the admin pattern.
+ *
+ * Derived from design/design_source/screens-public.jsx + design/README.md
+ * (§Public-site palette). Tokens are prefixed `--p-*` per the design source.
+ */
+
+.public-shell {
+  --p-paper: #f4eee2;
+  --p-paper-2: #ece5d4;
+  --p-paper-3: #e2dac4;
+
+  --p-ink: #14140f;
+  --p-ink-2: #3a3a32;
+  --p-ink-3: #7a7868;
+  --p-ink-4: #a39f8a;
+
+  --p-rule: #d2c9b3;
+  --p-rule-2: #b8af98;
+
+  --p-primary: #1f3a2e;
+  --p-primary-2: #2a4a3a;
+  --p-accent: #b5401b;
+  --p-accent-2: #d25a2e;
+
+  background: var(--p-paper);
+  color: var(--p-ink);
+  font-family:
+    "Geist", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.public-shell .font-display {
+  font-family: "Newsreader", Georgia, serif;
+  font-feature-settings:
+    "liga",
+    "dlig";
+  letter-spacing: -0.015em;
+}
+
+.public-shell .font-mono {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.public-shell .font-serif {
+  font-family: "Newsreader", Georgia, serif;
+}
+
+/* CAPS — small all-caps labels with wide tracking, used as eyebrows. */
+.public-shell .caps {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+
+/* Public buttons — primary (filled deep-forest) and ghost (outlined ink). */
+.public-shell .p-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+  border: none;
+}
+.public-shell .p-btn:active {
+  transform: scale(0.98);
+}
+.public-shell .p-btn-primary {
+  background: var(--p-primary);
+  color: var(--p-paper);
+}
+.public-shell .p-btn-primary:hover {
+  background: var(--p-primary-2);
+}
+.public-shell .p-btn-ghost {
+  background: transparent;
+  color: var(--p-ink);
+  border: 1px solid var(--p-rule-2);
+}
+.public-shell .p-btn-ghost:hover {
+  background: var(--p-paper-2);
+}
+
+/* Inputs — unobtrusive, cream-bg with thin rule. */
+.public-shell .p-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid var(--p-rule);
+  border-radius: 4px;
+  color: var(--p-ink);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 120ms ease;
+}
+.public-shell .p-input:focus {
+  outline: none;
+  border-color: var(--p-primary);
+}
+.public-shell textarea.p-input {
+  height: auto;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+/* Page-enter fade — mirrors the admin page-enter animation. */
+.public-shell .page-enter {
+  animation: public-fade-in 240ms ease-out both;
+}
+@keyframes public-fade-in {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Decorative diagonal stripe placeholder (used behind hero/team images while
+   real photography is configured). */
+.public-shell .p-stripes {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0 8px,
+    transparent 8px 16px
+  );
+}
+
+/* Editorial body for rich-text HTML coming out of the news editor. The editor
+   emits raw <h2>/<p>/<blockquote>/<ul>/<a> without classes, so we restyle by
+   element selector inside the article container. Keeps the warm/serif feel
+   regardless of how the post was authored. */
+.public-shell .news-article-body p {
+  margin: 0 0 1.1em;
+}
+.public-shell .news-article-body h2 {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 1.4em 0 0.4em;
+}
+.public-shell .news-article-body h3 {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 21px;
+  line-height: 1.25;
+  margin: 1.2em 0 0.3em;
+}
+.public-shell .news-article-body a {
+  color: var(--p-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.public-shell .news-article-body blockquote {
+  margin: 1.4em 0;
+  padding-left: 20px;
+  border-left: 3px solid var(--p-accent);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--p-ink);
+}
+.public-shell .news-article-body ul,
+.public-shell .news-article-body ol {
+  padding-left: 1.4em;
+  margin: 0 0 1.1em;
+}
+.public-shell .news-article-body li {
+  margin: 0.3em 0;
+}
+.public-shell .news-article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1.2em 0;
+}
+
+/* Visually-hidden helper for screen-reader-only labels inside forms. */
+.public-shell .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Header / nav responsive helpers. We can't rely on Tailwind's `hidden`
+   utility against `.p-btn { display: inline-flex }` because the public.css
+   rule wins specificity-wise — explicit display media queries instead.
+   Mobile-first: declare the small-screen state, then override at md+. */
+.public-shell .public-only-desktop {
+  display: none;
+}
+.public-shell .public-only-desktop-flex {
+  display: none;
+}
+.public-shell .public-only-mobile {
+  display: inline-flex;
+}
+@media (min-width: 768px) {
+  .public-shell .public-only-desktop {
+    display: inline-flex;
+  }
+  .public-shell .public-only-desktop-flex {
+    display: flex;
+  }
+  .public-shell .public-only-mobile {
+    display: none;
+  }
+}
