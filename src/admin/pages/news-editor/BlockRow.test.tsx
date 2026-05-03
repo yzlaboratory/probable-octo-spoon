@@ -5,7 +5,7 @@ import BlockRow from "./BlockRow";
 const sampleBlock = { kind: "paragraph" as const, text: "Hallo" };
 
 describe("BlockRow", () => {
-  it("renders its children and the kind abbreviation", () => {
+  it("renders its children", () => {
     render(
       <BlockRow
         block={sampleBlock}
@@ -18,7 +18,6 @@ describe("BlockRow", () => {
       </BlockRow>,
     );
     expect(screen.getByText("child")).toBeTruthy();
-    expect(screen.getByText("par")).toBeTruthy();
   });
 
   it("marks data-active when active=true", () => {

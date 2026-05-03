@@ -13,8 +13,7 @@ interface Props {
 
 /**
  * The surrounding chrome for a single block: hover-only reorder + delete
- * handles on the gutters, an active-state rail on the left, and a kind
- * abbreviation shown to help authors navigate long articles.
+ * handles on the gutters and an active-state rail on the left.
  */
 export default function BlockRow({
   block,
@@ -98,14 +97,6 @@ export default function BlockRow({
           }}
         />
       )}
-
-      <div
-        aria-hidden
-        className="caps pointer-events-none absolute -left-8 top-3 font-mono text-[9px] opacity-0 transition group-hover:opacity-100"
-        style={{ color: "var(--ink-4)" }}
-      >
-        {block.kind.slice(0, 3)}
-      </div>
 
       {children}
     </div>
