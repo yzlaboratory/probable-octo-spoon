@@ -1,11 +1,15 @@
 import { Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
+import PublicLayout from "./components/PublicLayout";
 import HomePage from "./pages/HomePage";
 import ImpressumPage from "./pages/ImpressumPage";
 import DatenschutzPage from "./pages/DatenschutzPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
+import NewsListPagePublic from "./pages/NewsListPagePublic";
 import SchedulePage from "./pages/SchedulePage";
 import TrainingPage from "./pages/TrainingPage";
+import SponsorsPage from "./pages/SponsorsPage";
+import TeamPage from "./pages/TeamPage";
+import ContactPage from "./pages/ContactPage";
 import { AuthProvider } from "./admin/AuthContext";
 import RequireAuth from "./admin/RequireAuth";
 import AdminLayout from "./admin/AdminLayout";
@@ -26,13 +30,17 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route element={<Layout />}>
+        <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/Impressum" element={<ImpressumPage />} />
           <Route path="/Datenschutzerklaerung" element={<DatenschutzPage />} />
+          <Route path="/news" element={<NewsListPagePublic />} />
           <Route path="/news/:path" element={<NewsDetailPage />} />
           <Route path="/training" element={<TrainingPage />} />
           <Route path="/spiele" element={<SchedulePage />} />
+          <Route path="/sponsors" element={<SponsorsPage />} />
+          <Route path="/team" element={<TeamPage />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Route>
 
         <Route path="/admin/login" element={<LoginPage />} />
