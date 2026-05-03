@@ -1,26 +1,46 @@
-describe("Navigation", () => {
-  it("navigates from homepage to Impressum via footer link", () => {
+describe("Public navigation", () => {
+  it("navigates to Impressum via the footer", () => {
     cy.visit("/");
-    cy.get("a[href='/Impressum']").first().click({ force: true });
+    cy.get(".public-footer a[href='/Impressum']").click({ force: true });
     cy.url().should("include", "/Impressum");
-    cy.contains("IMPRESSUM").should("be.visible");
+    cy.contains("Impressum.").should("be.visible");
   });
 
-  it("navigates from homepage to Datenschutzerklaerung via footer link", () => {
+  it("navigates to Datenschutzerklärung via the footer", () => {
     cy.visit("/");
-    cy.get("a[href='/Datenschutzerklaerung']").first().click({ force: true });
+    cy.get(".public-footer a[href='/Datenschutzerklaerung']").click({
+      force: true,
+    });
     cy.url().should("include", "/Datenschutzerklaerung");
   });
 
-  it("navigates back to homepage from Impressum via Startseite link", () => {
+  it("returns to the homepage via the wordmark link", () => {
     cy.visit("/Impressum");
-    cy.get("a[href='/']").first().click({ force: true });
+    cy.get(".public-header a[aria-label='Startseite']").click({ force: true });
     cy.url().should("eq", Cypress.config().baseUrl + "/");
   });
 
-  it("navigates to a news detail page by clicking a news card", () => {
+  it("navigates to /team via the desktop nav", () => {
+    cy.viewport(1440, 900);
     cy.visit("/");
-    cy.get(".newscardcontainer a").first().click();
-    cy.url().should("include", "/news/");
+    cy.get(".public-nav a[href='/team']").click();
+    cy.url().should("include", "/team");
+    cy.contains("Mannschaften.").should("be.visible");
+  });
+
+  it("navigates to /sponsors via the desktop nav", () => {
+    cy.viewport(1440, 900);
+    cy.visit("/");
+    cy.get(".public-nav a[href='/sponsors']").click();
+    cy.url().should("include", "/sponsors");
+    cy.contains("Unsere Partner.").should("be.visible");
+  });
+
+  it("navigates to /contact via the desktop nav", () => {
+    cy.viewport(1440, 900);
+    cy.visit("/");
+    cy.get(".public-nav a[href='/contact']").click();
+    cy.url().should("include", "/contact");
+    cy.contains("Kontakt.").should("be.visible");
   });
 });

@@ -1,4 +1,4 @@
-describe("Impressum Page", () => {
+describe("Impressum page", () => {
   beforeEach(() => {
     cy.visit("/Impressum");
   });
@@ -7,8 +7,8 @@ describe("Impressum Page", () => {
     cy.get("body").should("be.visible");
   });
 
-  it("displays the IMPRESSUM heading", () => {
-    cy.get("h1").should("contain.text", "IMPRESSUM");
+  it("displays the Impressum heading", () => {
+    cy.contains("h1", "Impressum.").should("be.visible");
   });
 
   it("shows the responsible person", () => {
@@ -20,21 +20,15 @@ describe("Impressum Page", () => {
     cy.contains("66822 Lebach").should("be.visible");
   });
 
-  it("displays the KONTAKT section", () => {
-    cy.contains("KONTAKT").should("be.visible");
+  it("displays the contact section", () => {
+    cy.contains("Kontakt").should("be.visible");
     cy.contains("0151 2222 8048").should("be.visible");
     cy.contains("throwaway.relock977@passinbox.com").should("be.visible");
   });
 
-  it("displays the REDAKTIONELL VERANTWORTLICH section", () => {
-    cy.contains("REDAKTIONELL VERANTWORTLICH").should("be.visible");
-  });
-
-  it("includes the header", () => {
-    cy.contains("SVALEMANNIA").should("be.visible");
-  });
-
-  it("includes the footer", () => {
-    cy.contains("SV Alemannia Thalexweiler").should("exist");
+  it("renders inside the warm public shell", () => {
+    cy.get(".public-shell").should("exist");
+    cy.get(".public-header").should("be.visible");
+    cy.get(".public-footer").should("exist");
   });
 });

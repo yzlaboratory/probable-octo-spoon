@@ -1,4 +1,4 @@
-describe("Datenschutzerklaerung Page", () => {
+describe("Datenschutzerklaerung page", () => {
   beforeEach(() => {
     cy.visit("/Datenschutzerklaerung");
   });
@@ -7,23 +7,19 @@ describe("Datenschutzerklaerung Page", () => {
     cy.get("body").should("be.visible");
   });
 
-  it("displays a privacy policy heading", () => {
-    cy.get("h1, h2").first().should("be.visible");
+  it("renders the Rechtliches eyebrow + privacy heading", () => {
+    cy.contains("Rechtliches").should("be.visible");
+    cy.contains("Datenschutzerkl").should("exist");
   });
 
-  it("contains privacy-related content", () => {
-    cy.contains("Datenschutz").should("exist");
-  });
-
-  it("mentions data collection", () => {
+  it("contains GDPR / data-collection content", () => {
+    cy.contains("DSGVO").should("exist");
     cy.contains("Daten").should("exist");
   });
 
-  it("includes the header", () => {
-    cy.contains("SVALEMANNIA").should("be.visible");
-  });
-
-  it("includes the footer", () => {
-    cy.contains("SV Alemannia Thalexweiler").should("exist");
+  it("renders inside the warm public shell", () => {
+    cy.get(".public-shell").should("exist");
+    cy.get(".public-header").should("be.visible");
+    cy.get(".public-footer").should("exist");
   });
 });

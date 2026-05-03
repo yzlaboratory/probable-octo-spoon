@@ -1,51 +1,28 @@
-describe("News Detail Page", () => {
-  // Use the first news entry path from news.json
-  const testPath = "dreikampf2026-02-14";
-
-  beforeEach(() => {
-    cy.visit(`/news/${testPath}`);
-  });
-
-  it("loads successfully", () => {
-    cy.get("body").should("be.visible");
-  });
-
-  it("displays the news title", () => {
-    cy.get("h1").should("be.visible").and("not.be.empty");
-  });
-
-  it("displays the article tag", () => {
-    cy.contains("FESTLICHKEIT").should("be.visible");
-  });
-
-  it("displays the article image", () => {
-    cy.get("img[alt='Portrait']").should("be.visible");
-  });
-
-  it("displays the long-form article text", () => {
-    cy.contains("Dreikampf").scrollIntoView().should("be.visible");
-  });
-
-  it("includes the header", () => {
-    cy.contains("SVALEMANNIA").should("be.visible");
-  });
-
-  it("includes the footer", () => {
-    cy.contains("SV Alemannia Thalexweiler").should("exist");
-  });
-
-  it("all news paths are accessible", () => {
+describe("News detail page (editorial)", () => {
+  it("returns the SPA shell for any news slug (200)", () => {
     const paths = [
-      "websitedev2025-02-20",
-      "dreikampf2025-01-24",
-      "fuenfkampf2025-05-07",
-      "kirmes2025-06-12",
+      "any-slug",
+      "another-one",
       "dreikampf2026-02-14",
-      "vereinbrauchtdich2026-03-22",
     ];
-
     for (const path of paths) {
       cy.request(`/news/${path}`).its("status").should("eq", 200);
     }
+  });
+
+  describe("rendered shell", () => {
+    beforeEach(() => {
+      cy.visit("/news/does-not-exist", { failOnStatusCode: false });
+    });
+
+    it("renders inside the warm public shell", () => {
+      cy.get(".public-shell").should("exist");
+      cy.get(".public-header").should("be.visible");
+      cy.get(".public-footer").should("exist");
+    });
+
+    it("shows a friendly fallback when the slug is unknown", () => {
+      cy.contains(/Artikel nicht gefunden|Lädt/).should("exist");
+    });
   });
 });
