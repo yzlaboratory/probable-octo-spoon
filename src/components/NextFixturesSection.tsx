@@ -52,29 +52,55 @@ function formatKickoff(iso: string): { date: string; time: string } {
 
 export function FixtureCard({ fixture }: { fixture: Fixture }) {
   const { date, time } = formatKickoff(fixture.kickoff);
-  const hvLabel = fixture.ourSide === "home" ? "H" : fixture.ourSide === "away" ? "A" : "N";
+  const hvLabel =
+    fixture.ourSide === "home" ? "H" : fixture.ourSide === "away" ? "A" : "N";
   return (
     <article
-      className="fixturecard bg-dark-gray-700 relative flex w-9/10 shrink-0 flex-col gap-3 p-4 text-white md:w-80"
+      className="fixturecard cs-tile relative flex w-9/10 shrink-0 flex-col gap-3 p-4 md:w-80"
       data-fixture-id={fixture.id}
       data-our-side={fixture.ourSide ?? ""}
     >
-      <header className="flex items-center justify-between text-xs text-gray-300">
-        <span className="font-mono">{date}</span>
+      <header className="flex items-center justify-between text-[11.5px]">
+        <span className="font-mono" style={{ color: "var(--ink-3)" }}>
+          {date}
+        </span>
         {fixture.live ? (
-          <span className="fixture-live rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold tracking-widest text-white uppercase">
+          <span
+            className="fixture-live caps inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px]"
+            style={{
+              background: "oklch(0.55 0.2 25 / 0.18)",
+              color: "oklch(0.85 0.15 25)",
+              border: "1px solid oklch(0.55 0.2 25 / 0.4)",
+            }}
+          >
+            <span
+              className="live-dot inline-block h-1.5 w-1.5 rounded-full"
+              style={{ background: "oklch(0.7 0.2 25)" }}
+            />
             LIVE
           </span>
         ) : (
-          <span className="font-mono">{time}</span>
+          <span className="font-mono" style={{ color: "var(--ink-2)" }}>
+            {time}
+          </span>
         )}
       </header>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         <TeamRow team={fixture.home} emphasise={fixture.ourSide === "home"} />
         <TeamRow team={fixture.away} emphasise={fixture.ourSide === "away"} />
       </div>
-      <footer className="flex items-center justify-between text-[11px] text-gray-400">
-        <span className="rounded border border-gray-700 px-2 py-0.5 uppercase">
+      <footer
+        className="rule-t flex items-center justify-between pt-3 text-[11px]"
+        style={{ color: "var(--ink-3)" }}
+      >
+        <span
+          className="caps inline-flex items-center justify-center rounded-md px-2 py-0.5 text-[10px]"
+          style={{
+            background: "var(--paper-3)",
+            border: "1px solid var(--rule-2)",
+            color: "var(--ink-2)",
+          }}
+        >
           {hvLabel}
         </span>
         <span className="truncate pl-2">
@@ -102,9 +128,17 @@ function TeamRow({
           loading="lazy"
         />
       ) : (
-        <div className="h-6 w-6 rounded-full bg-gray-700" />
+        <div
+          className="h-6 w-6 rounded-full"
+          style={{ background: "var(--paper-3)" }}
+        />
       )}
-      <span className={`truncate ${emphasise ? "font-semibold" : "text-gray-200"}`}>
+      <span
+        className={`truncate text-[13.5px] ${emphasise ? "font-semibold" : ""}`}
+        style={{
+          color: emphasise ? "var(--ink)" : "var(--ink-2)",
+        }}
+      >
         {team.name}
       </span>
     </div>
@@ -144,16 +178,32 @@ export default function NextFixturesSection({
           Array.from({ length: limit }).map((_, i) => (
             <div
               key={`sk-${i}`}
-              className="bg-dark-gray-700 flex w-9/10 shrink-0 flex-col gap-3 p-4 md:w-80"
+              className="cs-tile flex w-9/10 shrink-0 flex-col gap-3 p-4 md:w-80"
             >
-              <Skeleton variant="text" width="60%" sx={{ bgcolor: "#2a2a2a" }} />
-              <Skeleton variant="text" width="80%" sx={{ bgcolor: "#2a2a2a" }} />
-              <Skeleton variant="text" width="80%" sx={{ bgcolor: "#2a2a2a" }} />
-              <Skeleton variant="text" width="40%" sx={{ bgcolor: "#2a2a2a" }} />
+              <Skeleton
+                variant="text"
+                width="60%"
+                sx={{ bgcolor: "var(--paper-3)" }}
+              />
+              <Skeleton
+                variant="text"
+                width="80%"
+                sx={{ bgcolor: "var(--paper-3)" }}
+              />
+              <Skeleton
+                variant="text"
+                width="80%"
+                sx={{ bgcolor: "var(--paper-3)" }}
+              />
+              <Skeleton
+                variant="text"
+                width="40%"
+                sx={{ bgcolor: "var(--paper-3)" }}
+              />
             </div>
           ))}
         {loaded && fixtures.length === 0 && (
-          <div className="px-2 py-6 text-sm text-gray-400">
+          <div className="px-2 py-6 text-sm" style={{ color: "var(--ink-3)" }}>
             Derzeit keine anstehenden Spiele.
           </div>
         )}
@@ -165,9 +215,11 @@ export default function NextFixturesSection({
         <div className="mt-4 px-4 text-right text-sm md:px-20">
           <Link
             to="/spiele"
-            className="text-primary underline-offset-4 hover:underline"
+            className="cs-focus inline-flex items-center gap-1.5 text-[13px] font-medium"
+            style={{ color: "var(--primary-2)" }}
           >
-            Alle Spiele →
+            Alle Spiele
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
       )}

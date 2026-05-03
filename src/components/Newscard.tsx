@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import Card from "@mui/material/Card";
 
 interface Props {
   title: string;
@@ -19,45 +18,60 @@ export default function Newscard({
   path,
 }: Props) {
   return (
-    <div className="bg-background newscardcontainer flex h-auto w-9/10 shrink-0 px-2 lg:w-1/4">
-      <Card
-        elevation={0}
-        component={Link}
+    <div className="newscardcontainer flex w-9/10 shrink-0 px-2 lg:w-1/4">
+      <Link
         to={"/news/" + path}
-        sx={{
-          bgcolor: "transparent",
-          borderRadius: 0,
-          color: "inherit",
-          overflow: "visible",
-          textDecoration: "none",
-        }}
-        className="card after:bg-primary relative flex h-auto w-full shrink-0 flex-col justify-start gap-6 pb-6 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full"
+        className="cs-tile cs-focus group relative flex h-full w-full flex-col overflow-hidden no-underline"
+        style={{ color: "var(--ink)" }}
       >
-        <div className="flex aspect-[100/56] w-full overflow-hidden">
+        <div className="aspect-[100/56] w-full overflow-hidden">
           {imageUrl && (
             <img
               src={imageUrl}
               alt="Portrait"
-              className="min-w-full object-fill"
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex w-full flex-row items-center gap-4">
-            <div className="bg-primary h-3 w-10"></div>
-            <h3 className="text-sm font-medium text-white 2xl:text-base">
-              {date} / {tag}
+        <div className="flex flex-1 flex-col gap-3 p-4 md:p-5">
+          <div className="flex items-center gap-2">
+            <span
+              className="chip"
+              style={{
+                background: "oklch(0.62 0.22 290 / 0.15)",
+                color: "oklch(0.8 0.18 290)",
+              }}
+            >
+              <span
+                className="chip-dot"
+                style={{ background: "var(--primary)" }}
+              />
+              {tag}
+            </span>
+            <h3
+              className="font-mono text-[11px]"
+              style={{ color: "var(--ink-3)" }}
+            >
+              {date}
             </h3>
           </div>
 
-          <h1 className="text-xl font-semibold text-white 2xl:text-3xl">{title}</h1>
+          <h1
+            className="font-display text-[19px] leading-[1.15] md:text-[22px]"
+            style={{ letterSpacing: "-0.012em", color: "var(--ink)" }}
+          >
+            {title}
+          </h1>
 
-          <div className="h-max text-sm font-light overflow-ellipsis text-gray-300 2xl:text-base">
-            <p className="inter-primary line-clamp-4 text-wrap">{description}</p>
-          </div>
+          <p
+            className="line-clamp-3 text-[13px] leading-[1.55]"
+            style={{ color: "var(--ink-2)" }}
+          >
+            {description}
+          </p>
         </div>
-      </Card>
+      </Link>
     </div>
   );
 }

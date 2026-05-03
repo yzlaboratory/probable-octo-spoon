@@ -48,37 +48,62 @@ export default function Gallery({
     const nextBtn = nextRef.current;
     if (!scrollContainer || !prevBtn || !nextBtn) return;
 
-    const height =
-      scrollContainer.getBoundingClientRect().height.toString() + "px";
-    nextBtn.style.height = height;
-    prevBtn.style.height = height;
+    const sizeButtons = () => {
+      const height =
+        scrollContainer.getBoundingClientRect().height.toString() + "px";
+      nextBtn.style.height = height;
+      prevBtn.style.height = height;
+    };
 
-    const childElement = scrollContainer.querySelector(
-      `.${childrenClassName}`,
-    );
-    const scrollValue =
-      (childElement?.getBoundingClientRect().width || 0) *
-      numberOfItemsInViewport;
+    const pageWidth = () => {
+      const childElement = scrollContainer.querySelector(
+        `.${childrenClassName}`,
+      );
+      return (
+        (childElement?.getBoundingClientRect().width || 0) *
+        numberOfItemsInViewport
+      );
+    };
 
     const handleNext = () => {
-      finalScrollRef.current += scrollValue;
+      finalScrollRef.current += pageWidth();
       scrollContainer.scrollLeft = finalScrollRef.current;
       checkButtons();
     };
 
     const handlePrev = () => {
-      finalScrollRef.current -= scrollValue;
+      finalScrollRef.current -= pageWidth();
       scrollContainer.scrollLeft = finalScrollRef.current;
+      checkButtons();
+    };
+
+    const handleScroll = () => {
+      finalScrollRef.current = scrollContainer.scrollLeft;
       checkButtons();
     };
 
     nextBtn.addEventListener("click", handleNext);
     prevBtn.addEventListener("click", handlePrev);
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Re-check when child content (re)flows — children load async from APIs,
+    // so initial mount has 0 width and we need to recompute later.
+    const ro = new ResizeObserver(() => {
+      sizeButtons();
+      checkButtons();
+    });
+    ro.observe(scrollContainer);
+    const firstChild = scrollContainer.firstElementChild;
+    if (firstChild) ro.observe(firstChild);
+
+    sizeButtons();
     checkButtons();
 
     return () => {
       nextBtn.removeEventListener("click", handleNext);
       prevBtn.removeEventListener("click", handlePrev);
+      scrollContainer.removeEventListener("scroll", handleScroll);
+      ro.disconnect();
     };
   }, [childrenClassName, numberOfItemsInViewport, checkButtons]);
 
@@ -87,34 +112,48 @@ export default function Gallery({
       <Frontpageheader text={headerTitle} />
       <div
         ref={scrollRef}
-        className="galleryContainer hidescrollbar relative flex max-w-full flex-row flex-nowrap content-start overflow-auto scroll-smooth px-4 md:px-20"
+        className="galleryContainer hidescrollbar relative flex max-w-full flex-row flex-nowrap content-start items-stretch overflow-auto scroll-smooth px-4 md:px-20"
       >
         {children}
       </div>
       <div
         ref={nextRef}
-        className={`${classPrefix}NextButton bg-background/75 hidden lg:flex absolute right-0 z-1 bottom-0 h-full w-20 items-center justify-center hover:bg-background/90 transition-colors ease-in-out duration-300 hover:cursor-pointer`}
+        className={`${classPrefix}NextButton absolute right-0 bottom-0 z-1 hidden h-full w-20 items-center justify-center transition-opacity duration-200 hover:cursor-pointer lg:flex`}
+        style={{
+          background:
+            "linear-gradient(to left, color-mix(in oklab, var(--paper) 92%, transparent), transparent)",
+        }}
       >
         <IconButton
           disableRipple
           sx={{ color: "inherit", p: 0 }}
           aria-label="Next"
         >
-          <span className="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl! text-zinc-400">
+          <span
+            className="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl!"
+            style={{ color: "var(--ink-2)" }}
+          >
             arrow_forward_ios
           </span>
         </IconButton>
       </div>
       <div
         ref={prevRef}
-        className={`${classPrefix}PrevButton bg-background/75 hidden lg:flex absolute bottom-0 left-0 z-1 h-full w-20 items-center justify-center hover:bg-background/90 transition-colors ease-in-out duration-300 hover:cursor-pointer`}
+        className={`${classPrefix}PrevButton absolute bottom-0 left-0 z-1 hidden h-full w-20 items-center justify-center transition-opacity duration-200 hover:cursor-pointer lg:flex`}
+        style={{
+          background:
+            "linear-gradient(to right, color-mix(in oklab, var(--paper) 92%, transparent), transparent)",
+        }}
       >
         <IconButton
           disableRipple
           sx={{ color: "inherit", p: 0 }}
           aria-label="Previous"
         >
-          <span className="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl! text-zinc-400">
+          <span
+            className="material-symbols-rounded material-symbols-rounded-light z-10 text-5xl!"
+            style={{ color: "var(--ink-2)" }}
+          >
             arrow_back_ios_new
           </span>
         </IconButton>

@@ -1,0 +1,287 @@
+/*
+ * Public-site design tokens and helpers.
+ *
+ * Mirrors the admin `.admin-shell` palette (src/styles/admin.css) so the
+ * marketing site shares the same modern dark look — but lives under its own
+ * scope so each shell can drift without breaking the other.
+ */
+
+.public-shell {
+  --paper: #0e0e12;
+  --paper-2: #16161c;
+  --paper-3: #1e1e26;
+
+  --ink: #f2f1ee;
+  --ink-2: #c9c8c2;
+  --ink-3: #7a7985;
+  --ink-4: #4a4955;
+
+  --rule: #25252e;
+  --rule-2: #35353f;
+
+  --primary: oklch(0.62 0.22 290);
+  --primary-2: oklch(0.7 0.22 290);
+  --accent: oklch(0.72 0.19 25);
+  --accent-2: oklch(0.78 0.19 25);
+  --warn: oklch(0.78 0.16 85);
+  --tertiary: oklch(0.58 0.22 330);
+  --moss: oklch(0.68 0.18 250);
+  --glow: oklch(0.62 0.22 290 / 0.35);
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+  min-height: 100vh;
+  position: relative;
+}
+
+.public-shell .font-display {
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.public-shell .font-mono {
+  font-family: "Geist Mono", ui-monospace, monospace;
+}
+.public-shell .font-ui {
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+}
+
+/* Ambient glow behind content. Pointer-events none so it never intercepts clicks. */
+.public-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.65;
+  z-index: 0;
+  background-image: radial-gradient(
+      ellipse 1100px 700px at 12% -10%,
+      oklch(0.45 0.2 290 / 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 1000px 700px at 100% 110%,
+      oklch(0.5 0.18 25 / 0.1),
+      transparent 60%
+    );
+}
+.public-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+  mix-blend-mode: overlay;
+}
+.public-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-shell ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.public-shell ::-webkit-scrollbar-thumb {
+  background: var(--rule-2);
+  border-radius: 999px;
+}
+.public-shell ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.public-shell .cs-focus:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.public-shell .caps {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-feature-settings: "ss01";
+}
+
+.public-shell .rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+.public-shell .rule-t {
+  border-top: 1px solid var(--rule);
+}
+.public-shell .rule-r {
+  border-right: 1px solid var(--rule);
+}
+.public-shell .rule-l {
+  border-left: 1px solid var(--rule);
+}
+
+.public-shell .btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 8px 24px -10px var(--glow);
+}
+.public-shell .btn-primary:hover {
+  background: var(--primary-2);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 10px 30px -8px var(--glow);
+}
+.public-shell .btn-ghost {
+  background: var(--paper-2);
+  color: var(--ink);
+  border: 1px solid var(--rule-2);
+}
+.public-shell .btn-ghost:hover {
+  background: var(--paper-3);
+  border-color: var(--ink-4);
+}
+.public-shell .btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+.public-shell .btn-accent:hover {
+  background: var(--accent-2);
+}
+
+.public-shell .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.public-shell .chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Card surface. */
+.public-shell .cs-card {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+
+/* News/Vorstand/Social card link surface — hairline border, glow on hover. */
+.public-shell .cs-tile {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+.public-shell .cs-tile:hover {
+  border-color: var(--rule-2);
+  box-shadow: 0 12px 36px -16px var(--glow);
+  transform: translateY(-2px);
+}
+
+/* Topbar nav link — desktop. */
+.public-shell .navlink {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.public-shell .navlink:hover {
+  background: var(--paper-3);
+  color: var(--ink);
+}
+.public-shell .navlink.active {
+  background: var(--paper-3);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--rule-2);
+}
+
+/* Section heading: Newsreader display + caps eyebrow + glowing rail. */
+.public-shell .section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.public-shell .section-eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  box-shadow: 0 0 12px var(--glow);
+}
+
+.public-shell .row-hover {
+  transition: background 0.15s;
+}
+.public-shell .row-hover:hover {
+  background: var(--paper-3);
+}
+
+.public-shell .stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04) 0 8px,
+    transparent 8px 16px
+  );
+}
+
+.public-shell .live-dot {
+  animation: publicTick 1.6s ease-in-out infinite;
+}
+@keyframes publicTick {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}

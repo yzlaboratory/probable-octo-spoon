@@ -1,51 +1,121 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import iglogo from "../assets/instagramwhite.svg";
 
+interface NavItem {
+  to: string;
+  label: string;
+  end?: boolean;
+}
+
+const NAV: NavItem[] = [
+  { to: "/", label: "Start", end: true },
+  { to: "/spiele", label: "Spiele" },
+  { to: "/training", label: "Training" },
+];
+
 export default function Header() {
   return (
-    <div className="relative z-20 flex w-full flex-row justify-evenly border-0 border-t-4 border-solid border-t-primary bg-black p-3 text-white">
-      <span className="material-symbols-rounded absolute left-6 hidden! self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50 xl:flex!">
-        menu
-      </span>
-      <div className="flex h-full w-full max-w-6xl justify-between">
-        <div className="flex h-full items-center justify-center gap-2 md:gap-0">
-          <span className="material-symbols-rounded left-6 flex hidden! self-center text-4xl! text-white hover:cursor-not-allowed hover:opacity-50 xl:hidden!">
-            menu
-          </span>
+    <header
+      className="sticky top-0 z-30 w-full"
+      style={{
+        background: "color-mix(in oklab, var(--paper) 75%, transparent)",
+        borderBottom: "1px solid var(--rule)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+      }}
+    >
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 md:px-8 lg:gap-8">
+        {/* Wordmark */}
+        <Link
+          to="/"
+          className="cs-focus flex items-center gap-3 select-none"
+          style={{ color: "var(--ink)" }}
+        >
           <img
-            className="mr-0 h-10 w-10 md:mr-2 md:h-14 md:w-14 lg:mr-4"
-            width="38"
-            height="38"
             src={logo}
             alt="Club Logo."
+            width="36"
+            height="36"
+            className="h-9 w-9 rounded-md"
+            style={{ boxShadow: "0 0 18px var(--glow)" }}
           />
-          <div className="flex h-full flex-col justify-center text-sm md:flex md:text-base">
-            <div className="mb-[-3px] font-black">SVALEMANNIA</div>
-            <div className="mt-[-3px] font-black">THALEXWEILER</div>
+          <div className="flex flex-col leading-[1.05]">
+            <span
+              className="text-[12px] font-semibold tracking-[0.04em] md:text-[13px]"
+              style={{ color: "var(--ink)" }}
+            >
+              SVALEMANNIA
+            </span>
+            <span
+              className="text-[10px] tracking-[0.18em] md:text-[10.5px]"
+              style={{ color: "var(--ink-3)" }}
+            >
+              THALEXWEILER
+            </span>
           </div>
-        </div>
-        <div className="flex h-full w-max flex-row items-center justify-between gap-2 md:gap-6">
+        </Link>
+
+        {/* Desktop nav */}
+        <nav
+          className="hidden flex-1 items-center gap-1 md:flex"
+          aria-label="Hauptnavigation"
+        >
+          {NAV.map((n) => (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              end={n.end}
+              className={({ isActive }) =>
+                `navlink cs-focus ${isActive ? "active" : ""}`.trim()
+              }
+            >
+              {n.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="flex flex-1 items-center justify-end gap-2 md:flex-none md:gap-3">
+          <a
+            href="https://www.instagram.com/sgthalexweileraschbach/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cs-focus inline-flex h-9 w-9 items-center justify-center rounded-md"
+            style={{
+              background: "var(--paper-2)",
+              border: "1px solid var(--rule-2)",
+            }}
+            aria-label="Instagram"
+          >
+            <img src={iglogo} alt="" className="h-4 w-4" />
+          </a>
           <Link
             to="/admin"
-            className="border-primary hidden border-2 border-solid px-4 py-2 text-xs hover:opacity-80 md:text-base lg:flex"
+            className="btn-ghost cs-focus hidden h-9 items-center rounded-md px-4 text-[12.5px] font-medium lg:inline-flex"
           >
             LOGIN
           </Link>
-          <span className="material-symbols-rounded hidden! h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50 lg:flex!">
-            shopping_cart
-          </span>
-          <span className="material-symbols-rounded hidden! h-max text-xl! text-white hover:cursor-not-allowed hover:opacity-50 lg:flex!">
-            search
-          </span>
-          <a
-            className="h-max"
-            href="https://www.instagram.com/sgthalexweileraschbach/"
-          >
-            <img src={iglogo} alt="" className="w-8 lg:w-4" />
-          </a>
         </div>
       </div>
-    </div>
+
+      {/* Mobile nav row */}
+      <nav
+        className="flex w-full items-center gap-1 overflow-x-auto px-3 pb-2 md:hidden"
+        aria-label="Hauptnavigation"
+      >
+        {NAV.map((n) => (
+          <NavLink
+            key={n.to}
+            to={n.to}
+            end={n.end}
+            className={({ isActive }) =>
+              `navlink cs-focus shrink-0 ${isActive ? "active" : ""}`.trim()
+            }
+          >
+            {n.label}
+          </NavLink>
+        ))}
+      </nav>
+    </header>
   );
 }

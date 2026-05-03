@@ -1,4 +1,3 @@
-import Card from "@mui/material/Card";
 import iglogo from "../assets/instagramwhite.svg";
 
 interface Props {
@@ -20,42 +19,39 @@ export default function Socialcard({
   children,
 }: Props) {
   return (
-    <div className="socialcard flex h-auto w-9/10 shrink-0 bg-transparent px-2 lg:w-1/5">
-      <Card
-        elevation={0}
-        sx={{
-          bgcolor: "transparent",
-          borderRadius: 0,
-          color: "inherit",
-          overflow: "visible",
-        }}
-        className="card after:bg-primary relative flex h-auto w-full shrink-0 flex-col justify-start gap-6 pb-6 text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:before:w-0 hover:after:w-full"
+    <div className="socialcard flex w-9/10 shrink-0 px-2 lg:w-1/5">
+      <a
+        href={permalink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cs-tile cs-focus group relative flex w-full flex-col overflow-hidden no-underline"
+        style={{ color: "var(--ink)" }}
       >
-        <div className="flex aspect-[100/56] w-full overflow-hidden">
+        <div className="aspect-[100/56] w-full overflow-hidden">
           {type === "IMAGE" ? (
             <img
               src={imageUrl}
               alt="Portrait"
-              className="min-w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           ) : type === "VIDEO" ? (
-            <video className="min-w-full object-cover" muted autoPlay>
+            <video className="h-full w-full object-cover" muted autoPlay>
               <source src={imageUrl} />
             </video>
           ) : type === "CAROUSEL_ALBUM" && children ? (
-            <div className="ig_gallery hidescrollbar flex snap-x snap-mandatory flex-row overflow-auto scroll-smooth">
+            <div className="ig_gallery hidescrollbar flex h-full snap-x snap-mandatory flex-row overflow-auto scroll-smooth">
               {children.data.map((item, idx) =>
                 item.media_type === "IMAGE" ? (
                   <img
                     key={idx}
                     src={item.media_url}
                     alt="Portrait"
-                    className="min-w-full snap-start object-cover"
+                    className="h-full min-w-full snap-start object-cover"
                   />
                 ) : item.media_type === "VIDEO" ? (
                   <video
                     key={idx}
-                    className="min-w-full snap-start object-cover"
+                    className="h-full min-w-full snap-start object-cover"
                     muted
                     autoPlay
                   >
@@ -69,21 +65,32 @@ export default function Socialcard({
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex w-full flex-row items-center gap-4">
-            <div className="bg-primary h-3 w-10"></div>
-            <h3 className="text-sm font-medium text-white 2xl:text-base">
-              {new Date(timestamp).toLocaleDateString()} / SOCIAL
+        <div className="flex flex-col gap-3 p-4 md:p-5">
+          <div className="flex items-center justify-between gap-2">
+            <h3
+              className="font-mono text-[11px]"
+              style={{ color: "var(--ink-3)" }}
+            >
+              {new Date(timestamp).toLocaleDateString()} · SOCIAL
             </h3>
-            <a className="h-max py-1 text-white" href={permalink}>
-              <img src={iglogo} alt="" className="w-4" />
-            </a>
+            <span
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full"
+              style={{
+                background: "var(--paper-3)",
+                border: "1px solid var(--rule-2)",
+              }}
+            >
+              <img src={iglogo} alt="" className="h-3.5 w-3.5" />
+            </span>
           </div>
-          <div className="h-max text-sm font-light overflow-ellipsis text-gray-300 2xl:text-base">
-            <p className="inter-primary line-clamp-4 text-wrap">{caption}</p>
-          </div>
+          <p
+            className="line-clamp-4 text-[13px] leading-[1.55]"
+            style={{ color: "var(--ink-2)" }}
+          >
+            {caption}
+          </p>
         </div>
-      </Card>
+      </a>
     </div>
   );
 }

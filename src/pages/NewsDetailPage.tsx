@@ -9,16 +9,22 @@ export default function NewsDetailPage() {
 
   if (data === undefined) {
     return (
-      <div className="flex flex-1 items-center justify-center text-white">
-        <p>Lade…</p>
+      <div
+        className="flex flex-1 items-center justify-center"
+        style={{ color: "var(--ink-3)" }}
+      >
+        <p className="text-[13px]">Lade…</p>
       </div>
     );
   }
 
   if (data === null) {
     return (
-      <div className="flex flex-1 items-center justify-center text-white">
-        <p>Artikel nicht gefunden</p>
+      <div
+        className="flex flex-1 items-center justify-center"
+        style={{ color: "var(--ink-2)" }}
+      >
+        <p className="text-[14px]">Artikel nicht gefunden</p>
       </div>
     );
   }

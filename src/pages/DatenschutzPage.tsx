@@ -1,15 +1,15 @@
 import Footer from "../components/Footer";
 
 const DATENSCHUTZ_HTML = `
-        <h1 class="text-3xl font-black break-words uppercase md:text-7xl">
+        <h1 class="font-display">
           Datenschutzerkl&auml;rung
         </h1>
-        <h1 class="text-2xl font-black uppercase md:text-6xl">
+        <h2 class="font-display">
           1. Datenschutz auf einen Blick
-        </h1>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        </h2>
+        <h3 class="font-display">
           Allgemeine Hinweise
-        </h1>
+        </h3>
         <p>
           Die folgenden Hinweise geben einen einfachen &Uuml;berblick
           dar&uuml;ber, was mit Ihren personenbezogenen Daten passiert, wenn Sie
@@ -18,21 +18,21 @@ const DATENSCHUTZ_HTML = `
           Ausf&uuml;hrliche Informationen zum Thema Datenschutz entnehmen Sie
           unserer unter diesem Text aufgef&uuml;hrten Datenschutzerkl&auml;rung.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Datenerfassung auf dieser Website
-        </h1>
-        <h1 class="text-lg font-black uppercase md:text-4xl">
+        </h3>
+        <h4 class="font-display">
           Wer ist verantwortlich f&uuml;r die Datenerfassung auf dieser Website?
-        </h1>
+        </h4>
         <p>
           Die Datenverarbeitung auf dieser Website erfolgt durch den
           Websitebetreiber. Dessen Kontaktdaten k&ouml;nnen Sie dem Abschnitt
           &bdquo;Hinweis zur Verantwortlichen Stelle&ldquo; in dieser
           Datenschutzerkl&auml;rung entnehmen.
         </p>
-        <h1 class="text-lg font-black uppercase md:text-4xl">
+        <h4 class="font-display">
           Wie erfassen wir Ihre Daten?
-        </h1>
+        </h4>
         <p>
           Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese
           mitteilen. Hierbei kann es sich z.&nbsp;B. um Daten handeln, die Sie
@@ -45,9 +45,9 @@ const DATENSCHUTZ_HTML = `
           Uhrzeit des Seitenaufrufs). Die Erfassung dieser Daten erfolgt
           automatisch, sobald Sie diese Website betreten.
         </p>
-        <h1 class="text-lg font-black uppercase md:text-4xl">
+        <h4 class="font-display">
           Wof&uuml;r nutzen wir Ihre Daten?
-        </h1>
+        </h4>
         <p>
           Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung
           der Website zu gew&auml;hrleisten. Andere Daten k&ouml;nnen zur
@@ -56,9 +56,9 @@ const DATENSCHUTZ_HTML = `
           werden die &uuml;bermittelten Daten auch f&uuml;r Vertragsangebote,
           Bestellungen oder sonstige Auftragsanfragen verarbeitet.
         </p>
-        <h1 class="text-lg font-black uppercase md:text-4xl">
+        <h4 class="font-display">
           Welche Rechte haben Sie bez&uuml;glich Ihrer Daten?
-        </h1>
+        </h4>
         <p>
           Sie haben jederzeit das Recht, unentgeltlich Auskunft &uuml;ber
           Herkunft, Empf&auml;nger und Zweck Ihrer gespeicherten
@@ -75,9 +75,9 @@ const DATENSCHUTZ_HTML = `
           Hierzu sowie zu weiteren Fragen zum Thema Datenschutz k&ouml;nnen Sie
           sich jederzeit an uns wenden.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Analyse-Tools und Tools von Dritt&shy;anbietern
-        </h1>
+        </h3>
         <p>
           Beim Besuch dieser Website kann Ihr Surf- Verhalten statistisch
           ausgewertet werden. Das geschieht vor allem mit sogenannten
@@ -87,9 +87,9 @@ const DATENSCHUTZ_HTML = `
           Detaillierte Informationen zu diesen Analyseprogrammen finden Sie in
           der folgenden Datenschutzerkl&auml;rung.
         </p>
-        <h1 class="text-2xl font-black uppercase md:text-6xl">2. Hosting</h1>
+        <h2 class="font-display">2. Hosting</h2>
         <p>Wir hosten die Inhalte unserer Website bei folgendem Anbieter:</p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">Hetzner</h1>
+        <h3 class="font-display">Hetzner</h3>
         <p>
           Anbieter ist die Hetzner Online GmbH, Industriestr. 25, 91710
           Gunzenhausen (nachfolgend Hetzner).
@@ -113,10 +113,10 @@ const DATENSCHUTZ_HTML = `
           Endger&auml;t des Nutzers (z.&nbsp;B. Device-Fingerprinting) im Sinne
           des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.
         </p>
-        <h1 class="text-2xl font-black uppercase md:text-6xl">
+        <h2 class="font-display">
           3. Allgemeine Hinweise und Pflicht&shy;informationen
-        </h1>
-        <h1 class="text-xl font-black uppercase md:text-5xl">Datenschutz</h1>
+        </h2>
+        <h3 class="font-display">Datenschutz</h3>
         <p>
           Die Betreiber dieser Seiten nehmen den Schutz Ihrer pers&ouml;nlichen
           Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten
@@ -137,9 +137,9 @@ const DATENSCHUTZ_HTML = `
           aufweisen kann. Ein l&uuml;ckenloser Schutz der Daten vor dem Zugriff
           durch Dritte ist nicht m&ouml;glich.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Hinweis zur verantwortlichen Stelle
-        </h1>
+        </h3>
         <p>
           Die verantwortliche Stelle f&uuml;r die Datenverarbeitung auf dieser
           Website ist:
@@ -159,7 +159,7 @@ const DATENSCHUTZ_HTML = `
           Mittel der Verarbeitung von personenbezogenen Daten (z.&nbsp;B. Namen,
           E-Mail- Adressen o. &Auml;.) entscheidet.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">Speicherdauer</h1>
+        <h3 class="font-display">Speicherdauer</h3>
         <p>
           Soweit innerhalb dieser Datenschutzerkl&auml;rung keine speziellere
           Speicherdauer genannt wurde, verbleiben Ihre personenbezogenen Daten
@@ -172,10 +172,10 @@ const DATENSCHUTZ_HTML = `
           Aufbewahrungsfristen); im letztgenannten Fall erfolgt die
           L&ouml;schung nach Fortfall dieser Gr&uuml;nde.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Allgemeine Hinweise zu den Rechtsgrundlagen der Datenverarbeitung auf
           dieser Website
-        </h1>
+        </h3>
         <p>
           Sofern Sie in die Datenverarbeitung eingewilligt haben, verarbeiten
           wir Ihre personenbezogenen Daten auf Grundlage von Art. 6 Abs. 1 lit.
@@ -199,9 +199,9 @@ const DATENSCHUTZ_HTML = `
           jeweils im Einzelfall einschl&auml;gigen Rechtsgrundlagen wird in den
           folgenden Abs&auml;tzen dieser Datenschutzerkl&auml;rung informiert.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Empf&auml;nger von personenbezogenen Daten
-        </h1>
+        </h3>
         <p>
           Im Rahmen unserer Gesch&auml;ftst&auml;tigkeit arbeiten wir mit
           verschiedenen externen Stellen zusammen. Dabei ist teilweise auch eine
@@ -218,9 +218,9 @@ const DATENSCHUTZ_HTML = `
           Auftragsverarbeitung weiter. Im Falle einer gemeinsamen Verarbeitung
           wird ein Vertrag &uuml;ber gemeinsame Verarbeitung geschlossen.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Widerruf Ihrer Einwilligung zur Datenverarbeitung
-        </h1>
+        </h3>
         <p>
           Viele Datenverarbeitungsvorg&auml;nge sind nur mit Ihrer
           ausdr&uuml;cklichen Einwilligung m&ouml;glich. Sie k&ouml;nnen eine
@@ -228,10 +228,10 @@ const DATENSCHUTZ_HTML = `
           Rechtm&auml;&szlig;igkeit der bis zum Widerruf erfolgten
           Datenverarbeitung bleibt vom Widerruf unber&uuml;hrt.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Widerspruchsrecht gegen die Datenerhebung in besonderen F&auml;llen
           sowie gegen Direktwerbung (Art. 21 DSGVO)
-        </h1>
+        </h3>
         <p>
           WENN DIE DATENVERARBEITUNG AUF GRUNDLAGE VON ART. 6 ABS. 1 LIT. E ODER
           F DSGVO ERFOLGT, HABEN SIE JEDERZEIT DAS RECHT, AUS GR&Uuml;NDEN, DIE
@@ -257,10 +257,10 @@ const DATENSCHUTZ_HTML = `
           MEHR ZUM ZWECKE DER DIREKTWERBUNG VERWENDET (WIDERSPRUCH NACH ART. 21
           ABS. 2 DSGVO).
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Beschwerde&shy;recht bei der zust&auml;ndigen
           Aufsichts&shy;beh&ouml;rde
-        </h1>
+        </h3>
         <p>
           Im Falle von Verst&ouml;&szlig;en gegen die DSGVO steht den
           Betroffenen ein Beschwerderecht bei einer Aufsichtsbeh&ouml;rde,
@@ -269,9 +269,9 @@ const DATENSCHUTZ_HTML = `
           Versto&szlig;es zu. Das Beschwerderecht besteht unbeschadet
           anderweitiger verwaltungsrechtlicher oder gerichtlicher Rechtsbehelfe.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Recht auf Daten&shy;&uuml;bertrag&shy;barkeit
-        </h1>
+        </h3>
         <p>
           Sie haben das Recht, Daten, die wir auf Grundlage Ihrer Einwilligung
           oder in Erf&uuml;llung eines Vertrags automatisiert verarbeiten, an
@@ -280,9 +280,9 @@ const DATENSCHUTZ_HTML = `
           &Uuml;bertragung der Daten an einen anderen Verantwortlichen
           verlangen, erfolgt dies nur, soweit es technisch machbar ist.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Auskunft, Berichtigung und L&ouml;schung
-        </h1>
+        </h3>
         <p>
           Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit
           das Recht auf unentgeltliche Auskunft &uuml;ber Ihre gespeicherten
@@ -291,9 +291,9 @@ const DATENSCHUTZ_HTML = `
           L&ouml;schung dieser Daten. Hierzu sowie zu weiteren Fragen zum Thema
           personenbezogene Daten k&ouml;nnen Sie sich jederzeit an uns wenden.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Recht auf Einschr&auml;nkung der Verarbeitung
-        </h1>
+        </h3>
         <p>
           Sie haben das Recht, die Einschr&auml;nkung der Verarbeitung Ihrer
           personenbezogenen Daten zu verlangen. Hierzu k&ouml;nnen Sie sich
@@ -339,9 +339,9 @@ const DATENSCHUTZ_HTML = `
           wichtigen &ouml;ffentlichen Interesses der Europ&auml;ischen Union
           oder eines Mitgliedstaats verarbeitet werden.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           SSL- bzw. TLS-Verschl&uuml;sselung
-        </h1>
+        </h3>
         <p>
           Diese Seite nutzt aus Sicherheitsgr&uuml;nden und zum Schutz der
           &Uuml;bertragung vertraulicher Inhalte, wie zum Beispiel Bestellungen
@@ -356,10 +356,10 @@ const DATENSCHUTZ_HTML = `
           die Daten, die Sie an uns &uuml;bermitteln, nicht von Dritten
           mitgelesen werden.
         </p>
-        <h1 class="text-2xl font-black uppercase md:text-6xl">
+        <h2 class="font-display">
           4. Datenerfassung auf dieser Website
-        </h1>
-        <h1 class="text-xl font-black uppercase md:text-5xl">Cookies</h1>
+        </h2>
+        <h3 class="font-display">Cookies</h3>
         <p>
           Unsere Internetseiten verwenden so genannte &bdquo;Cookies&ldquo;.
           Cookies sind kleine Datenpakete und richten auf Ihrem Endger&auml;t
@@ -415,9 +415,9 @@ const DATENSCHUTZ_HTML = `
           Welche Cookies und Dienste auf dieser Website eingesetzt werden,
           k&ouml;nnen Sie dieser Datenschutzerkl&auml;rung entnehmen.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Kontaktformular
-        </h1>
+        </h3>
         <p>
           Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre
           Angaben aus dem Anfrageformular inklusive der von Ihnen dort
@@ -444,9 +444,9 @@ const DATENSCHUTZ_HTML = `
           Anfrage). Zwingende gesetzliche Bestimmungen &ndash; insbesondere
           Aufbewahrungsfristen &ndash; bleiben unber&uuml;hrt.
         </p>
-        <h1 class="text-xl font-black uppercase md:text-5xl">
+        <h3 class="font-display">
           Anfrage per E-Mail, Telefon oder Telefax
-        </h1>
+        </h3>
         <p>
           Wenn Sie uns per E-Mail, Telefon oder Telefax kontaktieren, wird Ihre
           Anfrage inklusive aller daraus hervorgehenden personenbezogenen Daten
@@ -474,10 +474,10 @@ const DATENSCHUTZ_HTML = `
           &ndash; insbesondere gesetzliche Aufbewahrungsfristen &ndash; bleiben
           unber&uuml;hrt.
         </p>
-        <h1 class="text-2xl font-black uppercase md:text-6xl">
+        <h2 class="font-display">
           5. Soziale Medien
-        </h1>
-        <h1 class="text-xl font-black uppercase md:text-5xl">Instagram</h1>
+        </h2>
+        <h3 class="font-display">Instagram</h3>
         <p>
           Auf dieser Website sind Funktionen des Dienstes Instagram eingebunden.
           Diese Funktionen werden angeboten durch die Meta Platforms Ireland
@@ -576,10 +576,10 @@ const DATENSCHUTZ_HTML = `
             >https://www.dataprivacyframework.gov/participant/4452</a
           >.
         </p>
-        <h1 class="text-2xl font-black uppercase md:text-6xl">
+        <h2 class="font-display">
           6. Plugins und Tools
-        </h1>
-        <h1 class="text-xl font-black uppercase md:text-5xl">Google Fonts</h1>
+        </h2>
+        <h3 class="font-display">Google Fonts</h3>
         <p>
           Diese Seite nutzt zur einheitlichen Darstellung von Schriftarten so
           genannte Google Fonts, die von Google bereitgestellt werden. Beim
@@ -641,9 +641,13 @@ const DATENSCHUTZ_HTML = `
 export default function DatenschutzPage() {
   return (
     <div className="flex flex-1 flex-col justify-start overflow-auto">
-      <div className="mt-8 flex w-full flex-col">
+      <div className="mt-10 flex w-full flex-col gap-10 md:mt-16">
+        <header className="flex flex-col gap-3 px-6 md:px-20">
+          <span className="section-eyebrow">Rechtliches</span>
+        </header>
         <div
-          className="m-8 flex flex-col gap-4 text-white md:m-16 md:gap-8"
+          className="prose prose-invert mx-auto w-full max-w-4xl px-6 pb-10 text-[14.5px] leading-[1.65] md:px-12 md:text-[15.5px]"
+          style={{ color: "var(--ink-2)" }}
           dangerouslySetInnerHTML={{ __html: DATENSCHUTZ_HTML }}
         />
         <Footer />
