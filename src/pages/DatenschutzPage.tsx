@@ -1,5 +1,3 @@
-import Footer from "../components/Footer";
-
 const DATENSCHUTZ_HTML = `
         <h1 class="text-3xl font-black break-words uppercase md:text-7xl">
           Datenschutzerkl&auml;rung
@@ -640,14 +638,36 @@ const DATENSCHUTZ_HTML = `
 
 export default function DatenschutzPage() {
   return (
-    <div className="flex flex-1 flex-col justify-start overflow-auto">
-      <div className="mt-8 flex w-full flex-col">
-        <div
-          className="m-8 flex flex-col gap-4 text-white md:m-16 md:gap-8"
-          dangerouslySetInnerHTML={{ __html: DATENSCHUTZ_HTML }}
-        />
-        <Footer />
+    <article
+      className="datenschutz mx-auto"
+      style={{
+        maxWidth: 760,
+        padding: "56px 24px 80px",
+        color: "var(--p-ink)",
+      }}
+    >
+      <div
+        className="caps"
+        style={{
+          fontSize: 10.5,
+          color: "var(--p-accent)",
+          letterSpacing: "0.2em",
+          marginBottom: 12,
+        }}
+      >
+        Rechtliches
       </div>
-    </div>
+      <div
+        className="datenschutz-body"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          fontSize: 15,
+          lineHeight: 1.65,
+        }}
+        dangerouslySetInnerHTML={{ __html: DATENSCHUTZ_HTML }}
+      />
+    </article>
   );
 }
