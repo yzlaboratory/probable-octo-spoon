@@ -325,18 +325,20 @@
   background-size: 4px 4px;
 }
 
-/* Page enter fade. */
+/* Page enter fade. Opacity-only so we don't leave a residual transform on
+   the wrapper — `to { transform: none }` resolves to matrix(1,0,0,1,0,0)
+   under animation-fill-mode: both, which counts as a non-none transform
+   and creates a containing block, breaking position: fixed for any modal
+   rendered inside the page (the upload dialog gets clipped to <main>). */
 .admin-shell .page-enter {
   animation: adminPageIn 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 @keyframes adminPageIn {
   from {
     opacity: 0.4;
-    transform: translateY(3px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 

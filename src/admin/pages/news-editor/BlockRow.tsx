@@ -100,7 +100,8 @@ export default function BlockRow({
       )}
 
       <div
-        className="caps absolute -left-8 top-3 font-mono text-[9px] opacity-0 transition group-hover:opacity-100"
+        aria-hidden
+        className="caps pointer-events-none absolute -left-8 top-3 font-mono text-[9px] opacity-0 transition group-hover:opacity-100"
         style={{ color: "var(--ink-4)" }}
       >
         {block.kind.slice(0, 3)}
