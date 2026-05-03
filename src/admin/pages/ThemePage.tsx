@@ -27,12 +27,12 @@ const BODY_FONTS: BodyFont[] = ["Geist", "IBMPlex", "Manrope"];
 const DENSITIES: Density[] = ["airy", "balanced", "compact"];
 
 const PUBLISH_DISABLED_REASON =
-  "Bald verfügbar — kommt mit dem Website-Redesign.";
+  "Bald verfügbar — sobald die Website Theme-Tokens liest.";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="caps text-[11px] mb-1.5 block"
+      className="caps mb-1.5 block text-[11px]"
       style={{ color: "var(--ink-3)" }}
     >
       {children}
@@ -72,7 +72,7 @@ function PaletteRow({
       <div className="flex-1">
         <div className="text-[13px] font-medium">{palette.label}</div>
         <div
-          className="font-mono mt-0.5 text-[10.5px]"
+          className="mt-0.5 font-mono text-[10.5px]"
           style={{ color: "var(--ink-3)" }}
         >
           {palette.paper.toUpperCase()} / {palette.primary.toUpperCase()}
@@ -242,8 +242,8 @@ export default function ThemePage() {
         subtitle={
           <>
             Probiere Farben, Schriften und Dichte aus. Die Vorschau aktualisiert
-            sich sofort. Die Einstellungen bleiben in deinem Browser, bis das
-            Website-Redesign live geht — solange wirken sie nicht auf
+            sich sofort. Die Einstellungen bleiben in deinem Browser, bis die
+            Website Theme-Tokens liest — solange wirken sie nicht auf
             Besucher:innen.
           </>
         }
@@ -336,7 +336,7 @@ export default function ThemePage() {
                     className="flex-1"
                     style={{ accentColor: "var(--primary)" }}
                   />
-                  <span className="font-mono w-12 text-right text-[12px]">
+                  <span className="w-12 text-right font-mono text-[12px]">
                     {draft.baseSizePx} px
                   </span>
                 </div>
@@ -384,12 +384,9 @@ export default function ThemePage() {
               Vorschau · Startseite
             </div>
             <ThemePreview draft={draft} />
-            <p
-              className="mt-3 text-[11.5px]"
-              style={{ color: "var(--ink-3)" }}
-            >
+            <p className="mt-3 text-[11.5px]" style={{ color: "var(--ink-3)" }}>
               Die Vorschau ist eine Simulation — die echte Website nutzt diese
-              Einstellungen erst, wenn das Website-Redesign live geht.
+              Einstellungen erst, sobald sie Theme-Tokens liest.
             </p>
           </div>
         </div>
