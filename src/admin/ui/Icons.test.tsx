@@ -4,9 +4,9 @@ import { Check, Icons, Plus, Wordmark, X } from "./Icons";
 import type { IconName } from "./Icons";
 
 describe("Icons", () => {
-  it("exports all 34 prototype icons", () => {
+  it("exports all 33 prototype icons", () => {
     const expected: IconName[] = [
-      "Dashboard", "News", "Sponsors", "Vorstand", "Theme", "Media", "Schedule",
+      "Dashboard", "News", "Sponsors", "Vorstand", "Media", "Schedule",
       "Settings", "Search", "Plus", "Arrow", "Chevron", "Down", "Eye", "EyeOff",
       "Calendar", "Tag", "Drag", "Check", "X", "Bold", "Italic", "Link", "Image",
       "Heading", "List", "External", "Upload", "Bell", "Trash", "Star", "Sliders",

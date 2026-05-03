@@ -71,17 +71,6 @@ export const Vorstand = (p: IconProps) => (
   </Icon>
 );
 
-export const Theme = (p: IconProps) => (
-  <Icon {...p}>
-    <circle cx="12" cy="12" r="9" />
-    <path d="M12 3a9 9 0 0 0 0 18" />
-    <circle cx="6.5" cy="11" r="1.2" fill="currentColor" />
-    <circle cx="9" cy="6.5" r="1.2" fill="currentColor" />
-    <circle cx="15" cy="6.5" r="1.2" fill="currentColor" />
-    <circle cx="17.5" cy="11" r="1.2" fill="currentColor" />
-  </Icon>
-);
-
 export const Media = (p: IconProps) => (
   <Icon {...p}>
     <rect x="3" y="5" width="18" height="14" rx="1" />
@@ -331,7 +320,6 @@ export const Icons = {
   News,
   Sponsors,
   Vorstand,
-  Theme,
   Media,
   Schedule,
   Settings,

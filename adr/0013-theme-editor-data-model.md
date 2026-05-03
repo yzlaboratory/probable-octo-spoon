@@ -1,11 +1,11 @@
 # ADR 0013 — Theme editor: client-only state for now, server schema sketched for later
 
-- **Status:** Accepted
+- **Status:** Superseded — the theme editor was removed from the admin panel on 2026-05-03 (public-redesign branch). The editor previewed a hypothetical token-driven public site, but the public-redesign (PR #20) shipped a fixed dark `cs-tile` shell that does not consume theme tokens, so the editor was rendering settings nothing reads. Until / unless a real publish path is built, the screen has no job. The `localStorage` key `clubsoft.admin.theme.draft.v1`, the `theme_settings` schema sketch below, and the four palettes / font enums are kept here for future reference if the work is revived.
 - **Date:** 2026-05-02
 - **Deciders:** Yannik Zeyer.
 - **Supersedes:** none
-- **Superseded by:** none
-- **Related:** `specs/planned/admin-theme-editor.md`, `design/IMPLEMENTATION_PLAN.md` (Phase 5, Decision 3 option (a)), ADR 0007 (SQLite), ADR 0009 (admin authentication mechanics).
+- **Superseded by:** removal commit on `public-redesign` (no replacement ADR — the feature is dropped, not redesigned).
+- **Related:** `design/IMPLEMENTATION_PLAN.md` (Phase 5, Decision 3 option (a)), ADR 0007 (SQLite), ADR 0009 (admin authentication mechanics).
 
 ## Context
 
