@@ -14,29 +14,63 @@ export default function NewsDetail({
   longHtml,
 }: Props) {
   return (
-    <div className="m-8 flex flex-col gap-4 text-white lg:m-16 lg:mt-32 lg:gap-16">
-      <div>
-        <h1 className="text-3xl font-black sm:text-7xl">
-          {title.toUpperCase()}
-        </h1>
-        <div className="flex w-full flex-row items-center gap-4">
-          <div className="bg-primary h-3 w-10"></div>
-          <h3 className="text-md font-medium text-white">
-            {date} / {tag}
-          </h3>
-        </div>
+    <article
+      className="news-article mx-auto"
+      style={{ maxWidth: 720, padding: "56px 24px 80px" }}
+    >
+      <div
+        className="caps"
+        style={{
+          fontSize: 10.5,
+          color: "var(--p-accent)",
+          letterSpacing: "0.2em",
+          marginBottom: 12,
+        }}
+      >
+        {tag} · {date}
       </div>
-      <div className="flex w-full flex-col items-center gap-4 lg:flex-row lg:gap-0">
-        <img
-          src={imageUrl}
-          alt="Portrait"
-          className="w-full max-h-[70vh] object-contain lg:w-2/3 lg:max-w-[66.67%] lg:min-w-[66.67%] lg:pr-8"
-        />
+
+      <h1
+        className="font-display"
+        style={{
+          fontSize: "clamp(32px, 5vw, 46px)",
+          letterSpacing: "-0.02em",
+          lineHeight: 1.05,
+          margin: 0,
+        }}
+      >
+        {title}
+      </h1>
+
+      {imageUrl && (
         <div
-          className="prose prose-invert flex w-full max-w-none items-start justify-start text-sm font-light text-balance text-white lg:w-1/3 lg:max-w-[33.33%] lg:min-w-[33.33%] lg:pl-8 lg:text-xl"
-          dangerouslySetInnerHTML={{ __html: longHtml }}
-        />
-      </div>
-    </div>
+          aria-hidden="true"
+          style={{
+            marginTop: 32,
+            aspectRatio: "16 / 9",
+            borderRadius: 8,
+            overflow: "hidden",
+            position: "relative",
+            background: `url(${imageUrl}) center/cover no-repeat, linear-gradient(135deg, var(--p-primary-2), var(--p-primary))`,
+          }}
+        >
+          <span
+            className="p-stripes"
+            style={{ position: "absolute", inset: 0 }}
+          />
+        </div>
+      )}
+
+      <div
+        className="news-article-body font-serif"
+        style={{
+          marginTop: 32,
+          fontSize: 17,
+          lineHeight: 1.7,
+          color: "var(--p-ink)",
+        }}
+        dangerouslySetInnerHTML={{ __html: longHtml }}
+      />
+    </article>
   );
 }
