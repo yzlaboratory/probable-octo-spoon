@@ -20,6 +20,7 @@ import SponsorEditPage from "./admin/pages/SponsorEditPage";
 import VorstandPage from "./admin/pages/VorstandPage";
 import AdminsPage from "./admin/pages/AdminsPage";
 import PublicPreviewPage from "./admin/pages/PublicPreviewPage";
+import NotFoundPage from "./admin/pages/NotFoundPage";
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/admin/vorstand" element={<VorstandPage />} />
             <Route path="/admin/admins" element={<AdminsPage />} />
             <Route path="/admin/public" element={<PublicPreviewPage />} />
+            <Route path="/admin/*" element={<NotFoundPage />} />
           </Route>
         </Route>
       </Routes>
