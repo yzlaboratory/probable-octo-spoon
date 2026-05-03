@@ -15,6 +15,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   events: "Termine",
   media: "Mediathek",
   members: "Mitglieder",
+  training: "Training",
   public: "Website-Vorschau",
 };
 

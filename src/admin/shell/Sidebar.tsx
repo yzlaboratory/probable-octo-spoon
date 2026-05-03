@@ -31,6 +31,12 @@ const CONTENT_NAV: NavEntry[] = [
     icon: "Vorstand",
     to: "/admin/vorstand",
   },
+  {
+    id: "training",
+    label: "Training",
+    icon: "Schedule",
+    to: "/admin/training",
+  },
   { id: "members", label: "Mitglieder", icon: "Vorstand", soon: true },
 ];
 

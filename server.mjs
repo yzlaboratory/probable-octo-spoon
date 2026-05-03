@@ -12,6 +12,7 @@ import mediaRoutes from "./server/routes/media.mjs";
 import newsRoutes, { runPublishTick } from "./server/routes/news.mjs";
 import sponsorRoutes from "./server/routes/sponsors.mjs";
 import vorstandRoutes from "./server/routes/vorstand.mjs";
+import trainingRoutes from "./server/routes/training.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -37,6 +38,7 @@ app.use("/api/media", mediaRoutes(db));
 app.use("/api/news", newsRoutes(db));
 app.use("/api/sponsors", sponsorRoutes(db));
 app.use("/api/vorstand", vorstandRoutes(db));
+app.use("/api/training", trainingRoutes(db));
 
 async function callFupa(req, res) {
   try {

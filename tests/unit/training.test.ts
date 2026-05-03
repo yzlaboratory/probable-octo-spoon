@@ -3,15 +3,40 @@ import {
   slotsForDay,
   telHref,
   trainingDaysInOrder,
-  trainingSlots,
-  seasonalBanner,
-  type TrainingVisibility,
+  type TrainingSlot,
 } from "../../src/data/training";
 
-const ALLOWED_VISIBILITIES: TrainingVisibility[] = [
-  "offen für Gäste",
-  "Anmeldung erforderlich",
-  "nur Mitglieder",
+const SAMPLE: TrainingSlot[] = [
+  {
+    id: 1,
+    group: "Bambini",
+    day: "Dienstag",
+    timeFrom: "17:00",
+    timeTo: "18:00",
+    trainer: "A",
+    phone: "0151 1",
+    visibility: "offen für Gäste",
+  },
+  {
+    id: 2,
+    group: "Herren",
+    day: "Dienstag",
+    timeFrom: "19:00",
+    timeTo: "20:30",
+    trainer: "B",
+    phone: "0151 2",
+    visibility: "nur Mitglieder",
+  },
+  {
+    id: 3,
+    group: "AH",
+    day: "Freitag",
+    timeFrom: "19:30",
+    timeTo: "21:00",
+    trainer: "C",
+    phone: "0151 3",
+    visibility: "offen für Gäste",
+  },
 ];
 
 describe("trainingDaysInOrder", () => {
@@ -23,62 +48,29 @@ describe("trainingDaysInOrder", () => {
   });
 });
 
-describe("trainingSlots schema", () => {
-  it("each slot carries the required fields", () => {
-    for (const slot of trainingSlots) {
-      expect(slot.id).toBeTypeOf("string");
-      expect(slot.id.length).toBeGreaterThan(0);
-      expect(slot.group.length).toBeGreaterThan(0);
-      expect(trainingDaysInOrder).toContain(slot.day);
-      expect(slot.timeFrom).toMatch(/^\d{2}:\d{2}$/);
-      expect(slot.timeTo).toMatch(/^\d{2}:\d{2}$/);
-      expect(slot.trainer.length).toBeGreaterThan(0);
-      expect(slot.phone.length).toBeGreaterThan(0);
-      expect(ALLOWED_VISIBILITIES).toContain(slot.visibility);
-    }
-  });
-
-  it("each slot's timeFrom is strictly before timeTo", () => {
-    for (const slot of trainingSlots) {
-      expect(slot.timeFrom < slot.timeTo, `${slot.id}: ${slot.timeFrom} < ${slot.timeTo}`).toBe(true);
-    }
-  });
-
-  it("slot ids are unique", () => {
-    const ids = trainingSlots.map((s) => s.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("keeps the AH slot marked as 'offen für Gäste' per spec", () => {
-    const ah = trainingSlots.find((s) => /alte herren|^ah\b/i.test(s.group));
-    expect(ah, "AH slot present").toBeDefined();
-    expect(ah!.visibility).toBe("offen für Gäste");
-  });
-});
-
 describe("slotsForDay", () => {
   it("only returns slots for the requested day", () => {
     for (const day of trainingDaysInOrder) {
-      const slots = slotsForDay(day);
+      const slots = slotsForDay(SAMPLE, day);
       for (const slot of slots) expect(slot.day).toBe(day);
     }
   });
 
   it("returns slots sorted by timeFrom ascending", () => {
-    for (const day of trainingDaysInOrder) {
-      const slots = slotsForDay(day);
-      for (let i = 1; i < slots.length; i++) {
-        expect(slots[i - 1].timeFrom <= slots[i].timeFrom).toBe(true);
-      }
-    }
+    const slots = slotsForDay(SAMPLE, "Dienstag");
+    expect(slots.map((s) => s.timeFrom)).toEqual(["17:00", "19:00"]);
   });
 
-  it("total slot count across all days equals trainingSlots.length", () => {
+  it("total slot count across all days equals input length", () => {
     const total = trainingDaysInOrder.reduce(
-      (acc, d) => acc + slotsForDay(d).length,
+      (acc, d) => acc + slotsForDay(SAMPLE, d).length,
       0,
     );
-    expect(total).toBe(trainingSlots.length);
+    expect(total).toBe(SAMPLE.length);
+  });
+
+  it("returns empty array on empty input", () => {
+    expect(slotsForDay([], "Montag")).toEqual([]);
   });
 });
 
@@ -90,14 +82,5 @@ describe("telHref", () => {
 
   it("returns tel: on empty phone without crashing", () => {
     expect(telHref("")).toBe("tel:");
-  });
-});
-
-describe("seasonalBanner", () => {
-  it("is either null or a non-empty string", () => {
-    if (seasonalBanner.message !== null) {
-      expect(typeof seasonalBanner.message).toBe("string");
-      expect(seasonalBanner.message!.length).toBeGreaterThan(0);
-    }
   });
 });
