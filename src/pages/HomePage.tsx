@@ -20,7 +20,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-1 flex-col justify-start overflow-auto">
-      <div className="mt-30 flex w-full flex-col gap-30">
+      <div className="mt-10 flex w-full flex-col gap-20 md:mt-14 md:gap-24">
         <NewsSection newsItems={newsItems} />
         <NextFixturesSection />
         <LeagueStandingsSection />

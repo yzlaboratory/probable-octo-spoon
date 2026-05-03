@@ -38,23 +38,34 @@ export default function Sponsorcard({
 
   return (
     <div
-      className={`bg-background relative w-9/10 shrink-0 px-2 ${lgWidthClass} ${containerClassName || ""}`}
+      className={`relative w-9/10 shrink-0 px-2 ${lgWidthClass} ${containerClassName || ""}`}
     >
-      <div className="absolute inset-0 card bg-dark-gray-700 after:bg-primary flex flex-col items-center justify-center overflow-hidden text-white before:absolute before:right-0 before:bottom-0 before:z-2 before:h-[2px] before:w-full before:bg-gray-600 before:transition-[width] before:duration-300 before:ease-in-out before:content-[''] after:absolute after:bottom-0 after:left-0 after:z-2 after:h-[2px] after:w-0 after:transition-[width] after:delay-125 after:duration-300 after:ease-[cubic-bezier(0.55,0.085,0.68,0.53)] after:content-[''] hover:cursor-pointer hover:before:w-0 hover:after:w-full">
+      <div
+        className="cs-tile absolute inset-2 flex flex-col items-center justify-center overflow-hidden"
+        style={{ background: "var(--paper-3)" }}
+      >
+        <span
+          className="caps absolute top-3 left-4 text-[9.5px]"
+          style={{ color: "var(--ink-3)" }}
+        >
+          Partner
+        </span>
         <div
           ref={scrollRef}
-          className="hidescrollbar flex w-full h-full snap-x snap-mandatory flex-row overflow-auto scroll-smooth"
+          className="hidescrollbar flex h-full w-full snap-x snap-mandatory flex-row overflow-auto scroll-smooth"
         >
           {imageUrls.map((img, index) => (
             <a
               key={index}
               href={urls[index]}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex min-w-full snap-start items-center justify-center"
             >
               <img
                 src={img}
                 alt="Sponsor"
-                className={`max-w-full max-h-full object-contain px-4 ${backgroundClasses?.[index] || ""}`}
+                className={`max-h-full max-w-full object-contain px-6 py-8 ${backgroundClasses?.[index] || ""}`}
               />
             </a>
           ))}

@@ -14,29 +14,56 @@ export default function NewsDetail({
   longHtml,
 }: Props) {
   return (
-    <div className="m-8 flex flex-col gap-4 text-white lg:m-16 lg:mt-32 lg:gap-16">
-      <div>
-        <h1 className="text-3xl font-black sm:text-7xl">
-          {title.toUpperCase()}
-        </h1>
-        <div className="flex w-full flex-row items-center gap-4">
-          <div className="bg-primary h-3 w-10"></div>
-          <h3 className="text-md font-medium text-white">
-            {date} / {tag}
-          </h3>
+    <article
+      className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10 md:px-12 md:py-16 lg:gap-12"
+      style={{ color: "var(--ink)" }}
+    >
+      <header className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <span
+            className="chip"
+            style={{
+              background: "oklch(0.62 0.22 290 / 0.15)",
+              color: "oklch(0.8 0.18 290)",
+            }}
+          >
+            <span
+              className="chip-dot"
+              style={{ background: "var(--primary)" }}
+            />
+            {tag}
+          </span>
+          <span
+            className="font-mono text-[12px]"
+            style={{ color: "var(--ink-3)" }}
+          >
+            {date}
+          </span>
         </div>
-      </div>
-      <div className="flex w-full flex-col items-center gap-4 lg:flex-row lg:gap-0">
+        <h1
+          className="text-2xl leading-[1.15] font-semibold md:text-4xl"
+          style={{ letterSpacing: "-0.02em" }}
+        >
+          {title}
+        </h1>
+      </header>
+
+      <div
+        className="cs-card overflow-hidden p-0"
+        style={{ background: "var(--paper-2)" }}
+      >
         <img
           src={imageUrl}
           alt="Portrait"
-          className="w-full max-h-[70vh] object-contain lg:w-2/3 lg:max-w-[66.67%] lg:min-w-[66.67%] lg:pr-8"
-        />
-        <div
-          className="prose prose-invert flex w-full max-w-none items-start justify-start text-sm font-light text-balance text-white lg:w-1/3 lg:max-w-[33.33%] lg:min-w-[33.33%] lg:pl-8 lg:text-xl"
-          dangerouslySetInnerHTML={{ __html: longHtml }}
+          className="block max-h-[70vh] w-full object-contain"
         />
       </div>
-    </div>
+
+      <div
+        className="prose prose-invert max-w-none text-[15px] leading-[1.7] md:text-[17px]"
+        style={{ color: "var(--ink-2)" }}
+        dangerouslySetInnerHTML={{ __html: longHtml }}
+      />
+    </article>
   );
 }

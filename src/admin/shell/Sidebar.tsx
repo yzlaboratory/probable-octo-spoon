@@ -42,12 +42,6 @@ const CONFIG_NAV: NavEntry[] = [
     to: "/admin/public",
   },
   {
-    id: "theme",
-    label: "Erscheinungsbild",
-    icon: "Theme",
-    to: "/admin/theme",
-  },
-  {
     id: "admins",
     label: "Administratoren",
     icon: "Vorstand",

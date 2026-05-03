@@ -59,9 +59,6 @@ describe("Sidebar", () => {
     const admins = getByText("Administratoren").closest(
       "a",
     ) as HTMLAnchorElement;
-    const theme = getByText("Erscheinungsbild").closest(
-      "a",
-    ) as HTMLAnchorElement;
     const publicPreview = getByText("Website-Vorschau").closest(
       "a",
     ) as HTMLAnchorElement;
@@ -70,7 +67,6 @@ describe("Sidebar", () => {
     expect(media.getAttribute("href")).toBe("/admin/media");
     expect(sponsors.getAttribute("href")).toBe("/admin/sponsors");
     expect(admins.getAttribute("href")).toBe("/admin/admins");
-    expect(theme.getAttribute("href")).toBe("/admin/theme");
     expect(publicPreview.getAttribute("href")).toBe("/admin/public");
   });
 
