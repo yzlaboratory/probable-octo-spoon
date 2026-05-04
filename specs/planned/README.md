@@ -18,10 +18,10 @@ Each file follows the same structure so a reader can cold-read any one of them:
 
 ## Where architecture lives
 
-Implementation mechanics — storage schema, editor library, session model, rate-limit numbers, image pipeline, audit-log schema, structured-data emission, security headers — do **not** appear in these specs. They live in `adr/`:
+Implementation mechanics — storage schema, editor library, session model, rate-limit numbers, image pipeline, audit-log schema, structured-data emission, security headers — do **not** appear in these specs. They live in `docs/adr/`:
 
-- Committed decisions go in a dedicated ADR (`adr/0001-…`, `adr/0004-…`, etc.).
-- Open architectural questions live in `adr/0003-architecture-backlog.md` until the feature is scheduled, then graduate into their own ADR.
+- Committed decisions go in a dedicated ADR (`docs/adr/0001-…`, `docs/adr/0004-…`, etc.).
+- Open architectural questions live in `docs/adr/0003-architecture-backlog.md` until the feature is scheduled, then graduate into their own ADR.
 
 Specs link to the backlog entry or ADR by number, but do not duplicate the mechanics. If a planned spec needs to say "the hashing algorithm belongs in an ADR," the link is enough — a whole paragraph is not.
 

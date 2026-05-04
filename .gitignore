@@ -30,3 +30,6 @@ infrastructure/tfplan
 infrastructure/*.tfplan
 infrastructure/lambda/*.zip
 cypress/screenshots/
+
+# local-only issue tracker
+docs/ephemeral/

@@ -46,7 +46,7 @@ None gating the MVP. The FuPa terms-of-use check remains as an operational pre-s
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B2 (shared with `game-schedule.md`).
+Tracked in `docs/adr/0003-architecture-backlog.md` B2 (shared with `game-schedule.md`).
 
 ## What it does not do
 

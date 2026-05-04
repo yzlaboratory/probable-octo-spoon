@@ -40,7 +40,7 @@ Specifically:
 
 3. **Admin UI.** A single-page admin area under `/admin` implements the editor flows already specified in `specs/planned/admin-{auth,news-editor,sponsor-editor,vorstand-editor}.md`. The UI consumes only the backend API — no direct DB access from the browser, no shared secrets in the client bundle.
 
-4. **Frontend.** The public site replaces its build-time JSON imports and hardcoded arrays with runtime fetches against the public read endpoints. The first-paint strategy (inlined at request time vs. skeleton-first fetch) is tracked in `adr/0003-architecture-backlog.md` B1 — both patterns are already in the codebase and the choice per section can be made when each migration phase lands.
+4. **Frontend.** The public site replaces its build-time JSON imports and hardcoded arrays with runtime fetches against the public read endpoints. The first-paint strategy (inlined at request time vs. skeleton-first fetch) is tracked in `docs/adr/0003-architecture-backlog.md` B1 — both patterns are already in the codebase and the choice per section can be made when each migration phase lands.
 
 5. **Migration pathway.**
    - Phase 1: stand up the DB schema and backend endpoints with read-only routes that return the current hardcoded data as seeds. Verify the public site behaves identically when wired to the API.
@@ -81,4 +81,4 @@ Specifically:
 
 - Write per-domain schema notes as the design crystallizes — either one schema ADR when the first migration lands, or a small ADR per domain if schemas diverge.
 - Plan and schedule the three migration phases with the Vorstand so cutover does not collide with Kirmes, Dreikampf, or the season-opening fixture.
-- Resolve `adr/0003-architecture-backlog.md` B1 (first-paint strategy, connection pooling, backup/restore drill) as phase 1 begins.
+- Resolve `docs/adr/0003-architecture-backlog.md` B1 (first-paint strategy, connection pooling, backup/restore drill) as phase 1 begins.

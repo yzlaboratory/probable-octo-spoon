@@ -56,7 +56,7 @@ The entire first pass of scoping decisions, starting with:
 
 ## Architecture
 
-Not yet tracked in `adr/0003-architecture-backlog.md` — this feature is far enough out that adding an entry now would be premature. A backlog entry gets written once the scope decisions above are settled.
+Not yet tracked in `docs/adr/0003-architecture-backlog.md` — this feature is far enough out that adding an entry now would be premature. A backlog entry gets written once the scope decisions above are settled.
 
 ## What it does not do (for now)
 

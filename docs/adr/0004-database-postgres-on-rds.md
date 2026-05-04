@@ -60,4 +60,4 @@ The workload is small: kilobytes of content, dozens of reads per minute at peak,
 - Pick a migrations tool (dbmate, node-pg-migrate, or similar) and commit to one migration-file style — very small ADR, or a line in this one once the backend repo lands.
 - Parameter-group hardening (statement timeout, `idle_in_transaction_session_timeout`, `log_min_duration_statement`) before the admin UI is public.
 - Backup restore drill before Multi-AZ goes live — one full restore into a throwaway instance, documented.
-- Decide connection-pooling story (RDS Proxy vs. a per-process pool in the Express app). Tracked in `adr/0003-architecture-backlog.md` B1.
+- Decide connection-pooling story (RDS Proxy vs. a per-process pool in the Express app). Tracked in `docs/adr/0003-architecture-backlog.md` B1.

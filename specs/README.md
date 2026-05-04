@@ -2,7 +2,7 @@
 
 Prose-style user scenarios for the SV Alemannia Thalexweiler website.
 
-Each file describes what a person using the site experiences. Implementation details (component structure, routing config, build tooling, data shapes, endpoint definitions) live in the code, in `CLAUDE.md`, and in `adr/` — not in these specs. If a paragraph here only makes sense by reading source, it has drifted and should be moved.
+Each file describes what a person using the site experiences. Implementation details (component structure, routing config, build tooling, data shapes, endpoint definitions) live in the code, in `CLAUDE.md`, and in `docs/adr/` — not in these specs. If a paragraph here only makes sense by reading source, it has drifted and should be moved.
 
 "Person using the site" covers both public visitors and admins (once the admin area lands). Both get scenarios written the same way.
 
@@ -33,19 +33,19 @@ See `planned/README.md` for the shared shape every planned spec follows. Files:
 
 ## Where architecture lives
 
-- `adr/0000-template.md` — template for new ADRs.
-- `adr/0001-migrate-hardcoded-data-to-database.md` — the umbrella decision the admin specs depend on.
-- `adr/0002-aws-as-infrastructure.md` — hosting baseline.
-- `adr/0003-architecture-backlog.md` — open architectural questions per planned feature, kept here until each feature is scheduled and graduates into its own ADR.
-- `adr/0004-database-postgres-on-rds.md` — **superseded by 0007**.
-- `adr/0005-compute-ecs-fargate-behind-alb.md` — **superseded by 0008**.
-- `adr/0006-api-shape-rest-json.md` — internal API shape.
-- `adr/0007-database-sqlite-on-ebs.md` — datastore (SQLite file on the app host's EBS volume, weekly `.backup` to S3).
-- `adr/0008-compute-single-ec2-with-traefik.md` — compute topology (single EC2, Traefik, Let's Encrypt).
-- `adr/0009-admin-authentication-mechanics.md` — hashing, sessions, timeouts, security headers.
-- `adr/0010-news-editor-data-model.md` — TipTap, HTML sanitization, image pipeline.
-- `adr/0011-sponsor-data-model.md` — sponsor schema, palette, SVG sanitization.
-- `adr/0012-vorstand-data-model.md` — Vorstand schema, reorder model, portrait pipeline.
+- `docs/adr/0000-template.md` — template for new ADRs.
+- `docs/adr/0001-migrate-hardcoded-data-to-database.md` — the umbrella decision the admin specs depend on.
+- `docs/adr/0002-aws-as-infrastructure.md` — hosting baseline.
+- `docs/adr/0003-architecture-backlog.md` — open architectural questions per planned feature, kept here until each feature is scheduled and graduates into its own ADR.
+- `docs/adr/0004-database-postgres-on-rds.md` — **superseded by 0007**.
+- `docs/adr/0005-compute-ecs-fargate-behind-alb.md` — **superseded by 0008**.
+- `docs/adr/0006-api-shape-rest-json.md` — internal API shape.
+- `docs/adr/0007-database-sqlite-on-ebs.md` — datastore (SQLite file on the app host's EBS volume, weekly `.backup` to S3).
+- `docs/adr/0008-compute-single-ec2-with-traefik.md` — compute topology (single EC2, Traefik, Let's Encrypt).
+- `docs/adr/0009-admin-authentication-mechanics.md` — hashing, sessions, timeouts, security headers.
+- `docs/adr/0010-news-editor-data-model.md` — TipTap, HTML sanitization, image pipeline.
+- `docs/adr/0011-sponsor-data-model.md` — sponsor schema, palette, SVG sanitization.
+- `docs/adr/0012-vorstand-data-model.md` — Vorstand schema, reorder model, portrait pipeline.
 
 ## Conventions
 

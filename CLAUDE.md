@@ -90,3 +90,13 @@ npm run test:admin
 
 - `IG_ACCESS_TOKEN` — Instagram Graph API token, read by `server.mjs`. If missing or equal to `"placeholder"`, `/api/instagram` returns an empty array.
 - `PORT` — server port for `npm run serve` (defaults to 4321).
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as local markdown under `docs/ephemeral/` (gitignored). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout (`CONTEXT.md` + `docs/adr/` at repo root). See `docs/agents/domain.md`.

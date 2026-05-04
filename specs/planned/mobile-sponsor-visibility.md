@@ -44,4 +44,4 @@ None gating the MVP. Desktop positions are treated as load-bearing and are not m
 
 ## Architecture and instrumentation
 
-Tracked in `adr/0003-architecture-backlog.md` B5 (shared with `admin-sponsor-editor.md`).
+Tracked in `docs/adr/0003-architecture-backlog.md` B5 (shared with `admin-sponsor-editor.md`).

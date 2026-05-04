@@ -44,7 +44,7 @@ None gating the MVP. The AH evening session is labelled **offen für Gäste**.
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B7.
+Tracked in `docs/adr/0003-architecture-backlog.md` B7.
 
 ## What it does not do
 

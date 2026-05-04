@@ -45,7 +45,7 @@ None gating the MVP.
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B2 (shared with `league-standings.md`).
+Tracked in `docs/adr/0003-architecture-backlog.md` B2 (shared with `league-standings.md`).
 
 ## What it does not do
 

@@ -42,7 +42,7 @@ This ADR is an **umbrella decision**: it fixes the vendor, the region, and a sma
 
 7. **Email.** **Amazon SES** for the contact-form router (`specs/planned/contact-form.md`), admin auto-acks, password resets, and anomaly emails (`specs/planned/admin-auth.md`). Domain verified for `svthalexweiler.de` with SPF, DKIM, and DMARC records published.
 
-8. **Scheduled jobs.** **EventBridge Scheduler → Lambda** for the IG token refresher, the SFV scrape (if that path is chosen — see `adr/0003-architecture-backlog.md` B2), and housekeeping jobs (audit-log pruning, soft-delete purges).
+8. **Scheduled jobs.** **EventBridge Scheduler → Lambda** for the IG token refresher, the SFV scrape (if that path is chosen — see `docs/adr/0003-architecture-backlog.md` B2), and housekeeping jobs (audit-log pruning, soft-delete purges).
 
 9. **Identity and access.**
    - All human access via IAM Identity Center (SSO); no long-lived IAM user keys for humans.

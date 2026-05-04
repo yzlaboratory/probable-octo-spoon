@@ -46,7 +46,7 @@ None gating the MVP. The feature is blocked on the admin area landing first (for
 
 ## Architecture
 
-Tracked in `adr/0003-architecture-backlog.md` B8.
+Tracked in `docs/adr/0003-architecture-backlog.md` B8.
 
 ## What the contact form does not do
 
