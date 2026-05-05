@@ -29,6 +29,11 @@ jobs:
       - name: Install
         run: npm ci --legacy-peer-deps
 
+      # Vitest browser project + Playwright e2e both run on Chromium. The runner
+      # does not ship browsers — install them (and Linux deps) once per job.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
       # On PRs, fetch the latest green main coverage-summary.json so the diff
       # comparator has a meaningful baseline. The same diff comparator module
       # gates locally and in CI; only the baseline source path differs.
