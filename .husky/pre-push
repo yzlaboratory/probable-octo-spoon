@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# Local coverage gate per ADR 0015. Runs Vitest both projects with coverage,
+# diffs against .git/last-good-coverage.json, fails the push on regression.
+# First push from a fresh clone (no cache) is informational only.
+#
+# Bypass policy: --no-verify is reserved for explicit user authorisation.
+# Agents do not bypass.
+
+set -e
+
+start=$(date +%s)
+
+echo "[pre-push] running vitest both projects with coverage..."
+npm run test:coverage --silent
+
+echo "[pre-push] diffing coverage against .git/last-good-coverage.json..."
+node scripts/verify-coverage.mjs
+
+end=$(date +%s)
+echo "[pre-push] wall time: $((end - start))s (target: <= 90s)"

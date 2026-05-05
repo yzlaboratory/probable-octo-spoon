@@ -1,6 +1,9 @@
 # build output
 dist/
 
+# coverage reports (generated; baseline cache lives in .git/, never committed)
+coverage/
+
 # generated types
 .astro/
 
