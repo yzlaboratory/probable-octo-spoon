@@ -8,18 +8,32 @@
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import Database from "better-sqlite3";
+import { openDb } from "../server/db.mjs";
 
 const DB_PATH = process.env.DB_PATH ?? "/tmp/clubsoft-local/app.db";
 const MEDIA_ROOT = process.env.MEDIA_ROOT ?? "/tmp/clubsoft-local/media";
 const REPO = path.resolve(import.meta.dirname, "..");
 
-if (!fs.existsSync(DB_PATH)) {
-  console.error(`DB not found at ${DB_PATH} — start server.mjs first.`);
-  process.exit(1);
-}
+// openDb() is migration-aware and creates the file/dir if missing — that
+// makes this script usable both for local dev (after the server has booted)
+// and for the e2e wrapper (which drops the data dir per-run and needs the
+// schema to exist before INSERTs). Falling through to better-sqlite3
+// directly would skip migrations and crash on the INSERT.
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+const db = openDb(DB_PATH);
 
-const db = new Database(DB_PATH);
+// Idempotency: if seed has already run (sponsors present), don't duplicate.
+// Re-running this script on a populated DB used to multiply rows because the
+// INSERTs are unconditional. Cheap to gate on a single COUNT.
+const existingSponsors = db
+  .prepare("SELECT COUNT(*) AS n FROM sponsors")
+  .get();
+if (existingSponsors.n > 0) {
+  console.log(
+    `seed-local-demo: ${existingSponsors.n} sponsors present — skipping seed.`,
+  );
+  process.exit(0);
+}
 
 function copyImage(srcRel, kind, ext) {
   const src = path.join(REPO, srcRel);
