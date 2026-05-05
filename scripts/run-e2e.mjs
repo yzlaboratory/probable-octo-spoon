@@ -39,11 +39,12 @@ if (existsSync(dumpDir)) {
 mkdirSync(dumpDir, { recursive: true });
 
 // Build the SPA if dist/index.html is missing — the server expects it to
-// exist for the SPA fallback.
+// exist for the SPA fallback. Build with sourcemaps so Monocart can map
+// browser-side V8 coverage back to repo-relative source paths.
 const distIndex = resolve(repoRoot, "dist", "index.html");
 if (!existsSync(distIndex) && process.env.E2E_SKIP_BUILD !== "1") {
   console.log("[run-e2e] dist/index.html missing — running vite build...");
-  const build = spawnSync("npx", ["vite", "build"], {
+  const build = spawnSync("npx", ["vite", "build", "--sourcemap=true"], {
     cwd: repoRoot,
     stdio: "inherit",
   });
@@ -124,7 +125,10 @@ async function runPlaywright() {
 
 const result = await runE2eServer({
   command: "node",
-  args: [resolve(repoRoot, "server.mjs")],
+  // Boot via the e2e entry shim so SIGTERM triggers v8.takeCoverage() and
+  // a clean process.exit(0) — NODE_V8_COVERAGE's default atexit hook is
+  // unreliable on signal-induced exits.
+  args: [resolve(repoRoot, "scripts", "e2e-server-entry.mjs")],
   env: {
     PORT,
     DB_PATH: resolve(dataDir, "app.db"),
