@@ -62,4 +62,82 @@ test.describe("Gallery Components", () => {
       expect(await imgs.count()).toBeGreaterThanOrEqual(1);
     });
   });
+
+  // Exercises the desktop-only handlers in Gallery.tsx (handleNext, handlePrev,
+  // handleScroll, pageWidth, ResizeObserver) which only fire on user
+  // interaction at viewport ≥ 64rem. Without these the merged-tier coverage
+  // for src/components/Gallery.tsx regresses.
+  test.describe("Desktop scroll controls", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto("/");
+      await expect(page.locator(".newscardcontainer").first()).toBeVisible();
+    });
+
+    test("next button scrolls the news gallery forward", async ({ page }) => {
+      const container = page
+        .locator(".galleryContainer")
+        .filter({ has: page.locator(".newscardcontainer") })
+        .first();
+      const nextBtn = page.locator(".newsNextButton");
+      await expect(nextBtn).toBeVisible();
+
+      const before = await container.evaluate((el) => el.scrollLeft);
+      await nextBtn.click();
+      await expect
+        .poll(async () => container.evaluate((el) => el.scrollLeft))
+        .toBeGreaterThan(before);
+    });
+
+    test("prev button reverses the scroll after stepping forward", async ({
+      page,
+    }) => {
+      const container = page
+        .locator(".galleryContainer")
+        .filter({ has: page.locator(".newscardcontainer") })
+        .first();
+      await page.locator(".newsNextButton").click();
+      await expect
+        .poll(async () => container.evaluate((el) => el.scrollLeft))
+        .toBeGreaterThan(0);
+
+      const afterNext = await container.evaluate((el) => el.scrollLeft);
+      await page.locator(".newsPrevButton").click();
+      await expect
+        .poll(async () => container.evaluate((el) => el.scrollLeft))
+        .toBeLessThan(afterNext);
+    });
+
+    test("manual scroll updates the button visibility state", async ({
+      page,
+    }) => {
+      const container = page
+        .locator(".galleryContainer")
+        .filter({ has: page.locator(".newscardcontainer") })
+        .first();
+      // Drive scroll directly; this dispatches the scroll event the
+      // useEffect's handleScroll listener consumes.
+      await container.evaluate(
+        (el) => (el.scrollLeft = el.scrollWidth - el.clientWidth),
+      );
+      // After scrolling fully right the next button hides itself.
+      await expect(page.locator(".newsNextButton")).toBeHidden();
+      await expect(page.locator(".newsPrevButton")).toBeVisible();
+    });
+
+    test("resize triggers the ResizeObserver-driven button resize", async ({
+      page,
+    }) => {
+      const nextBtn = page.locator(".newsNextButton");
+      const heightBefore = await nextBtn.evaluate(
+        (el) => (el as HTMLElement).style.height,
+      );
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await expect
+        .poll(async () =>
+          nextBtn.evaluate((el) => (el as HTMLElement).style.height),
+        )
+        .not.toBe(heightBefore);
+    });
+  });
 });
