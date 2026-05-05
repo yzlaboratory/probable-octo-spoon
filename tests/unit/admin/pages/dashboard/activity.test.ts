@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { mergeActivity } from "./activity";
-import type { News, Sponsor, Vorstand } from "../../types";
+import { mergeActivity } from "../../../../../src/admin/pages/dashboard/activity";
+import type { News, Sponsor, Vorstand } from "../../../../../src/admin/types";
 
 function n(id: number, title: string, updatedAt: string): News {
   return {

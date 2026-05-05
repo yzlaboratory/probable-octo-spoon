@@ -6,8 +6,8 @@ import {
   sponsorSubline,
   vorstandKpi,
   vorstandSubline,
-} from "./kpi";
-import type { News, Sponsor, Vorstand } from "../../types";
+} from "../../../../../src/admin/pages/dashboard/kpi";
+import type { News, Sponsor, Vorstand } from "../../../../../src/admin/types";
 
 function n(status: News["status"], rest: Partial<News> = {}): News {
   return {

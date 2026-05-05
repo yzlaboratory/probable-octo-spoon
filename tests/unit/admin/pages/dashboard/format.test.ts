@@ -5,7 +5,7 @@ import {
   formatShortDate,
   greetingFor,
   relativeTime,
-} from "./format";
+} from "../../../../../src/admin/pages/dashboard/format";
 
 describe("formatLongDate", () => {
   it("formats a Thursday in April", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { breadcrumbsFor } from "./breadcrumbs";
+import { breadcrumbsFor } from "../../../../src/admin/shell/breadcrumbs";
 
 describe("breadcrumbsFor", () => {
   it("returns the club crumb for the admin root", () => {
@@ -12,9 +12,18 @@ describe("breadcrumbsFor", () => {
 
   it("maps known section segments to German labels", () => {
     expect(breadcrumbsFor("/admin/news")).toEqual(["SV Alemannia", "News"]);
-    expect(breadcrumbsFor("/admin/sponsors")).toEqual(["SV Alemannia", "Sponsoren"]);
-    expect(breadcrumbsFor("/admin/vorstand")).toEqual(["SV Alemannia", "Vorstand"]);
-    expect(breadcrumbsFor("/admin/admins")).toEqual(["SV Alemannia", "Administratoren"]);
+    expect(breadcrumbsFor("/admin/sponsors")).toEqual([
+      "SV Alemannia",
+      "Sponsoren",
+    ]);
+    expect(breadcrumbsFor("/admin/vorstand")).toEqual([
+      "SV Alemannia",
+      "Vorstand",
+    ]);
+    expect(breadcrumbsFor("/admin/admins")).toEqual([
+      "SV Alemannia",
+      "Administratoren",
+    ]);
   });
 
   it("treats numeric ids as 'Bearbeiten' so raw ids do not surface", () => {

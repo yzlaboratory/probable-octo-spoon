@@ -38,5 +38,9 @@ cypress/screenshots/
 test-results/
 playwright-report/
 
+# Vitest browser-mode artifacts (failure screenshots + attachments)
+.vitest-attachments/
+**/__screenshots__/
+
 # local-only issue tracker
 docs/ephemeral/
