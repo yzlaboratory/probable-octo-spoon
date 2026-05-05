@@ -1,4 +1,4 @@
-// Playwright port of cypress/e2e/mobile-sponsor-visibility.cy.ts.
+// Playwright port of the former cypress/e2e/mobile-sponsor-visibility.cy.ts.
 //
 // Triage (ADR 0014 §6): asserts on the news gallery's mobile-vs-desktop
 // sponsor-slot composition. The render path needs the full mounted app
@@ -11,9 +11,6 @@
 // fetch + relying on real `lg:` viewport behaviour brings most of the
 // Playwright surface anyway. Default (per the rule's last bullet) ⇒
 // Playwright.
-//
-// Like-for-like with the Cypress original. The Cypress copy stays in
-// place until issue 08 deletes Cypress wholesale.
 
 import { test, expect } from "./support/fixtures";
 import { mockPublicData } from "./support/public-mocks";

@@ -1,8 +1,7 @@
-// Playwright port of cypress/e2e/impressum.cy.ts. Like-for-like assertions
-// per the ADR 0014 §6 triage rule — Impressum crosses a route boundary
-// (`/Impressum`) and exercises the full mounted app + Footer, so it lands in
-// Playwright (not Vitest browser). The Cypress version stays in place; issue
-// 08 retires Cypress wholesale.
+// Playwright port of the former cypress/e2e/impressum.cy.ts. Like-for-like
+// assertions per the ADR 0014 §6 triage rule — Impressum crosses a route
+// boundary (`/Impressum`) and exercises the full mounted app + Footer, so
+// it lands in Playwright (not Vitest browser).
 
 import { test, expect } from "./support/fixtures";
 

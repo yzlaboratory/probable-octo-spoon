@@ -1,12 +1,9 @@
-// Playwright port of cypress/e2e/mobile-layout.cy.ts.
+// Playwright port of the former cypress/e2e/mobile-layout.cy.ts.
 //
 // Triage (ADR 0014 §6): the legacy spec navigates between four routes (/,
 // /Impressum, /Datenschutzerklaerung, /news/dreikampf2026-02-14) and asserts
 // on multi-section structure that only renders when the public API is
 // reachable → Playwright.
-//
-// Like-for-like with the Cypress original. The Cypress copy stays in place
-// until issue 08 deletes Cypress wholesale.
 
 import { test, expect } from "./support/fixtures";
 import { mockPublicData } from "./support/public-mocks";

@@ -1,9 +1,9 @@
-// Playwright port of cypress/e2e/homepage.cy.ts. Like-for-like assertions
-// per the ADR 0014 §6 triage rule — the homepage exercises the full mounted
-// app, fetches /api/news/public, /api/sponsors/public, /api/vorstand/public
-// at runtime, and asserts on cross-component layout (Header, NewsSection,
-// VorstandSection, Footer). Crosses route + server boundaries → Playwright.
-// The Cypress version stays in place until issue 08 retires Cypress.
+// Playwright port of the former cypress/e2e/homepage.cy.ts. Like-for-like
+// assertions per the ADR 0014 §6 triage rule — the homepage exercises the
+// full mounted app, fetches /api/news/public, /api/sponsors/public,
+// /api/vorstand/public at runtime, and asserts on cross-component layout
+// (Header, NewsSection, VorstandSection, Footer). Crosses route + server
+// boundaries → Playwright.
 
 import { test, expect } from "./support/fixtures";
 
@@ -80,9 +80,7 @@ test.describe("Homepage", () => {
   test("has Instagram link in header", async ({ page }) => {
     await expect(
       page
-        .locator(
-          "a[href='https://www.instagram.com/sgthalexweileraschbach/']",
-        )
+        .locator("a[href='https://www.instagram.com/sgthalexweileraschbach/']")
         .first(),
     ).toBeAttached();
   });

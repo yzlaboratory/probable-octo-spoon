@@ -1,4 +1,4 @@
-// Playwright port of cypress/e2e/responsive.cy.ts.
+// Playwright port of the former cypress/e2e/responsive.cy.ts.
 //
 // Triage: full app mounted (header + news + footer) at three viewport sizes
 // without crossing route boundaries — but the legacy spec asserts on
@@ -7,9 +7,6 @@
 // ADR 0014 §6 it belongs in **Playwright**, not Vitest browser. Public
 // payloads are mocked via mockPublicData() so the spec stays deterministic
 // regardless of the e2e DB seeder.
-//
-// Like-for-like with the Cypress original. The Cypress version stays in
-// place until issue 08 deletes Cypress wholesale.
 
 import { test, expect } from "./support/fixtures";
 import { mockPublicData } from "./support/public-mocks";

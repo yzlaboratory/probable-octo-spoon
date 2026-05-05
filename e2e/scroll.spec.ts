@@ -1,13 +1,10 @@
-// Playwright port of cypress/e2e/scroll.cy.ts.
+// Playwright port of the former cypress/e2e/scroll.cy.ts.
 //
 // Triage (ADR 0014 §6): legacy spec navigates five routes (/, /Impressum,
 // /Datenschutzerklaerung, /news/dreikampf2026-02-14, plus the home
 // scroll-container variant) and asserts each is scrollable down to the
 // .allsponsors footer block. Multi-route + full-app + needs the public
 // API for the news gallery and sponsor list to render → Playwright.
-//
-// Like-for-like with the Cypress original. The Cypress copy stays in
-// place until issue 08 deletes Cypress wholesale.
 
 import { test, expect } from "./support/fixtures";
 import { mockPublicData } from "./support/public-mocks";

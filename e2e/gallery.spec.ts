@@ -1,4 +1,5 @@
-// Playwright port of cypress/e2e/gallery.cy.ts. Triage per ADR 0014 §6:
+// Playwright port of the former cypress/e2e/gallery.cy.ts. Triage per ADR
+// 0014 §6:
 //
 //   The spec visits /, then asserts on the rendered NewsSection's
 //   .newscardcontainer cards (driven by /api/news/public) and the
@@ -7,7 +8,7 @@
 //   "single component, no route or server boundary" Vitest browser bucket —
 //   so this lands in Playwright. Ambiguous-default also points here.
 //
-// Like-for-like assertion port; cypress version stays until issue 08.
+// Like-for-like assertion port.
 
 import { test, expect } from "./support/fixtures";
 
@@ -20,7 +21,10 @@ test.describe("Gallery Components", () => {
     test("has navigation arrows on desktop", async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 720 });
       await expect(
-        page.locator("[class*='news']").locator("span.material-symbols-rounded").first(),
+        page
+          .locator("[class*='news']")
+          .locator("span.material-symbols-rounded")
+          .first(),
       ).toBeAttached();
     });
 

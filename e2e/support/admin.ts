@@ -1,9 +1,8 @@
-// Admin auth helpers for Playwright. Mirrors cypress/support/admin.ts so the
-// ported specs read like-for-like.
+// Admin auth helpers for Playwright.
 //
 // Credentials come from PLAYWRIGHT_ADMIN_EMAIL / PLAYWRIGHT_ADMIN_PASSWORD
-// (forwarded from ~/.credentials by the test:e2e:admin script). Specs skip
-// cleanly when those vars are missing so CI without secrets stays green.
+// (forwarded from ~/.credentials by the `npm run test:admin` script). Specs
+// skip cleanly when those vars are missing so CI without secrets stays green.
 
 import type { Page } from "@playwright/test";
 

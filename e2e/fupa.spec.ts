@@ -1,6 +1,5 @@
-// Playwright port of cypress/e2e/fupa.cy.ts. Like-for-like assertion
-// equivalence per ADR 0014 triage rule. The Cypress version stays in place
-// until issue 08 deletes Cypress wholesale.
+// Playwright port of the former cypress/e2e/fupa.cy.ts. Like-for-like
+// assertion equivalence per ADR 0014 triage rule.
 //
 // Cross-route + API boundary (the FuPa proxy at /api/fupa/*) → Playwright
 // per the triage rule. The FuPa upstream is mocked in-browser via

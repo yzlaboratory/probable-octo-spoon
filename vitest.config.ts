@@ -30,7 +30,6 @@ export default defineConfig({
         "**/*.test.{ts,tsx,mjs}",
         "**/*.config.{ts,js,mjs}",
         "tests/**",
-        "cypress/**",
       ],
     },
     projects: [

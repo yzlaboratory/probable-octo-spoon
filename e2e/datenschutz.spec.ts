@@ -1,8 +1,7 @@
-// Playwright port of cypress/e2e/datenschutz.cy.ts. Like-for-like assertions
-// per the ADR 0014 §6 triage rule — Datenschutzerklaerung crosses a route
-// boundary (`/Datenschutzerklaerung`) and exercises the full mounted app +
-// Footer, so it lands in Playwright. The Cypress version stays in place
-// until issue 08 retires Cypress.
+// Playwright port of the former cypress/e2e/datenschutz.cy.ts. Like-for-like
+// assertions per the ADR 0014 §6 triage rule — Datenschutzerklaerung crosses
+// a route boundary (`/Datenschutzerklaerung`) and exercises the full mounted
+// app + Footer, so it lands in Playwright.
 
 import { test, expect } from "./support/fixtures";
 

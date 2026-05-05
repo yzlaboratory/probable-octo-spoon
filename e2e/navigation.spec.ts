@@ -1,8 +1,8 @@
-// Playwright port of cypress/e2e/navigation.cy.ts. Like-for-like assertions
-// per the ADR 0014 §6 triage rule — the entire spec is about crossing route
-// boundaries (/, /Impressum, /Datenschutzerklaerung, /news/:path) and
-// asserting the URL after each navigation. Textbook Playwright case. The
-// Cypress version stays in place until issue 08 retires Cypress.
+// Playwright port of the former cypress/e2e/navigation.cy.ts. Like-for-like
+// assertions per the ADR 0014 §6 triage rule — the entire spec is about
+// crossing route boundaries (/, /Impressum, /Datenschutzerklaerung,
+// /news/:path) and asserting the URL after each navigation. Textbook
+// Playwright case.
 
 import { test, expect } from "./support/fixtures";
 

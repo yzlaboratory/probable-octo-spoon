@@ -1,6 +1,5 @@
-// Playwright port of cypress/e2e/admin-login.cy.ts. Like-for-like assertion
-// equivalence per ADR 0014 triage rule. The Cypress version stays in place
-// until issue 08 deletes Cypress wholesale.
+// Playwright port of the former cypress/e2e/admin-login.cy.ts. Like-for-like
+// assertion equivalence per ADR 0014 triage rule.
 
 import { test, expect } from "./support/fixtures";
 import { getAdminCreds, loginViaForm } from "./support/admin";

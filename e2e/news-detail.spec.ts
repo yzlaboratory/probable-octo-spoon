@@ -1,9 +1,8 @@
-// Playwright port of cypress/e2e/news-detail.cy.ts. Like-for-like assertions
-// per the ADR 0014 §6 triage rule — visits the dynamic /news/:path route,
-// asserts on rendered article content (title, tag, image, body) plus the
-// Layout's Header and Footer. Crosses route + server boundaries
-// (/api/news/public/:slug fetch). Default Playwright. The Cypress version
-// stays in place until issue 08 retires Cypress.
+// Playwright port of the former cypress/e2e/news-detail.cy.ts. Like-for-like
+// assertions per the ADR 0014 §6 triage rule — visits the dynamic
+// /news/:path route, asserts on rendered article content (title, tag, image,
+// body) plus the Layout's Header and Footer. Crosses route + server
+// boundaries (/api/news/public/:slug fetch). Default Playwright.
 //
 // Slugs come from scripts/seed-local-demo.mjs — the per-run e2e DB is
 // repopulated by run-e2e.mjs before each Playwright invocation, so these
