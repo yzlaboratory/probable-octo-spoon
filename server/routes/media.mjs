@@ -42,6 +42,7 @@ function variantsFor(kind) {
   if (kind === "news") return NEWS_VARIANTS;
   if (kind === "sponsor") return SPONSOR_VARIANTS;
   if (kind === "vorstand") return VORSTAND_VARIANTS;
+  /* v8 ignore next — defensive: callers pre-validate kind against KINDS. */
   throw new Error("unknown kind");
 }
 

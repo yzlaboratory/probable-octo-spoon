@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import express from "express";
 import cookieParser from "cookie-parser";
 import Database from "better-sqlite3";
@@ -355,7 +355,7 @@ describe("media delete", () => {
     expect(res.body.references[0].kind).toBe("vorstand");
   });
 
-  it("collects references across all three tables", async () => {
+  it("collects references across all three tables (news + sponsor + vorstand)", async () => {
     const request = (await import("supertest")).default;
     const { id } = seedWithDir("sponsor");
     const now = new Date().toISOString();
@@ -367,13 +367,17 @@ describe("media delete", () => {
       `INSERT INTO sponsors (name, link_url, logo_media_id, card_palette, weight, status, display_order, created_at, updated_at)
        VALUES ('B', 'https://b.test', ?, 'transparent', 50, 'active', 1, ?, ?)`,
     ).run(id, now, now);
+    db.prepare(
+      `INSERT INTO vorstand (name, role, portrait_media_id, status, display_order, created_at, updated_at)
+       VALUES ('C', 'Rolle', ?, 'active', 1, ?, ?)`,
+    ).run(id, now, now);
 
     const res = await request(srv)
       .delete(`/api/media/${id}`)
       .set("Cookie", auth.cookie)
       .set("x-csrf-token", auth.csrf);
     expect(res.status).toBe(409);
-    expect(res.body.references).toHaveLength(2);
+    expect(res.body.references).toHaveLength(3);
   });
 
   it("still returns 204 when the on-disk directory is already gone", async () => {
@@ -389,4 +393,192 @@ describe("media delete", () => {
       db.prepare("SELECT id FROM media WHERE id = ?").get(id),
     ).toBeUndefined();
   });
+
+  it("logs a console.error and still returns 204 when fs.rm rejects", async () => {
+    const request = (await import("supertest")).default;
+    const { id } = seedWithDir();
+    const rmSpy = vi
+      .spyOn(fs.promises, "rm")
+      .mockRejectedValueOnce(new Error("EACCES: simulated"));
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await request(srv)
+      .delete(`/api/media/${id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf);
+    expect(res.status).toBe(204);
+    expect(errSpy).toHaveBeenCalledWith(
+      "media file cleanup failed:",
+      expect.any(Error),
+    );
+    rmSpy.mockRestore();
+    errSpy.mockRestore();
+  });
+});
+
+describe("media upload (POST /)", () => {
+  let db: any;
+  let srv: any;
+  let auth: { cookie: string; csrf: string };
+
+  beforeEach(async () => {
+    db = bootstrap();
+    srv = app(db);
+    const adminId = await seedAdmin(
+      db,
+      "admin@example.org",
+      "correct horse battery staple !!",
+    );
+    auth = sessionFor(db, adminId);
+  });
+
+  // Build a tiny in-memory PNG that sharp can resize. 1x1 red pixel.
+  async function tinyPng(): Promise<Buffer> {
+    const sharp = (await import("sharp")).default;
+    return sharp({
+      create: {
+        width: 8,
+        height: 8,
+        channels: 4,
+        background: { r: 255, g: 0, b: 0, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer();
+  }
+
+  it("requires auth", async () => {
+    const request = (await import("supertest")).default;
+    const png = await tinyPng();
+    const res = await request(srv)
+      .post("/api/media")
+      .field("kind", "news")
+      .attach("file", png, { filename: "x.png", contentType: "image/png" });
+    expect(res.status).toBe(401);
+  });
+
+  it("requires CSRF", async () => {
+    const request = (await import("supertest")).default;
+    const png = await tinyPng();
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .field("kind", "news")
+      .attach("file", png, { filename: "x.png", contentType: "image/png" });
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects unknown kind values with 400", async () => {
+    const request = (await import("supertest")).default;
+    const png = await tinyPng();
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "bogus")
+      .attach("file", png, { filename: "x.png", contentType: "image/png" });
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe("bad_request");
+  });
+
+  it("rejects when no file is attached", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "news");
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/Datei/);
+  });
+
+  it("rejects oversize uploads with 413", async () => {
+    const request = (await import("supertest")).default;
+    // Sponsor max is 2 MiB — feed a 3 MiB blob disguised as a png.
+    const big = Buffer.alloc(3 * 1024 * 1024, 0xff);
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "sponsor")
+      .attach("file", big, { filename: "big.png", contentType: "image/png" });
+    expect(res.status).toBe(413);
+    expect(res.body.code).toBe("too_large");
+  });
+
+  it("rejects unsupported mime types with 415", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "news")
+      .attach("file", Buffer.from("PDF stuff"), {
+        filename: "x.pdf",
+        contentType: "application/pdf",
+      });
+    expect(res.status).toBe(415);
+    expect(res.body.code).toBe("unsupported_type");
+  });
+
+  it("uploads a news PNG and emits 400/800/1600 webp variants + fallback JPG", async () => {
+    const request = (await import("supertest")).default;
+    const png = await tinyPng();
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "news")
+      .attach("file", png, { filename: "hero.png", contentType: "image/png" });
+    expect(res.status).toBe(201);
+    expect(res.body.kind).toBe("news");
+    expect(res.body.filename).toBe("hero.png");
+    expect(res.body.uploadedBy).toBe("admin@example.org");
+    expect(Object.keys(res.body.variants).sort()).toEqual([
+      "1600w",
+      "400w",
+      "800w",
+      "fallbackJpg",
+    ]);
+    // Files actually exist under the redirected mediaRoot.
+    const variantUrl = res.body.variants["400w"] as string;
+    const onDisk = path.join(mediaTmp, variantUrl.replace(/^\/media\//, ""));
+    expect(fs.existsSync(onDisk)).toBe(true);
+  });
+
+  it("uploads a sponsor SVG and stores the sanitised file under variants.svg", async () => {
+    const request = (await import("supertest")).default;
+    const svg = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="red"/></svg>',
+    );
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "sponsor")
+      .attach("file", svg, { filename: "logo.svg", contentType: "image/svg+xml" });
+    expect(res.status).toBe(201);
+    expect(res.body.variants).toEqual({
+      svg: expect.stringMatching(/\/media\/sponsors\/.+\/original\.svg$/),
+    });
+    const onDisk = path.join(
+      mediaTmp,
+      (res.body.variants.svg as string).replace(/^\/media\//, ""),
+    );
+    expect(fs.existsSync(onDisk)).toBe(true);
+  });
+
+  it("uploads a vorstand PNG and emits 160/320/640 webp variants (no fallbackJpg)", async () => {
+    const request = (await import("supertest")).default;
+    const png = await tinyPng();
+    const res = await request(srv)
+      .post("/api/media")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .field("kind", "vorstand")
+      .attach("file", png, { filename: "anna.png", contentType: "image/png" });
+    expect(res.status).toBe(201);
+    expect(Object.keys(res.body.variants).sort()).toEqual(["160w", "320w", "640w"]);
+    expect(res.body.variants).not.toHaveProperty("fallbackJpg");
+  });
+
 });

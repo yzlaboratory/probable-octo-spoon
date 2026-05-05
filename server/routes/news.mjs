@@ -178,6 +178,9 @@ export default function newsRoutes(db) {
       );
     const data = parsed.data;
     const baseSlug = slug(data.slug || data.title, { lower: true });
+    /* v8 ignore start — defensive: slug() always returns a non-empty string for
+       any non-empty input the schema permits, so this branch is unreachable
+       under the current slug lib. Keep the guard in case the lib changes. */
     if (!baseSlug)
       return errorEnvelope(
         res,
@@ -185,6 +188,7 @@ export default function newsRoutes(db) {
         "bad_request",
         "Titel darf nicht leer sein.",
       );
+    /* v8 ignore stop */
     const finalSlug = uniqueSlug(baseSlug);
     const now = new Date().toISOString();
     const publishAt =

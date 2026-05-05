@@ -9,9 +9,19 @@ import authRoutes from "../../server/routes/auth.mjs";
 // @ts-expect-error — .mjs with no types
 import trainingRoutes from "../../server/routes/training.mjs";
 // @ts-expect-error — .mjs with no types
-import { sessionMiddleware } from "../../server/middleware.mjs";
+import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
 // @ts-expect-error — .mjs with no types
 import { hashPassword } from "../../server/auth.mjs";
+
+// The login rate limiter is a module-level singleton — its counter persists
+// between `beforeEach` runs, so we reset its store per test or later logins
+// start coming back as 429.
+import { beforeEach as _beforeEach } from "vitest";
+_beforeEach(() => {
+  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
+  loginRateLimiter.resetKey?.("127.0.0.1");
+  loginRateLimiter.resetKey?.("::1");
+});
 
 function app(db: any) {
   const a = express();
@@ -228,5 +238,86 @@ describe("training routes", () => {
       .set("Cookie", auth.cookie)
       .send({ message: "x" });
     expect(res.status).toBe(403);
+  });
+
+  it("GET / filters by status when ?status=hidden is provided", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/training")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send(VALID_SLOT);
+    await request(srv)
+      .patch(`/api/training/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ status: "hidden" });
+    const res = await request(srv)
+      .get("/api/training?status=hidden")
+      .set("Cookie", auth.cookie);
+    expect(res.status).toBe(200);
+    expect(res.body.every((s: any) => s.status === "hidden")).toBe(true);
+    expect(res.body.find((s: any) => s.id === created.body.id)).toBeTruthy();
+  });
+
+  it("GET /banner (admin) returns the banner shape", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .get("/api/training/banner")
+      .set("Cookie", auth.cookie);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body).toHaveProperty("updatedAt");
+  });
+
+  it("GET /banner requires auth", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv).get("/api/training/banner");
+    expect(res.status).toBe(401);
+  });
+
+  it("PATCH /banner rejects malformed payloads with 400", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .patch("/api/training/banner")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ message: 12345 });
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe("bad_request");
+  });
+
+  it("PATCH /:id returns 404 for unknown ids", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .patch("/api/training/9999999")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ trainer: "Foo" });
+    expect(res.status).toBe(404);
+  });
+
+  it("PATCH /:id rejects malformed payloads with 400", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/training")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send(VALID_SLOT);
+    const res = await request(srv)
+      .patch(`/api/training/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ day: "Funday" });
+    expect(res.status).toBe(400);
+  });
+
+  it("DELETE /:id returns 404 for unknown ids", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .delete("/api/training/9999999")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf);
+    expect(res.status).toBe(404);
   });
 });

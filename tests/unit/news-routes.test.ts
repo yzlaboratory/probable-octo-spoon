@@ -7,15 +7,23 @@ import path from "node:path";
 // @ts-expect-error — .mjs with no types
 import authRoutes from "../../server/routes/auth.mjs";
 // @ts-expect-error — .mjs with no types
-import newsRoutes from "../../server/routes/news.mjs";
+import newsRoutes, { runPublishTick } from "../../server/routes/news.mjs";
 // @ts-expect-error — .mjs with no types
 import sponsorRoutes from "../../server/routes/sponsors.mjs";
 // @ts-expect-error — .mjs with no types
 import vorstandRoutes from "../../server/routes/vorstand.mjs";
 // @ts-expect-error — .mjs with no types
-import { sessionMiddleware } from "../../server/middleware.mjs";
+import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
 // @ts-expect-error — .mjs with no types
 import { hashPassword } from "../../server/auth.mjs";
+
+// The login rate limiter is a module-level singleton (10/15min) and would
+// start rejecting around the 11th login if not reset between tests.
+beforeEach(() => {
+  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
+  loginRateLimiter.resetKey?.("127.0.0.1");
+  loginRateLimiter.resetKey?.("::1");
+});
 
 function app(db: any) {
   const a = express();
@@ -309,6 +317,275 @@ describe("sponsor crud", () => {
       .set("Cookie", auth.cookie)
       .set("x-csrf-token", auth.csrf);
     expect(okDel.status).toBe(200);
+  });
+});
+
+describe("news edge cases", () => {
+  let db: any;
+  let srv: any;
+  let auth: { cookie: string; csrf: string };
+
+  beforeEach(async () => {
+    db = bootstrap();
+    srv = app(db);
+    await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
+    auth = await login(srv, "admin@example.org", "correct horse battery staple !!");
+  });
+
+  it("GET / filters by status when ?status=draft is provided", async () => {
+    const request = (await import("supertest")).default;
+    await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ title: "DraftOne", tag: "t", short: "s", status: "draft" });
+    await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ title: "PubOne", tag: "t", short: "s", status: "published" });
+    const res = await request(srv)
+      .get("/api/news?status=draft")
+      .set("Cookie", auth.cookie);
+    expect(res.status).toBe(200);
+    expect(res.body.every((n: any) => n.status === "draft")).toBe(true);
+    expect(res.body.find((n: any) => n.title === "DraftOne")).toBeTruthy();
+    expect(res.body.find((n: any) => n.title === "PubOne")).toBeUndefined();
+  });
+
+  it("POST honours an explicit slug and dedupes on collision", async () => {
+    const request = (await import("supertest")).default;
+    const a = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Erste",
+        slug: "fixed-slug",
+        tag: "t",
+        short: "s",
+        status: "draft",
+      });
+    expect(a.body.slug).toBe("fixed-slug");
+
+    const b = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Zweite",
+        slug: "fixed-slug",
+        tag: "t",
+        short: "s",
+        status: "draft",
+      });
+    expect(b.body.slug).toBe("fixed-slug-2");
+  });
+
+  it("POST with status=scheduled and an explicit publishAt persists publish_at", async () => {
+    const request = (await import("supertest")).default;
+    const at = "2099-12-31T10:00:00.000Z";
+    const res = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Geplant",
+        tag: "t",
+        short: "s",
+        status: "scheduled",
+        publishAt: at,
+      });
+    expect(res.status).toBe(201);
+    expect(res.body.status).toBe("scheduled");
+    expect(res.body.publishAt).toBe(at);
+  });
+
+  it("GET /public/:slug returns 404 when no published item matches the slug", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv).get("/api/news/public/ghost");
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe("not_found");
+  });
+
+  it("GET /public/:slug returns the post when published", async () => {
+    const request = (await import("supertest")).default;
+    await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Sichtbar",
+        tag: "t",
+        short: "s",
+        status: "published",
+      });
+    const res = await request(srv).get("/api/news/public/sichtbar");
+    expect(res.status).toBe(200);
+    expect(res.body.slug).toBe("sichtbar");
+  });
+
+  it("GET /public/:slug returns the post with hero media when set", async () => {
+    const request = (await import("supertest")).default;
+    const heroId = seedMedia(db, "news");
+    await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "MitBild",
+        tag: "t",
+        short: "s",
+        heroMediaId: heroId,
+        status: "published",
+      });
+    const res = await request(srv).get("/api/news/public/mitbild");
+    expect(res.status).toBe(200);
+    expect(res.body.hero?.id).toBe(heroId);
+  });
+
+  it("PATCH 404s on an unknown id", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .patch("/api/news/999999")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ title: "Anything" });
+    expect(res.status).toBe(404);
+  });
+
+  it("PATCH rejects malformed payloads with 400", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ title: "Test", tag: "t", short: "s", status: "draft" });
+    const res = await request(srv)
+      .patch(`/api/news/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ status: "not-a-real-status" });
+    expect(res.status).toBe(400);
+  });
+
+  it("PATCH rewrites the slug when a new one is provided, leaving id stable", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ title: "Alt", tag: "t", short: "s", status: "draft" });
+    const patched = await request(srv)
+      .patch(`/api/news/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ slug: "neu" });
+    expect(patched.status).toBe(200);
+    expect(patched.body.slug).toBe("neu");
+    expect(patched.body.id).toBe(created.body.id);
+  });
+
+  it("PATCH allows clearing publishAt by sending null", async () => {
+    const request = (await import("supertest")).default;
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "T",
+        tag: "t",
+        short: "s",
+        status: "scheduled",
+        publishAt: "2099-12-31T10:00:00.000Z",
+      });
+    expect(created.body.publishAt).toBeTruthy();
+    const patched = await request(srv)
+      .patch(`/api/news/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ publishAt: null });
+    expect(patched.status).toBe(200);
+    expect(patched.body.publishAt).toBeNull();
+  });
+
+  it("PATCH allows updating heroMediaId to null", async () => {
+    const request = (await import("supertest")).default;
+    const heroId = seedMedia(db, "news");
+    const created = await request(srv)
+      .post("/api/news")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        title: "Hero",
+        tag: "t",
+        short: "s",
+        heroMediaId: heroId,
+        status: "draft",
+      });
+    expect(created.body.hero?.id).toBe(heroId);
+    const patched = await request(srv)
+      .patch(`/api/news/${created.body.id}`)
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ heroMediaId: null });
+    expect(patched.status).toBe(200);
+    expect(patched.body.hero).toBeNull();
+  });
+
+  it("DELETE 404s on an unknown id", async () => {
+    const request = (await import("supertest")).default;
+    const res = await request(srv)
+      .delete("/api/news/999999")
+      .set("Cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf);
+    expect(res.status).toBe(404);
+  });
+
+  it("toPublic surfaces malformed blocks_json as an empty array", async () => {
+    const request = (await import("supertest")).default;
+    const now = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO news (slug, title, tag, short, long_html, blocks_json, status, created_at, updated_at)
+       VALUES ('legacy', 'Legacy', 't', 's', '<p>x</p>', 'not-json', 'published', ?, ?)`,
+    ).run(now, now);
+    const res = await request(srv).get("/api/news/public/legacy");
+    expect(res.status).toBe(200);
+    expect(res.body.blocks).toEqual([]);
+  });
+
+  it("toPublic treats blocks_json='\"string\"' (valid JSON, not array) as an empty array", async () => {
+    const request = (await import("supertest")).default;
+    const now = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO news (slug, title, tag, short, long_html, blocks_json, status, created_at, updated_at)
+       VALUES ('quoted', 'Q', 't', 's', '<p>x</p>', '"hi"', 'published', ?, ?)`,
+    ).run(now, now);
+    const res = await request(srv).get("/api/news/public/quoted");
+    expect(res.body.blocks).toEqual([]);
+  });
+});
+
+describe("runPublishTick", () => {
+  it("flips scheduled posts whose publish_at is in the past to published", () => {
+    const db = bootstrap();
+    const past = new Date(Date.now() - 60_000).toISOString();
+    const future = new Date(Date.now() + 60_000).toISOString();
+    db.prepare(
+      `INSERT INTO news (slug, title, tag, short, long_html, status, publish_at, created_at, updated_at)
+       VALUES ('a', 'A', 't', 's', '', 'scheduled', ?, ?, ?)`,
+    ).run(past, past, past);
+    db.prepare(
+      `INSERT INTO news (slug, title, tag, short, long_html, status, publish_at, created_at, updated_at)
+       VALUES ('b', 'B', 't', 's', '', 'scheduled', ?, ?, ?)`,
+    ).run(future, future, future);
+
+    runPublishTick(db);
+
+    const a = db.prepare("SELECT status FROM news WHERE slug = 'a'").get();
+    const b = db.prepare("SELECT status FROM news WHERE slug = 'b'").get();
+    expect(a.status).toBe("published");
+    expect(b.status).toBe("scheduled");
   });
 });
 
