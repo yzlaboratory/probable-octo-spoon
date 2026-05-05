@@ -6,6 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Website for SV Alemannia Thalexweiler (German sports club) — built as a Vite + React 19 single-page application, served in production by an Express app that also proxies the Instagram Graph API. Styled with Tailwind CSS v4 and MUI. Deployed via Docker behind a Traefik v3.3 reverse proxy. The site is in German.
 
+## Implementation Conventions
+
+- Run `npm run verify` and confirm a green exit before declaring any code-touching task complete. The script is the single canonical gate; do not declare done if it has not run, and do not bypass with `--no-verify`.
+- A Husky `pre-push` hook also runs the fast subset of `verify` (Vitest both projects with coverage) and gates pushes against `.git/last-good-coverage.json`. The first push from a fresh clone is informational only and seeds the cache. To reset the cache: `rm "$(git rev-parse --git-dir)/last-good-coverage.json"`.
+- The regression threshold lives in `package.json` at `coverage.threshold` (default `0`, meaning any per-file `lines.pct` drop fails). Tune there rather than editing scripts.
+- **Test placement is mechanical (ADR 0014):** if a test file imports React (directly or via `@testing-library/react`), it belongs in the **`browser`** Vitest project — colocate it next to the source under `src/**/*.test.tsx`. Otherwise it belongs in the **`node`** project — put it under `tests/unit/**/*.test.ts`. No jsdom anywhere; the `browser` project runs in real Chromium via the Playwright provider, headless.
+
 ## Commands
 
 ```bash
@@ -15,35 +22,33 @@ npm run preview        # Preview the built SPA (port 4321)
 npm run serve          # Serve built app: node --env-file=.runtime.env server.mjs
 npm test               # Run Vitest unit tests once
 npm run test:watch     # Vitest watch mode
-npm run test:e2e       # Run Cypress end-to-end tests headless
-npm run test:e2e:open  # Open Cypress UI
-npm run test:admin     # Run admin-login Cypress specs (needs local server, see below)
-npm run test:admin:prod # Run admin-login specs against https://svthalexweiler.de
+npm run test:coverage  # Run Vitest with V8 coverage (writes coverage/coverage-summary.json)
+npm run verify         # Canonical end-of-task gate: coverage + diff vs cached baseline
+npm run verify:fast    # Fast tier of verify (same as pre-push hook in PR 1)
+npm run test:e2e       # Run Playwright e2e suite via the e2e server lifecycle wrapper
+npm run test:admin     # As test:e2e, but also seeds an admin user from ~/.credentials
 ```
 
-### Local admin e2e setup
+### Local e2e
 
-The admin specs talk to the Express server, not the Vite dev server, and hit a real SQLite DB. First-time setup:
+The Playwright suite under `e2e/` runs against the real Express server, booted by `scripts/run-e2e.mjs`. The wrapper provisions a fresh per-run SQLite DB and media root under `/tmp/clubsoft-e2e/` (override with `E2E_DATA_DIR`), seeds public demo data, builds the SPA if `dist/index.html` is missing, traps `SIGTERM` so V8 flushes the server-side coverage dump, and forwards extra CLI args to `playwright test`.
 
 ```bash
-# 1. Build the SPA
-npm run build
+# Public-only run — no admin login needed.
+npm run test:e2e
 
-# 2. Serve with a writable local data dir (default /var/lib/clubsoft isn't on a dev box)
-mkdir -p /tmp/clubsoft-e2e/media
-DB_PATH=/tmp/clubsoft-e2e/app.db MEDIA_ROOT=/tmp/clubsoft-e2e/media \
-  node --env-file=.runtime.env server.mjs
-
-# 3. In another shell, seed the admin user once (creds come from ~/.credentials)
-set -a; . ~/.credentials; set +a
-DB_PATH=/tmp/clubsoft-e2e/app.db node server/seed-admin.mjs \
-  "$CLUBSOFT_ADMIN_EMAIL" "$CLUBSOFT_ADMIN_PASSWORD"
-
-# 4. Run the specs
+# Admin-login run — sources ~/.credentials and forwards
+# CLUBSOFT_ADMIN_EMAIL / CLUBSOFT_ADMIN_PASSWORD as
+# PLAYWRIGHT_ADMIN_EMAIL / PLAYWRIGHT_ADMIN_PASSWORD so the wrapper can
+# seed an admin user before Playwright starts. Admin specs skip cleanly
+# when those vars are missing, so CI without secrets stays green.
 npm run test:admin
+
+# Run a single spec / pass extra Playwright flags through the wrapper:
+npm run test:e2e -- e2e/homepage.spec.ts --headed
 ```
 
-`test:admin` and `test:admin:prod` both source `~/.credentials` and forward `CLUBSOFT_ADMIN_EMAIL`/`CLUBSOFT_ADMIN_PASSWORD` into `CYPRESS_ADMIN_EMAIL`/`CYPRESS_ADMIN_PASSWORD`. Specs skip cleanly when those vars are missing, so CI without secrets stays green.
+The wrapper is the single canonical entry point for both local `npm run verify` and CI — no second copy of the boot recipe.
 
 ## Architecture
 

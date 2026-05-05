@@ -1,0 +1,151 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Vitest coverage + diff vs main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci --legacy-peer-deps
+
+      # Vitest browser project + Playwright e2e both run on Chromium. The runner
+      # does not ship browsers — install them (and Linux deps) once per job.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # On PRs, fetch the latest green main coverage-summary.json so the diff
+      # comparator has a meaningful baseline. The same diff comparator module
+      # gates locally and in CI; only the baseline source path differs.
+      #
+      # We use `gh run list/download` rather than a third-party action to keep
+      # the dependency surface small. If no main artifact yet exists (first PR
+      # before main has run the workflow), we degrade to informational mode.
+      - name: Download main baseline (PR only)
+        if: github.event_name == 'pull_request'
+        id: baseline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mkdir -p .coverage-baseline
+          run_id=$(gh run list \
+            --repo "${REPO}" \
+            --workflow coverage.yml \
+            --branch main \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId' || true)
+          if [ -z "${run_id:-}" ] || [ "${run_id}" = "null" ]; then
+            echo "::warning::no green main coverage run found yet"
+            exit 0
+          fi
+          echo "Found main coverage run: ${run_id}"
+          gh run download "${run_id}" \
+            --repo "${REPO}" \
+            --name coverage-summary \
+            --dir .coverage-baseline \
+            || echo "::warning::failed to download coverage-summary artifact from run ${run_id}"
+        continue-on-error: true
+
+      # `npm run verify` runs vitest with coverage and then the verify
+      # orchestrator. The orchestrator picks up COVERAGE_BASELINE / COVERAGE_NO_UPDATE
+      # from the environment so CI can override the baseline source without
+      # forking a second script. Same module, two callers (per ADR 0015 §5).
+      - name: Run npm run verify (PR — gate vs main baseline)
+        if: github.event_name == 'pull_request'
+        env:
+          COVERAGE_NO_UPDATE: "1"
+        run: |
+          if [ -f .coverage-baseline/coverage-summary.json ]; then
+            COVERAGE_BASELINE=.coverage-baseline/coverage-summary.json npm run verify
+          else
+            echo "::warning::no main baseline artifact found — running informational verify"
+            npm run verify
+          fi
+
+      # On push to main, run verify in CI mode (no local cache to update).
+      # First main run is informational; later runs gate against an empty
+      # baseline path → still informational. Push-to-main's job is to publish
+      # the artifact for PRs, not to gate against itself.
+      - name: Run npm run verify (push to main — publish baseline)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          COVERAGE_NO_UPDATE: "1"
+        run: npm run verify
+
+      - name: Upload coverage-summary.json artifact
+        if: always() && hashFiles('coverage/coverage-summary.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage/coverage-summary.json
+          retention-days: 90
+
+      - name: Upload merged coverage HTML report
+        if: always() && hashFiles('coverage/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage/
+          retention-days: 30
+
+      # Compose the PR-comment markdown from current + baseline summaries and
+      # post it via GH CLI. Uses the existing PR comment if present (sticky).
+      # Runs even when verify-coverage failed so reviewers see the delta on
+      # the very PR that failed the gate.
+      - name: Build PR comment delta
+        if: always() && github.event_name == 'pull_request' && hashFiles('coverage/coverage-summary.json') != ''
+        run: |
+          node scripts/coverage-pr-comment-cli.mjs \
+            --current=coverage/coverage-summary.json \
+            --baseline=.coverage-baseline/coverage-summary.json \
+            > .coverage-comment.md
+          # Marker so subsequent runs can find and update the same comment.
+          printf '\n<!-- coverage-bot:pr-comment -->\n' >> .coverage-comment.md
+          cat .coverage-comment.md
+
+      - name: Post / update PR comment
+        if: always() && github.event_name == 'pull_request' && hashFiles('.coverage-comment.md') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          MARKER="<!-- coverage-bot:pr-comment -->"
+          existing=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
+            | head -n1 || true)
+          if [ -n "${existing}" ]; then
+            jq -Rs '{body: .}' .coverage-comment.md \
+              | gh api -X PATCH "repos/${REPO}/issues/comments/${existing}" \
+                  --input - > /dev/null
+            echo "Updated existing comment: ${existing}"
+          else
+            gh pr comment "${PR_NUMBER}" \
+              --repo "${REPO}" \
+              --body-file .coverage-comment.md
+          fi

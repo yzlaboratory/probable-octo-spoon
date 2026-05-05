@@ -23,35 +23,14 @@ if ! npx vitest run 2>&1; then
 fi
 
 # --- E2E tests ---
-echo "Starting dev server for E2E tests..." >&2
-
-# Start dev server
-npx astro dev &
-DEV_PID=$!
-
-# Wait for server to be ready (max 30s)
-for i in $(seq 1 30); do
-  if curl -s -o /dev/null -w "" http://localhost:4321 2>/dev/null; then
-    break
-  fi
-  if [ "$i" -eq 30 ]; then
-    kill "$DEV_PID" 2>/dev/null || true
-    wait "$DEV_PID" 2>/dev/null || true
-    ERRORS="${ERRORS} Dev server failed to start within 30s, E2E tests skipped."
-    echo "{\"ok\": false, \"reason\": \"$ERRORS\"}"
-    exit 0
-  fi
-  sleep 1
-done
-
+# scripts/run-e2e.mjs (the canonical e2e wrapper from ADR 0014/0015) boots its
+# own Express server with NODE_V8_COVERAGE wired up, seeds the per-run SQLite
+# DB, runs Playwright, then propagates SIGTERM so V8 flushes coverage. No
+# external dev server / curl-readiness loop needed here.
 echo "Running E2E tests..." >&2
-if ! npx cypress run 2>&1; then
+if ! npm run test:e2e 2>&1; then
   ERRORS="${ERRORS} E2E tests failed."
 fi
-
-# Stop dev server
-kill "$DEV_PID" 2>/dev/null || true
-wait "$DEV_PID" 2>/dev/null || true
 
 # Report results
 if [ -n "$ERRORS" ]; then

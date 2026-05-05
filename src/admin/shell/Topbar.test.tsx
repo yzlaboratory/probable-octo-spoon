@@ -5,6 +5,11 @@ import type { ReactNode } from "react";
 import Topbar from "./Topbar";
 
 // A minimal stub of the auth context. The topbar only reads .admin and .logout.
+// vi.hoisted lets the mock factory reach the loggedOut spy without TDZ issues
+// — browser mode is strict about hoist-vs-let ordering where jsdom was lax.
+const { loggedOut } = vi.hoisted(() => ({
+  loggedOut: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock("../AuthContext", () => ({
   useAuth: () => ({
     admin: { id: 1, email: "eva.schmidt@example.com" },
@@ -14,9 +19,14 @@ vi.mock("../AuthContext", () => ({
     loading: false,
   }),
 }));
-const loggedOut = vi.fn().mockResolvedValue(undefined);
 
-function Wrapper({ children, path = "/admin/news" }: { children: ReactNode; path?: string }) {
+function Wrapper({
+  children,
+  path = "/admin/news",
+}: {
+  children: ReactNode;
+  path?: string;
+}) {
   return <MemoryRouter initialEntries={[path]}>{children}</MemoryRouter>;
 }
 

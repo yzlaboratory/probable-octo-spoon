@@ -1,6 +1,9 @@
 # build output
 dist/
 
+# coverage reports (generated; baseline cache lives in .git/, never committed)
+coverage/
+
 # generated types
 .astro/
 
@@ -30,6 +33,14 @@ infrastructure/tfplan
 infrastructure/*.tfplan
 infrastructure/lambda/*.zip
 cypress/screenshots/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+
+# Vitest browser-mode artifacts (failure screenshots + attachments)
+.vitest-attachments/
+**/__screenshots__/
 
 # local-only issue tracker
 docs/ephemeral/

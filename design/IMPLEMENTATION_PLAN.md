@@ -70,7 +70,7 @@ Each phase = one PR, mergeable on its own. Phases are numbered; within a phase, 
 - **Admins:** reskin in the new token palette; no layout change.
 - **Tests:** update existing component/e2e tests for new DOM structure; add tests for sidebar active-state and breadcrumb derivation.
 
-**Risk:** this is the biggest visual diff. The existing e2e tests (Cypress) likely rely on text/role selectors that will mostly keep working; table-row selectors may need updating.
+**Risk:** this is the biggest visual diff. The existing e2e tests (Playwright) likely rely on text/role selectors that will mostly keep working; table-row selectors may need updating.
 
 ### Phase 2 — Dashboard
 
