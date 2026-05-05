@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { breadcrumbsFor } from "./breadcrumbs";
+import { breadcrumbsFor } from "../../../../src/admin/shell/breadcrumbs";
 
 describe("breadcrumbsFor", () => {
   it("returns the club crumb for the admin root", () => {

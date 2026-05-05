@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Media } from "../../types";
+import type { Media } from "../../../../../src/admin/types";
 import {
   bestUrl,
   displayName,
@@ -8,7 +8,7 @@ import {
   mimeLabel,
   previewUrl,
   thumbUrl,
-} from "./helpers";
+} from "../../../../../src/admin/pages/media/helpers";
 
 function media(id: number, overrides: Partial<Media> = {}): Media {
   return {

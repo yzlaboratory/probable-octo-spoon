@@ -9,7 +9,7 @@ import {
   stripKeys,
   updateBlock,
   wordCount,
-} from "./blocks";
+} from "../../../../../src/admin/pages/news-editor/blocks";
 
 describe("newBlock", () => {
   it("returns sensible defaults per kind", () => {

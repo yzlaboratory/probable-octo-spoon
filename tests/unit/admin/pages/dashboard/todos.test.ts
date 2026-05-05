@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { deriveTodos } from "./todos";
-import type { News, Sponsor, Vorstand } from "../../types";
+import { deriveTodos } from "../../../../../src/admin/pages/dashboard/todos";
+import type { News, Sponsor, Vorstand } from "../../../../../src/admin/types";
 
 const NOW = new Date("2026-04-23T12:00:00Z");
 
