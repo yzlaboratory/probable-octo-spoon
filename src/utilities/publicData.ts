@@ -171,32 +171,74 @@ export function toPublicVorstand(v: ServerVorstand): PublicVorstandMember {
   };
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
+export async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url, { credentials: "same-origin" });
   if (!res.ok) throw new Error(`${url}: ${res.status}`);
   return res.json();
 }
 
+// Hook bodies are split into pure async loaders so the fetch + map + fallback
+// logic can be unit-tested directly in node. The hooks themselves are trivial
+// useState/useEffect wrappers.
+export async function loadPublicNews(): Promise<PublicNewsItem[]> {
+  try {
+    const rows = await fetchJson<ServerNews[]>("/api/news/public");
+    return rows.map(toPublicNews);
+  } catch {
+    return [];
+  }
+}
+
+export async function loadPublicNewsBySlug(
+  slug: string,
+): Promise<PublicNewsItem | null> {
+  try {
+    const n = await fetchJson<ServerNews>(
+      `/api/news/public/${encodeURIComponent(slug)}`,
+    );
+    return toPublicNews(n);
+  } catch {
+    return null;
+  }
+}
+
+export async function loadPublicSponsors(): Promise<PublicSponsor[]> {
+  try {
+    const rows = await fetchJson<ServerSponsor[]>("/api/sponsors/public");
+    return rows.map(toPublicSponsor);
+  } catch {
+    return [];
+  }
+}
+
+export async function loadPublicVorstand(): Promise<PublicVorstandMember[]> {
+  try {
+    const rows = await fetchJson<ServerVorstand[]>("/api/vorstand/public");
+    return rows.map(toPublicVorstand);
+  } catch {
+    return [];
+  }
+}
+
+/* v8 ignore start — React hook wrappers; bodies covered by load* loaders. */
 export function usePublicNews(): PublicNewsItem[] | null {
   const [data, setData] = useState<PublicNewsItem[] | null>(null);
   useEffect(() => {
-    fetchJson<ServerNews[]>("/api/news/public")
-      .then((rows) => setData(rows.map(toPublicNews)))
-      .catch(() => setData([]));
+    void loadPublicNews().then(setData);
   }, []);
   return data;
 }
 
-export function usePublicNewsBySlug(slug: string | undefined): PublicNewsItem | null | undefined {
+export function usePublicNewsBySlug(
+  slug: string | undefined,
+): PublicNewsItem | null | undefined {
   const [data, setData] = useState<PublicNewsItem | null | undefined>(undefined);
   useEffect(() => {
     if (!slug) {
       setData(null);
       return;
     }
-    fetchJson<ServerNews>(`/api/news/public/${encodeURIComponent(slug)}`)
-      .then((n) => setData(toPublicNews(n)))
-      .catch(() => setData(null));
+    void loadPublicNewsBySlug(slug).then(setData);
   }, [slug]);
   return data;
 }
@@ -204,9 +246,7 @@ export function usePublicNewsBySlug(slug: string | undefined): PublicNewsItem | 
 export function usePublicSponsors(): PublicSponsor[] | null {
   const [data, setData] = useState<PublicSponsor[] | null>(null);
   useEffect(() => {
-    fetchJson<ServerSponsor[]>("/api/sponsors/public")
-      .then((rows) => setData(rows.map(toPublicSponsor)))
-      .catch(() => setData([]));
+    void loadPublicSponsors().then(setData);
   }, []);
   return data;
 }
@@ -214,12 +254,11 @@ export function usePublicSponsors(): PublicSponsor[] | null {
 export function usePublicVorstand(): PublicVorstandMember[] | null {
   const [data, setData] = useState<PublicVorstandMember[] | null>(null);
   useEffect(() => {
-    fetchJson<ServerVorstand[]>("/api/vorstand/public")
-      .then((rows) => setData(rows.map(toPublicVorstand)))
-      .catch(() => setData([]));
+    void loadPublicVorstand().then(setData);
   }, []);
   return data;
 }
+/* v8 ignore stop */
 
 // Weighted shuffle preserved from src/utilities/sponsors.ts — now parametric.
 export function shuffleSponsors(sponsors: PublicSponsor[]): PublicSponsor[] {
