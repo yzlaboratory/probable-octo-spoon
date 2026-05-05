@@ -34,5 +34,9 @@ infrastructure/*.tfplan
 infrastructure/lambda/*.zip
 cypress/screenshots/
 
+# Vitest browser-mode artifacts (failure screenshots + attachments)
+.vitest-attachments/
+**/__screenshots__/
+
 # local-only issue tracker
 docs/ephemeral/

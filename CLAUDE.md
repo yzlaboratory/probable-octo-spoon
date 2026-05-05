@@ -11,6 +11,7 @@ Website for SV Alemannia Thalexweiler (German sports club) — built as a Vite +
 - Run `npm run verify` and confirm a green exit before declaring any code-touching task complete. The script is the single canonical gate; do not declare done if it has not run, and do not bypass with `--no-verify`.
 - A Husky `pre-push` hook also runs the fast subset of `verify` (Vitest both projects with coverage) and gates pushes against `.git/last-good-coverage.json`. The first push from a fresh clone is informational only and seeds the cache. To reset the cache: `rm "$(git rev-parse --git-dir)/last-good-coverage.json"`.
 - The regression threshold lives in `package.json` at `coverage.threshold` (default `0`, meaning any per-file `lines.pct` drop fails). Tune there rather than editing scripts.
+- **Test placement is mechanical (ADR 0014):** if a test file imports React (directly or via `@testing-library/react`), it belongs in the **`browser`** Vitest project — colocate it next to the source under `src/**/*.test.tsx`. Otherwise it belongs in the **`node`** project — put it under `tests/unit/**/*.test.ts`. No jsdom anywhere; the `browser` project runs in real Chromium via the Playwright provider, headless.
 
 ## Commands
 
