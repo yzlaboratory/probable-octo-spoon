@@ -1,6 +1,13 @@
 // Baseline cache manager. Read/write/reset over a JSON file (typically .git/last-good-coverage.json).
 
-import { readFileSync, writeFileSync, existsSync, renameSync, unlinkSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  renameSync,
+  unlinkSync,
+  mkdirSync,
+} from "node:fs";
 import { dirname } from "node:path";
 
 export function readBaseline(path) {

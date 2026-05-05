@@ -1,9 +1,20 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
+import {
+  mkdtempSync,
+  rmSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 // @ts-expect-error - .mjs has no types
-import { readBaseline, writeBaseline, resetBaseline } from "../../scripts/coverage-baseline.mjs";
+import {
+  readBaseline,
+  writeBaseline,
+  resetBaseline,
+} from "../../scripts/coverage-baseline.mjs";
 
 let dir: string;
 let cachePath: string;
@@ -31,8 +42,16 @@ describe("readBaseline", () => {
 describe("writeBaseline + readBaseline round-trip", () => {
   it("writes data that read returns verbatim", () => {
     const data = {
-      "src/foo.ts": { lines: { pct: 80 }, branches: { pct: 70 }, functions: { pct: 90 } },
-      "src/bar.ts": { lines: { pct: 100 }, branches: { pct: 100 }, functions: { pct: 100 } },
+      "src/foo.ts": {
+        lines: { pct: 80 },
+        branches: { pct: 70 },
+        functions: { pct: 90 },
+      },
+      "src/bar.ts": {
+        lines: { pct: 100 },
+        branches: { pct: 100 },
+        functions: { pct: 100 },
+      },
     };
     writeBaseline(cachePath, data);
     expect(readBaseline(cachePath)).toEqual(data);
@@ -57,7 +76,9 @@ describe("writeBaseline atomicity", () => {
     const parsed = JSON.parse(readFileSync(cachePath, "utf8"));
     expect(parsed).toEqual(data);
     // No leftover .tmp files for this path
-    const leftovers = readdirSync(dir).filter((n) => n.startsWith("last-good-coverage.json.") && n.endsWith(".tmp"));
+    const leftovers = readdirSync(dir).filter(
+      (n) => n.startsWith("last-good-coverage.json.") && n.endsWith(".tmp"),
+    );
     expect(leftovers).toEqual([]);
   });
 });

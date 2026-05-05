@@ -17,9 +17,19 @@ export function diffCoverage({ current, baseline, threshold = 0 }) {
       if (typeof cur !== "number" || typeof base !== "number") continue;
       const delta = cur - base;
       if (delta < 0 && Math.abs(delta) > threshold) {
-        regressions.push({ file, metric: "lines", baseline: base, current: cur, delta });
+        regressions.push({
+          file,
+          metric: "lines",
+          baseline: base,
+          current: cur,
+          delta,
+        });
       }
     }
   }
-  return { regressions, exitCode: regressions.length === 0 ? 0 : 1, informational };
+  return {
+    regressions,
+    exitCode: regressions.length === 0 ? 0 : 1,
+    informational,
+  };
 }

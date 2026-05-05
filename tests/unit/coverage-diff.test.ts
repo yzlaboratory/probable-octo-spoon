@@ -5,19 +5,35 @@ import { diffCoverage } from "../../scripts/coverage-diff.mjs";
 describe("diffCoverage", () => {
   it("returns no regressions when summaries are identical", () => {
     const summary = {
-      "src/foo.ts": { lines: { pct: 80 }, branches: { pct: 70 }, functions: { pct: 90 } },
+      "src/foo.ts": {
+        lines: { pct: 80 },
+        branches: { pct: 70 },
+        functions: { pct: 90 },
+      },
     };
-    const result = diffCoverage({ current: summary, baseline: summary, threshold: 0 });
+    const result = diffCoverage({
+      current: summary,
+      baseline: summary,
+      threshold: 0,
+    });
     expect(result.regressions).toEqual([]);
     expect(result.exitCode).toBe(0);
   });
 
   it("flags a file whose lines.pct dropped at threshold 0", () => {
     const baseline = {
-      "src/foo.ts": { lines: { pct: 80 }, branches: { pct: 70 }, functions: { pct: 90 } },
+      "src/foo.ts": {
+        lines: { pct: 80 },
+        branches: { pct: 70 },
+        functions: { pct: 90 },
+      },
     };
     const current = {
-      "src/foo.ts": { lines: { pct: 75 }, branches: { pct: 70 }, functions: { pct: 90 } },
+      "src/foo.ts": {
+        lines: { pct: 75 },
+        branches: { pct: 70 },
+        functions: { pct: 90 },
+      },
     };
     const result = diffCoverage({ current, baseline, threshold: 0 });
     expect(result.regressions).toHaveLength(1);
@@ -86,7 +102,10 @@ describe("diffCoverage", () => {
       "src/c.ts": { lines: { pct: 100 } },
     };
     const result = diffCoverage({ current, baseline, threshold: 0 });
-    expect(result.regressions.map((r) => r.file).sort()).toEqual(["src/a.ts", "src/b.ts"]);
+    expect(result.regressions.map((r) => r.file).sort()).toEqual([
+      "src/a.ts",
+      "src/b.ts",
+    ]);
     expect(result.exitCode).toBe(1);
   });
 });
