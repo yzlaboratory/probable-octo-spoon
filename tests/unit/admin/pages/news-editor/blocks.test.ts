@@ -13,7 +13,11 @@ import {
 
 describe("newBlock", () => {
   it("returns sensible defaults per kind", () => {
-    expect(newBlock("heading")).toEqual({ kind: "heading", level: 2, text: "" });
+    expect(newBlock("heading")).toEqual({
+      kind: "heading",
+      level: 2,
+      text: "",
+    });
     expect(newBlock("lead")).toEqual({ kind: "lead", text: "" });
     expect(newBlock("paragraph")).toEqual({ kind: "paragraph", text: "" });
     expect(newBlock("image")).toEqual({
@@ -47,8 +51,16 @@ describe("insertAfter", () => {
       { kind: "paragraph", text: "a" },
       { kind: "paragraph", text: "c" },
     ]);
-    const { next, insertedKey } = insertAfter(blocks, blocks[0].__key, "heading");
-    expect(next.map((b) => b.kind)).toEqual(["paragraph", "heading", "paragraph"]);
+    const { next, insertedKey } = insertAfter(
+      blocks,
+      blocks[0].__key,
+      "heading",
+    );
+    expect(next.map((b) => b.kind)).toEqual([
+      "paragraph",
+      "heading",
+      "paragraph",
+    ]);
     expect(next[1].__key).toBe(insertedKey);
   });
 
@@ -126,7 +138,12 @@ describe("blockIsEmpty", () => {
       blockIsEmpty({ kind: "image", mediaId: 5, caption: "", credit: "" }),
     ).toBe(false);
     expect(
-      blockIsEmpty({ kind: "image", mediaId: null, caption: "cap", credit: "" }),
+      blockIsEmpty({
+        kind: "image",
+        mediaId: null,
+        caption: "cap",
+        credit: "",
+      }),
     ).toBe(false);
   });
 });
@@ -156,7 +173,9 @@ describe("wordCount", () => {
 
   it("counts quote attribution", () => {
     expect(
-      wordCount([{ kind: "quote", text: "zwei Wörter", attr: "Name Nachname" }]),
+      wordCount([
+        { kind: "quote", text: "zwei Wörter", attr: "Name Nachname" },
+      ]),
     ).toBe(4);
   });
 
