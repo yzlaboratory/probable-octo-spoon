@@ -201,4 +201,268 @@ describe("FuPa lambda — fixtures", () => {
     const res = await handler({ rawPath: "/api/fupa/unknown" });
     expect(res.statusCode).toBe(404);
   });
+
+  it("isCancelled returns false for non-string/array/object flag values (numbers etc)", async () => {
+    const raw = [matchAt("2099-12-31T15:00:00+02:00", 42, "PRE")];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse(raw));
+      }),
+    );
+    const h = await freshHandler();
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/fixtures" })).body);
+    // Number flag → falls through to `return false` → match is NOT cancelled.
+    expect(body.fixtures).toHaveLength(1);
+  });
+
+  it("isCancelled handles a string flag like 'postponed'", async () => {
+    const raw = [matchAt("2026-04-26T15:00:00+02:00", "postponed", "PRE")];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse(raw));
+      }),
+    );
+    const h = await freshHandler();
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/fixtures" })).body);
+    expect(body.fixtures).toHaveLength(0);
+  });
+
+  it("falls back to event.path when rawPath is absent", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse([]));
+      }),
+    );
+    const h = await freshHandler();
+    const res = await h({ path: "/api/fupa/fixtures" });
+    expect(res.statusCode).toBe(200);
+  });
+
+  async function freshHandler(): Promise<typeof handler> {
+    vi.resetModules();
+    const mod = (await import("../../infrastructure/lambda/fupa.mjs")) as {
+      handler: typeof handler;
+    };
+    return mod.handler;
+  }
+
+  it("returns the empty payload shape when the upstream first call fails (no cache)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(jsonResponse({}, 500))),
+    );
+    const h = await freshHandler();
+    const res = await h({ rawPath: "/api/fupa/standings" });
+    const body = JSON.parse(res.body);
+    expect(res.statusCode).toBe(200);
+    expect(body.standings).toEqual([]);
+    expect(body.competition).toBeNull();
+    expect(body.fetchedAt).toBeNull();
+  });
+
+  it("emits svg logo URLs when team.image.svg is true", async () => {
+    const standingsSvg = {
+      standings: [
+        {
+          rank: 1,
+          matches: 1,
+          wins: 1,
+          draws: 0,
+          defeats: 0,
+          ownGoals: 1,
+          againstGoals: 0,
+          goalDifference: 1,
+          points: 3,
+          team: {
+            slug: "x",
+            clubSlug: "other",
+            // Tests `r.team?.name?.middle` fallback (no .full).
+            name: { middle: "MidName" },
+            image: { path: "https://image.fupa.net/club/svg/", svg: true },
+          },
+        },
+        {
+          rank: 2,
+          matches: 1,
+          wins: 0,
+          draws: 0,
+          defeats: 1,
+          ownGoals: 0,
+          againstGoals: 1,
+          goalDifference: -1,
+          points: 0,
+          team: {
+            slug: "no-image",
+            clubSlug: "another",
+            // Both .full and .middle missing — exercises final "" fallback.
+            name: {},
+            // No image at all — exercises null logo branch.
+          },
+        },
+      ],
+    };
+    const h = await freshHandler();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse(standingsSvg));
+      }),
+    );
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/standings" })).body);
+    expect(body.standings[0].team.logo).toMatch(/100x100\.svg$/);
+    expect(body.standings[0].team.name).toBe("MidName");
+    expect(body.standings[1].team.logo).toBeNull();
+    expect(body.standings[1].team.name).toBe("");
+  });
+
+  it("classifies cup matches as 'Pokal' and missing image paths as null", async () => {
+    const cupMatch = {
+      id: 1,
+      slug: "cup-1",
+      kickoff: "2099-12-31T15:00:00+02:00",
+      homeTeam: {
+        clubSlug: "opponent",
+        name: { full: "Heim FC", short: "HFC" },
+        // No image — exercises null logo branch.
+      },
+      awayTeam: {
+        clubSlug: "sv-thalexweiler",
+        name: { full: "SG Thalex.", short: "SGT" },
+        // No image — exercises null logo branch.
+      },
+      flags: null,
+      section: "PRE",
+      round: {
+        type: "cup",
+        competitionSeason: { name: "Pokal", shortName: "Pokal" },
+      },
+    };
+    const h = await freshHandler();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse([cupMatch]));
+      }),
+    );
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/fixtures" })).body);
+    expect(body.fixtures).toHaveLength(1);
+    expect(body.fixtures[0].category).toBe("Pokal");
+    expect(body.fixtures[0].ourSide).toBe("away");
+    expect(body.fixtures[0].home.logo).toBeNull();
+    expect(body.fixtures[0].away.logo).toBeNull();
+  });
+
+  it("classifies an unknown round type as 'Liga' (default)", async () => {
+    const friendly = {
+      id: 2,
+      slug: "f-1",
+      kickoff: "2099-12-31T15:00:00+02:00",
+      homeTeam: {
+        clubSlug: "neutral",
+        name: { full: "X", short: "X" },
+      },
+      awayTeam: {
+        clubSlug: "neutral2",
+        name: { full: "Y", short: "Y" },
+      },
+      flags: null,
+      section: "PRE",
+      round: {
+        type: "friendly",
+        competitionSeason: { name: "Friendly", shortName: "F" },
+      },
+    };
+    const h = await freshHandler();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse([friendly]));
+      }),
+    );
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/fixtures" })).body);
+    expect(body.fixtures).toHaveLength(1);
+    expect(body.fixtures[0].category).toBe("Liga");
+    // Neither home nor away is the club → ourSide is null.
+    expect(body.fixtures[0].ourSide).toBeNull();
+  });
+
+  it("standings returns null-shaped payload when team has no competition slug", async () => {
+    const h = await freshHandler();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse({ id: 1, competition: null }));
+        return Promise.resolve(jsonResponse({}, 500));
+      }),
+    );
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/standings" })).body);
+    expect(body.standings).toEqual([]);
+  });
+
+  it("fixtures returns empty payload when the team has no id", async () => {
+    const h = await freshHandler();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse({ slug: "no-id" })); // no id
+        return Promise.resolve(jsonResponse({}, 500));
+      }),
+    );
+    const body = JSON.parse((await h({ rawPath: "/api/fupa/fixtures" })).body);
+    expect(body.fixtures).toEqual([]);
+  });
+
+  it("standings serves a cached payload within the TTL window", async () => {
+    const h = await freshHandler();
+    let calls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        calls += 1;
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse(standingsFixture));
+      }),
+    );
+    await h({ rawPath: "/api/fupa/standings" });
+    const callsAfterPrime = calls;
+    // Second call within TTL — should not refetch.
+    await h({ rawPath: "/api/fupa/standings" });
+    expect(calls).toBe(callsAfterPrime);
+  });
+
+  it("fixtures serves a cached payload within the TTL window", async () => {
+    const h = await freshHandler();
+    let calls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        calls += 1;
+        if (url.endsWith("/v1/teams/sv-thalexweiler-m1"))
+          return Promise.resolve(jsonResponse(teamSeasonFixture));
+        return Promise.resolve(jsonResponse([]));
+      }),
+    );
+    await h({ rawPath: "/api/fupa/fixtures" });
+    const callsAfterPrime = calls;
+    await h({ rawPath: "/api/fupa/fixtures" });
+    expect(calls).toBe(callsAfterPrime);
+  });
 });
