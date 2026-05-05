@@ -1,40 +1,54 @@
 #!/usr/bin/env node
-// Coverage merge orchestrator. Wraps monocart-coverage-reports' multi-source
-// `inputDir` API. Auto-discovers any subdirectory of coverage/raw/ that
-// contains coverage-*.json V8 dump files and folds them into one report.
+// Coverage merge orchestrator. Two-stage pipeline:
+//
+//   Stage 1 — monocart-coverage-reports converts the V8 raw dumps from
+//   Playwright + the e2e Express server into Istanbul JSON via its `json` and
+//   `json-summary` reporters. Sourcemaps unpack the bundled JS back to the
+//   original .ts/.tsx/.mjs files.
+//
+//   Stage 2 — istanbul-lib-coverage merges that intermediate Istanbul JSON
+//   with the Istanbul JSON written by `@vitest/coverage-v8` (which covers the
+//   node + browser Vitest projects together). The combined map is summarised
+//   into the final coverage-summary.json that scripts/verify-coverage.mjs
+//   consumes.
+//
+// Why the two-stage shape: monocart's V8 converter throws when istanbul data
+// is mixed into the same generate() call as raw V8 inputs (CssAst path
+// crashes on entries with missing ranges; the istanbul/V8 unification has a
+// real bug). Doing the V8→Istanbul conversion first, then merging at the
+// Istanbul level, sidesteps the bug entirely and uses the standard
+// istanbul-lib-coverage merge that nyc and friends rely on.
 //
 // Inputs (auto-discovered):
-//   coverage/raw/vitest/        — vitest-monocart-coverage provider output (PR 1+)
-//   coverage/raw/vitest-node/   — future: when issue 02 splits projects
-//   coverage/raw/vitest-browser/— future: when issue 02 splits projects
-//   coverage/raw/playwright/    — monocart-reporter output (this PR)
-//   coverage/raw/server-e2e/    — NODE_V8_COVERAGE dump from the e2e Express server (this PR)
+//   coverage/coverage-final.json — Istanbul output from @vitest/coverage-v8
+//                                  (covers node + browser Vitest projects)
+//   coverage/raw/playwright/    — monocart-reporter raw V8 (browser bundle)
+//   coverage/raw/server-e2e/    — NODE_V8_COVERAGE dump from the e2e server
 //
 // Outputs:
-//   coverage/report/index.html  — merged human report
-//   coverage/coverage-summary.json — merged JSON summary (overwrites the
-//     Vitest-only summary so the diff comparator sees the unified picture).
-//
-// `sourcePath` normalisation collapses absolute paths and any
-// `file:///` URLs from the Node.js V8 dumps into repo-relative paths so the
-// same source file isn't double-counted under different paths across sources.
+//   coverage/report/index.html      — monocart's V8 HTML report (e2e only)
+//   coverage/report/coverage-final.json — istanbul JSON for the e2e tier
+//   coverage/coverage-final.json     — final merged Istanbul (vitest + e2e)
+//   coverage/coverage-summary.json   — final merged summary (verify reads this)
 
-import { readdirSync, statSync, existsSync, readFileSync } from "node:fs";
+import {
+  readdirSync,
+  statSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  copyFileSync,
+} from "node:fs";
 import { resolve, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { CoverageReport } from "monocart-coverage-reports";
+import libCoverage from "istanbul-lib-coverage";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, "..");
 const rawRoot = resolve(repoRoot, "coverage", "raw");
-const outputDir = resolve(repoRoot, "coverage", "report");
+const e2eOutputDir = resolve(repoRoot, "coverage", "report");
 
-// Two ingestion paths:
-//   - Monocart-formatted raw (Vitest + Playwright via monocart-reporter): keys
-//     include `id`, `type`, `data`. Loaded via the constructor's `inputDir`.
-//   - Node.js NODE_V8_COVERAGE raw (the e2e Express server dump): keys are
-//     `{ result: [...] }`. Loaded via `addFromDir(dir)` so Monocart hydrates
-//     each entry with its source text before merging.
 function classifyRawDir(dir) {
   let files;
   try {
@@ -56,9 +70,6 @@ function discoverRawSources(root) {
   if (!existsSync(root)) return { monocart: [], nodeV8: [] };
   const monocart = [];
   const nodeV8 = [];
-  // Walk up to two levels deep — monocart-reporter writes its raw under
-  // <outputDir>/raw/ when configured with `reports: [['raw']]`, so the path
-  // ends up like coverage/raw/playwright/raw/.
   const walk = (dir, depth) => {
     let st;
     try {
@@ -87,135 +98,169 @@ function discoverRawSources(root) {
   return { monocart, nodeV8 };
 }
 
-const sources = discoverRawSources(rawRoot);
-const inputDir = sources.monocart;
-const nodeV8Dirs = sources.nodeV8;
-if (inputDir.length === 0 && nodeV8Dirs.length === 0) {
-  console.error(
-    `[merge-coverage] no raw V8 coverage subdirs found under ${rawRoot}`,
-  );
-  console.error(
-    "[merge-coverage] expected coverage/raw/{vitest,playwright,server-e2e}/coverage-*.json",
-  );
-  process.exit(2);
-}
-
 function normaliseSourcePath(filePath) {
   if (!filePath) return filePath;
-  // Strip any file:// URL prefix.
   let p = filePath;
   if (p.startsWith("file://")) {
     try {
       p = fileURLToPath(p);
     } catch {
-      // Keep as-is if it isn't a valid URL.
+      // Keep as-is if not a valid URL.
     }
   }
-  // Collapse absolute repo paths to repo-relative form.
   if (p.startsWith(repoRoot + "/")) {
     p = relative(repoRoot, p);
   }
-  // Drop the worktree segment so the same source file under a worktree and
-  // under the main checkout collapses to one path. Worktrees live under
-  // .claude/worktrees/<id>/ — strip up to that prefix.
+  // Drop the worktree segment so the same source under a worktree and the
+  // main checkout collapses to one path.
   const worktreeMatch = p.match(/\.claude\/worktrees\/[^/]+\/(.*)$/);
   if (worktreeMatch) p = worktreeMatch[1];
   return p;
 }
 
-const coverageOptions = {
-  name: "Clubsoft unified coverage",
-  inputDir,
-  outputDir,
-  baseDir: repoRoot,
-  reports: [
-    // Human-readable HTML.
-    "v8",
-    // Machine-readable summary written into the merged report dir.
-    "json-summary",
-    // Console line for quick scan in CI logs.
-    "console-summary",
-  ],
-  entryFilter: (entry) => {
-    if (!entry?.url) return false;
-    const url = entry.url;
-    if (url.includes("/node_modules/")) return false;
-    if (url.includes("/dist/")) return false;
-    if (url.includes("/coverage/")) return false;
-    if (/\.test\.[tj]sx?$|\.test\.mjs$/.test(url)) return false;
-    // Drop CSS bundles surfaced by Chromium's CSSCoverage (Tailwind output is
-    // not actionable in the unified coverage signal). JS bundles stay in so
-    // their sourcemaps unpack into src/ entries; they're then removed by
-    // Monocart automatically.
-    if (/\.css(\?.*)?$/.test(url)) return false;
-    return true;
-  },
-  sourceFilter: (sourcePath) => {
-    if (!sourcePath) return false;
-    if (sourcePath.includes("node_modules/")) return false;
-    if (sourcePath.includes("/dist/")) return false;
-    if (sourcePath.includes("/coverage/")) return false;
-    // CSS surfaced from Chromium's CSSCoverage isn't useful for the unified
-    // signal — it's mostly Tailwind output and bundle-level concatenations.
-    if (/\.css(\?.*)?$/.test(sourcePath)) return false;
-    // Static assets imported by JS (svg, png, etc.) get registered as
-    // sourcemap entries by Vite. They have no executable code to cover.
-    if (
-      /\.(svg|png|jpe?g|gif|webp|ico|avif|woff2?|ttf|otf|eot|json)$/.test(
-        sourcePath,
-      )
-    ) {
-      return false;
-    }
-    // Bundle-named entries (e.g. localhost-4322/assets/index-*.js or
-    // assets/index-*.css) that didn't unpack into a real source path. Match
-    // both URL-style and stripped variants since Monocart rewrites path
-    // shapes during sourcemap unpacking.
-    if (/(^|\/)localhost[-:.]?\d*\//.test(sourcePath)) return false;
-    if (/(^|\/)assets\/[^/]+\.(m?js|css)$/.test(sourcePath)) return false;
-    if (/\.test\.[tj]sx?$|\.test\.mjs$/.test(sourcePath)) return false;
-    // Only first-party source files.
-    return /(^|\/)(src|server|scripts|infrastructure)\//.test(sourcePath);
-  },
-  sourcePath: (filePath) => normaliseSourcePath(filePath),
-  cleanCache: true,
-  clean: true,
-};
+const sources = discoverRawSources(rawRoot);
+const monocartDirs = sources.monocart;
+const nodeV8Dirs = sources.nodeV8;
 
-const allDirs = [...inputDir, ...nodeV8Dirs];
+const vitestIstanbulPath = resolve(repoRoot, "coverage", "coverage-final.json");
+const hasVitestIstanbul = existsSync(vitestIstanbulPath);
+
+if (
+  monocartDirs.length === 0 &&
+  nodeV8Dirs.length === 0 &&
+  !hasVitestIstanbul
+) {
+  console.error(
+    `[merge-coverage] no coverage inputs found under ${rawRoot} or coverage-final.json`,
+  );
+  console.error(
+    "[merge-coverage] expected coverage/coverage-final.json (vitest) and/or coverage/raw/{playwright,server-e2e}/coverage-*.json",
+  );
+  process.exit(2);
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Stage 1: V8 raw → Istanbul JSON via monocart.
+// ────────────────────────────────────────────────────────────────────────
+
+const sourceLines = [];
+for (const p of monocartDirs)
+  sourceLines.push(`${relative(repoRoot, p)} (monocart-raw)`);
+for (const p of nodeV8Dirs)
+  sourceLines.push(`${relative(repoRoot, p)} (node-v8)`);
+if (hasVitestIstanbul)
+  sourceLines.push(
+    `${relative(repoRoot, vitestIstanbulPath)} (vitest-istanbul)`,
+  );
 console.log(
-  `[merge-coverage] merging ${allDirs.length} source(s):\n  - ${allDirs
-    .map(
-      (p) =>
-        `${relative(repoRoot, p)} (${
-          inputDir.includes(p) ? "monocart-raw" : "node-v8"
-        })`,
-    )
-    .join("\n  - ")}`,
+  `[merge-coverage] merging ${sourceLines.length} source(s):\n  - ${sourceLines.join("\n  - ")}`,
 );
 
-const report = new CoverageReport(coverageOptions);
-// Pull in NODE_V8_COVERAGE-style dirs first (Monocart hydrates source text
-// from the file:// URLs in the raw dump). The constructor's `inputDir`
-// already handles the monocart-raw subdirs declared above.
-for (const dir of nodeV8Dirs) {
-  await report.addFromDir(dir);
-}
-const result = await report.generate();
+let e2eIstanbulPath = null;
+if (monocartDirs.length > 0 || nodeV8Dirs.length > 0) {
+  const e2eOptions = {
+    name: "Clubsoft e2e coverage",
+    inputDir: monocartDirs,
+    outputDir: e2eOutputDir,
+    baseDir: repoRoot,
+    reports: [
+      // Human-readable HTML drill-down (V8 reporter).
+      "v8",
+      // Per-file Istanbul JSON — this is what we feed into stage 2.
+      "json",
+      // Per-file summary JSON — convenient for spot-checks.
+      "json-summary",
+      "console-summary",
+    ],
+    entryFilter: (entry) => {
+      if (!entry?.url) return false;
+      const url = entry.url;
+      if (url.includes("/node_modules/")) return false;
+      if (url.includes("/dist/")) return false;
+      if (url.includes("/coverage/")) return false;
+      if (/\.test\.[tj]sx?$|\.test\.mjs$/.test(url)) return false;
+      if (/\.css(\?.*)?$/.test(url)) return false;
+      return true;
+    },
+    sourceFilter: (sourcePath) => {
+      if (!sourcePath) return false;
+      if (sourcePath.includes("node_modules/")) return false;
+      if (sourcePath.includes("/dist/")) return false;
+      if (sourcePath.includes("/coverage/")) return false;
+      if (/\.css(\?.*)?$/.test(sourcePath)) return false;
+      if (
+        /\.(svg|png|jpe?g|gif|webp|ico|avif|woff2?|ttf|otf|eot|json)$/.test(
+          sourcePath,
+        )
+      )
+        return false;
+      if (/(^|\/)localhost[-:.]?\d*\//.test(sourcePath)) return false;
+      if (/(^|\/)assets\/[^/]+\.(m?js|css)$/.test(sourcePath)) return false;
+      if (/\.test\.[tj]sx?$|\.test\.mjs$/.test(sourcePath)) return false;
+      return /(^|\/)(src|server|scripts|infrastructure)\//.test(sourcePath);
+    },
+    sourcePath: (filePath) => normaliseSourcePath(filePath),
+    cleanCache: true,
+    clean: true,
+  };
 
-// Mirror the merged json-summary up to coverage/coverage-summary.json so the
-// existing diff comparator (scripts/coverage-diff.mjs) sees the unified
-// signal without changes.
-const mergedSummary = resolve(outputDir, "coverage-summary.json");
-const topSummary = resolve(repoRoot, "coverage", "coverage-summary.json");
-if (existsSync(mergedSummary)) {
-  const { copyFileSync } = await import("node:fs");
-  copyFileSync(mergedSummary, topSummary);
+  const report = new CoverageReport(e2eOptions);
+  for (const dir of nodeV8Dirs) {
+    await report.addFromDir(dir);
+  }
+  await report.generate();
+  e2eIstanbulPath = resolve(e2eOutputDir, "coverage-final.json");
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Stage 2: Istanbul-level merge.
+// ────────────────────────────────────────────────────────────────────────
+
+function loadIstanbul(path) {
+  if (!existsSync(path)) return null;
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function rekeyToRepoRelative(istanbulData) {
+  // Vitest writes absolute paths as keys ("/Users/.../src/Foo.tsx"); monocart
+  // already writes repo-relative keys. Normalise everything to repo-relative
+  // so merge keys collide for the same source file.
+  const out = {};
+  for (const [k, v] of Object.entries(istanbulData)) {
+    const rel = normaliseSourcePath(k);
+    const fileCov = { ...v, path: rel };
+    out[rel] = fileCov;
+  }
+  return out;
+}
+
+const finalMap = libCoverage.createCoverageMap({});
+const vitestData = loadIstanbul(vitestIstanbulPath);
+const e2eData = loadIstanbul(e2eIstanbulPath);
+if (vitestData) finalMap.merge(rekeyToRepoRelative(vitestData));
+if (e2eData) finalMap.merge(rekeyToRepoRelative(e2eData));
+
+// Write the merged Istanbul JSON + summary.
+const finalIstanbulPath = resolve(repoRoot, "coverage", "coverage-final.json");
+const finalSummaryPath = resolve(repoRoot, "coverage", "coverage-summary.json");
+
+writeFileSync(finalIstanbulPath, JSON.stringify(finalMap.toJSON()));
+
+const summary = { total: finalMap.getCoverageSummary().toJSON() };
+for (const [path, fc] of Object.entries(finalMap.data)) {
+  summary[path] = fc.toSummary().toJSON();
+}
+writeFileSync(finalSummaryPath, JSON.stringify(summary));
+
+const t = summary.total;
+console.log(
+  `[merge-coverage] merged: lines ${t.lines.pct}% | statements ${t.statements.pct}% | functions ${t.functions.pct}% | branches ${t.branches.pct}%`,
+);
+console.log(
+  `[merge-coverage] summary at ${relative(repoRoot, finalSummaryPath)}`,
+);
+if (e2eIstanbulPath) {
   console.log(
-    `[merge-coverage] merged summary copied to ${relative(repoRoot, topSummary)}`,
+    `[merge-coverage] e2e HTML report at ${relative(repoRoot, e2eOutputDir)}/index.html`,
   );
 }
-
-console.log(
-  `[merge-coverage] report at ${relative(repoRoot, result?.reportPath ?? outputDir)}`,
-);

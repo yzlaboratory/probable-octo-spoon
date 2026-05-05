@@ -11,18 +11,26 @@ import { playwright } from "@vitest/browser-playwright";
 // Mechanical placement rule: a test file imports React → browser. It does not
 // → node. New pure-logic .test.ts files belong under tests/unit/**.
 //
-// Coverage: V8 raw output via the vitest-monocart-coverage provider. Output
-// goes to ./coverage/ — coverage-summary.json (json-summary) is the
-// machine-parseable signal consumed by scripts/coverage-diff.mjs and the
-// pre-push hook. See ADR 0014 / ADR 0015 and mcr.config.mjs.
+// Coverage: built-in `@vitest/coverage-v8` provider (NOT the third-party
+// `vitest-monocart-coverage`). The third-party provider can't define separate
+// entrypoints for node vs browser projects in one workspace — vitest doesn't
+// support per-project provider modules — so the browser project's V8 coverage
+// silently dropped on the floor. See vitest-dev/vitest#7316 and
+// cenfun/vitest-monocart-coverage#8.
+//
+// The built-in v8 provider works across both projects. It writes Istanbul-
+// shaped reports (json-summary, json, html) to ./coverage/ and the merge
+// orchestrator (scripts/merge-coverage.mjs) folds the istanbul JSON into the
+// unified report alongside Playwright + server-e2e raw V8.
 export default defineConfig({
   plugins: [react()],
   test: {
     coverage: {
       enabled: false,
-      provider: "custom",
-      customProviderModule: "vitest-monocart-coverage",
-      include: ["src/**", "server/**", "scripts/coverage-*.mjs"],
+      provider: "v8",
+      reporter: ["json-summary", "json", "html"],
+      reportsDirectory: "coverage",
+      include: ["src/**/*.{ts,tsx}", "server/**/*.mjs", "scripts/coverage-*.mjs"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",
@@ -30,6 +38,10 @@ export default defineConfig({
         "**/*.test.{ts,tsx,mjs}",
         "**/*.config.{ts,js,mjs}",
         "tests/**",
+        // Binary / non-source assets that the v8 provider tries to remap and
+        // chokes on (.DS_Store, images, fonts, etc.).
+        "**/*.{svg,png,jpg,jpeg,gif,webp,ico,woff,woff2,ttf,otf,eot}",
+        "**/.DS_Store",
       ],
     },
     projects: [
