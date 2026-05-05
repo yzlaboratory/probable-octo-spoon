@@ -5,14 +5,14 @@ import path from "node:path";
 import fs from "node:fs";
 import { handler as fupaHandler } from "./infrastructure/lambda/fupa.mjs";
 import { openDb, dbPath, mediaRoot } from "./server/db.mjs";
-import { sweepExpiredSessions } from "./server/auth.mjs";
 import { helmetMiddleware, sessionMiddleware } from "./server/middleware.mjs";
 import authRoutes from "./server/routes/auth.mjs";
 import mediaRoutes from "./server/routes/media.mjs";
-import newsRoutes, { runPublishTick } from "./server/routes/news.mjs";
+import newsRoutes from "./server/routes/news.mjs";
 import sponsorRoutes from "./server/routes/sponsors.mjs";
 import vorstandRoutes from "./server/routes/vorstand.mjs";
 import trainingRoutes from "./server/routes/training.mjs";
+import { runMaintenanceTick } from "./server/tick.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -92,18 +92,7 @@ app.get("/{*splat}", (_req, res) => {
   res.type("html").send(fs.readFileSync(path.join(__dirname, "dist", "index.html")));
 });
 
-setInterval(() => {
-  try {
-    runPublishTick(db);
-  } catch (e) {
-    console.error("publish tick:", e);
-  }
-  try {
-    sweepExpiredSessions(db);
-  } catch (e) {
-    console.error("session sweep:", e);
-  }
-}, 60_000);
+setInterval(() => runMaintenanceTick(db), 60_000);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
