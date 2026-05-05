@@ -243,4 +243,112 @@ describe("runE2eServer", () => {
     expect(observedEnv?.NODE_V8_COVERAGE).toBe(dumpDir);
     expect(observedEnv?.FOO).toBe("bar");
   });
+
+  it("returns exitCode=2 with a clear error when dumpDir is missing", async () => {
+    const result = await runE2eServer({
+      command: "node",
+      args: [],
+      env: {},
+      // @ts-expect-error — exercising the validation branch
+      dumpDir: undefined,
+      task: async () => ({}),
+    });
+    expect(result.exitCode).toBe(2);
+    expect(result.error).toMatch(/dumpDir/);
+  });
+
+  it("returns exitCode=2 with a clear error when task is not a function", async () => {
+    const dumpDir = join(tmp, "dump");
+    const result = await runE2eServer({
+      command: "node",
+      args: [],
+      env: {},
+      dumpDir,
+      // @ts-expect-error — exercising the validation branch
+      task: undefined,
+    });
+    expect(result.exitCode).toBe(2);
+    expect(result.error).toMatch(/task/);
+  });
+
+  it("ignores child.kill() throwing when the child has already gone away", async () => {
+    const dumpDir = join(tmp, "dump");
+    mkdirSync(dumpDir, { recursive: true });
+
+    const child = new FakeChild();
+    child.kill = () => {
+      throw new Error("ESRCH: already dead");
+    };
+
+    const promise = runE2eServer({
+      command: "node",
+      args: ["server.mjs"],
+      env: {},
+      dumpDir,
+      timeoutMs: 1000,
+      readyTimeoutMs: 1000,
+      spawn: () => child as any,
+      waitForReady: async () => {},
+      task: async () => ({ ok: true }),
+    });
+
+    setTimeout(() => {
+      writeFileSync(join(dumpDir, "coverage-1.json"), "{}");
+      child.emit("exit", 0, null);
+    }, 20);
+
+    const result = await promise;
+    expect(result.exitCode).toBe(0);
+  });
+
+  it("uses the default no-op waitForReady when none is provided", async () => {
+    const dumpDir = join(tmp, "dump");
+    mkdirSync(dumpDir, { recursive: true });
+    const child = new FakeChild();
+    const promise = runE2eServer({
+      command: "node",
+      args: ["server.mjs"],
+      env: {},
+      dumpDir,
+      timeoutMs: 1000,
+      readyTimeoutMs: 1000,
+      spawn: () => child as any,
+      // waitForReady intentionally omitted — defaultWaitForReady should
+      // resolve immediately so the task runs.
+      task: async () => ({ ok: true }),
+    });
+    setTimeout(() => {
+      writeFileSync(join(dumpDir, "coverage-1.json"), "{}");
+      child.emit("exit", 0, null);
+    }, 20);
+    const result = await promise;
+    expect(result.exitCode).toBe(0);
+  });
+
+  it("propagates a non-zero child exit code as the wrapper's exitCode", async () => {
+    const dumpDir = join(tmp, "dump");
+    mkdirSync(dumpDir, { recursive: true });
+
+    const child = new FakeChild();
+    const promise = runE2eServer({
+      command: "node",
+      args: ["server.mjs"],
+      env: {},
+      dumpDir,
+      timeoutMs: 1000,
+      readyTimeoutMs: 1000,
+      spawn: () => child as any,
+      waitForReady: async () => {},
+      task: async () => ({ ok: true }),
+    });
+
+    setTimeout(() => {
+      writeFileSync(join(dumpDir, "coverage-1.json"), "{}");
+      child.emit("exit", 17, null);
+    }, 20);
+
+    const result = await promise;
+    expect(result.exitCode).toBe(17);
+    expect(result.error).toMatch(/code 17/);
+  });
 });
