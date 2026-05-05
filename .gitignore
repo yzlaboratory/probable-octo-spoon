@@ -34,5 +34,9 @@ infrastructure/*.tfplan
 infrastructure/lambda/*.zip
 cypress/screenshots/
 
+# Playwright artifacts
+test-results/
+playwright-report/
+
 # local-only issue tracker
 docs/ephemeral/

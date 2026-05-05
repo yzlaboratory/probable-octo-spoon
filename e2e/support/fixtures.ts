@@ -24,7 +24,10 @@ const test = base.extend({
           page.coverage.stopJSCoverage(),
           page.coverage.stopCSSCoverage(),
         ]);
-        const coverageList = [...jsCoverage, ...cssCoverage];
+        // Skip CSS — Tailwind output isn't actionable in the unified
+        // signal, and CSS entries bypass Monocart's entryFilter.
+        void cssCoverage;
+        const coverageList = [...jsCoverage];
         await addCoverageReport(coverageList, test.info());
       }
     },
