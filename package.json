@@ -14,7 +14,9 @@
     "test:admin": "bash -c 'set -a; . ~/.credentials; set +a; CYPRESS_ADMIN_EMAIL=\"$CLUBSOFT_ADMIN_EMAIL\" CYPRESS_ADMIN_PASSWORD=\"$CLUBSOFT_ADMIN_PASSWORD\" cypress run --spec cypress/e2e/admin-*.cy.ts'",
     "test:admin:prod": "bash -c 'set -a; . ~/.credentials; set +a; CYPRESS_ADMIN_EMAIL=\"$CLUBSOFT_ADMIN_EMAIL\" CYPRESS_ADMIN_PASSWORD=\"$CLUBSOFT_ADMIN_PASSWORD\" CYPRESS_BASE_URL=https://svthalexweiler.de cypress run --spec cypress/e2e/admin-*.cy.ts'",
     "test:coverage": "vitest run --coverage",
-    "verify": "npm run test:coverage && node scripts/verify-coverage.mjs",
+    "test:e2e:pw": "node scripts/run-e2e.mjs",
+    "test:e2e:admin": "bash -c 'set -a; . ~/.credentials; set +a; PLAYWRIGHT_ADMIN_EMAIL=\"$CLUBSOFT_ADMIN_EMAIL\" PLAYWRIGHT_ADMIN_PASSWORD=\"$CLUBSOFT_ADMIN_PASSWORD\" node scripts/run-e2e.mjs'",
+    "verify": "npm run test:coverage && npm run test:e2e:pw && node scripts/merge-coverage.mjs && node scripts/verify-coverage.mjs --baseline=full",
     "verify:fast": "npm run test:coverage && node scripts/verify-coverage.mjs",
     "prepare": "husky"
   },

@@ -34,10 +34,19 @@ function resolveGitDir(cwd) {
 }
 
 const summaryPath = resolve(repoRoot, "coverage", "coverage-summary.json");
-const baselinePath = resolve(
-  resolveGitDir(repoRoot),
-  "last-good-coverage.json",
-);
+
+// Tier-aware baseline path. The default `last-good-coverage.json` is the
+// fast tier (Vitest only) used by the pre-push hook. The full tier (Vitest +
+// Playwright + e2e merge) writes to `last-good-coverage.full.json` so the two
+// signals don't whipsaw each other — Playwright/e2e add coverage Vitest can't
+// reach, so a single shared baseline would cause the fast tier to fail every
+// time after the full tier runs.
+const baselineArg = process.argv.find((a) => a.startsWith("--baseline="));
+const baselineName = baselineArg ? baselineArg.slice("--baseline=".length) : "";
+const baselineFile = baselineName
+  ? `last-good-coverage.${baselineName}.json`
+  : "last-good-coverage.json";
+const baselinePath = resolve(resolveGitDir(repoRoot), baselineFile);
 
 if (!existsSync(summaryPath)) {
   console.error(
