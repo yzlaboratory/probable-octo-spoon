@@ -56,6 +56,32 @@ if (!existsSync(distIndex) && process.env.E2E_SKIP_BUILD !== "1") {
 
 const baseUrl = `http://localhost:${PORT}`;
 
+// Public-data seed. Always runs — the public-site specs (homepage,
+// navigation, news-detail, gallery) assert on rendered news / sponsors /
+// vorstand cards which only exist when the DB is populated. The seed script
+// is idempotent (skips when sponsors already exist) so re-runs are safe.
+//
+// E2E_SKIP_PUBLIC_SEED=1 lets the admin-only spec runs opt out if needed.
+if (process.env.E2E_SKIP_PUBLIC_SEED !== "1") {
+  const seedPublic = spawnSync(
+    "node",
+    [resolve(repoRoot, "scripts", "seed-local-demo.mjs")],
+    {
+      cwd: repoRoot,
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        DB_PATH: resolve(dataDir, "app.db"),
+        MEDIA_ROOT: resolve(dataDir, "media"),
+      },
+    },
+  );
+  if (seedPublic.status !== 0) {
+    console.error(`[run-e2e] public-data seed failed (${seedPublic.status})`);
+    process.exit(seedPublic.status ?? 1);
+  }
+}
+
 // Optional admin seeding. Runs only when both PLAYWRIGHT_ADMIN_EMAIL and
 // PLAYWRIGHT_ADMIN_PASSWORD are set. The admin-login spec test.skip()s when
 // they're missing, so an unseeded run is also valid.
