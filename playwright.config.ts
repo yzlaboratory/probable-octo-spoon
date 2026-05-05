@@ -25,6 +25,11 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   use: {
     baseURL: E2E_BASE_URL,
+    // Production serves a German club; assertions on rendered times (e.g. FuPa
+    // fixtures) assume Europe/Berlin. Pin the browser context so CI runners
+    // (UTC by default) don't shift kickoffs by 1–2 hours.
+    timezoneId: "Europe/Berlin",
+    locale: "de-DE",
     trace: "off",
     screenshot: "off",
     video: "off",
