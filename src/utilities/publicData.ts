@@ -83,7 +83,7 @@ export interface PublicVorstandMember {
 }
 
 // Map the admin palette enum to the Tailwind classes the legacy components expect.
-function paletteToClass(p: ServerSponsor["cardPalette"]): string | undefined {
+export function paletteToClass(p: ServerSponsor["cardPalette"]): string | undefined {
   switch (p) {
     case "purple": return "bg-primary/70";
     case "warm-neutral": return "bg-rose-200";
@@ -93,7 +93,7 @@ function paletteToClass(p: ServerSponsor["cardPalette"]): string | undefined {
   }
 }
 
-function bestNewsImage(hero: MediaPayload | null): string {
+export function bestNewsImage(hero: MediaPayload | null): string {
   if (!hero) return logo;
   return (
     hero.variants.svg ||
@@ -105,7 +105,7 @@ function bestNewsImage(hero: MediaPayload | null): string {
   );
 }
 
-function bestSponsorLogo(media: MediaPayload | null): string {
+export function bestSponsorLogo(media: MediaPayload | null): string {
   if (!media) return logo;
   return (
     media.variants.svg ||
@@ -115,7 +115,7 @@ function bestSponsorLogo(media: MediaPayload | null): string {
   );
 }
 
-function bestPortrait(media: MediaPayload | null): string {
+export function bestPortrait(media: MediaPayload | null): string {
   if (!media) return logo;
   return (
     media.variants["320w"] ||
@@ -125,7 +125,7 @@ function bestPortrait(media: MediaPayload | null): string {
   );
 }
 
-function toPublicNews(n: ServerNews): PublicNewsItem {
+export function toPublicNews(n: ServerNews): PublicNewsItem {
   // Strip HTML tags for the legacy plain-text `long` fallback used by NewsDetail
   // until that component is updated. Whitespace-collapsed.
   const plain = n.longHtml
@@ -149,7 +149,7 @@ function toPublicNews(n: ServerNews): PublicNewsItem {
   };
 }
 
-function toPublicSponsor(s: ServerSponsor): PublicSponsor {
+export function toPublicSponsor(s: ServerSponsor): PublicSponsor {
   return {
     Name: s.name,
     Title: s.tagline ?? "",
@@ -161,7 +161,7 @@ function toPublicSponsor(s: ServerSponsor): PublicSponsor {
   };
 }
 
-function toPublicVorstand(v: ServerVorstand): PublicVorstandMember {
+export function toPublicVorstand(v: ServerVorstand): PublicVorstandMember {
   return {
     name: v.name,
     title: v.role,
