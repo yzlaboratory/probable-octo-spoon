@@ -33,7 +33,7 @@ import { readBaseline, writeBaseline } from "./coverage-baseline.mjs";
 // Resolve the real .git directory. In worktrees, ".git" at the repo root is a
 // pointer file (e.g. "gitdir: /path/to/.git/worktrees/<name>"); writing under
 // that path requires resolving to the actual directory.
-function resolveGitDir(cwd) {
+export function resolveGitDir(cwd) {
   try {
     const out = execSync("git rev-parse --git-dir", {
       cwd,
@@ -112,7 +112,7 @@ export function runVerify({
 }
 
 // Parse CLI args: --baseline=<path>, --tier=<name>, --no-update.
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const out = {};
   for (const a of argv) {
     if (a === "--no-update") out.updateBaseline = false;
@@ -123,20 +123,17 @@ function parseArgs(argv) {
   return out;
 }
 
-// Only run the CLI when invoked directly (not when imported by tests).
-const isMain = (() => {
-  try {
-    const me = fileURLToPath(import.meta.url);
-    return process.argv[1] && resolve(process.argv[1]) === me;
-  } catch {
-    return false;
-  }
-})();
-
-if (isMain) {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const repoRoot = resolve(here, "..");
-  const args = parseArgs(process.argv.slice(2));
+// CLI orchestration extracted so the bottom of this file is a thin shim.
+// All side effects (process.exit / repo-root resolution / env access) flow
+// through `opts` so it can be unit-tested in node mode.
+export function runCli({
+  argv = [],
+  env = {},
+  repoRoot,
+  log = (...a) => console.log(...a),
+  error = (...a) => console.error(...a),
+} = {}) {
+  const args = parseArgs(argv);
 
   let pkg;
   try {
@@ -147,10 +144,7 @@ if (isMain) {
   const threshold = Number(pkg?.coverage?.threshold ?? 0);
 
   const summaryPath = resolve(repoRoot, "coverage", "coverage-summary.json");
-  const baselineOverride =
-    args.baselineOverride ?? process.env.COVERAGE_BASELINE;
-  // Tier-aware default filename: --tier=full → last-good-coverage.full.json.
-  // Path override (CI) wins; tier flag picks the local-cache filename.
+  const baselineOverride = args.baselineOverride ?? env.COVERAGE_BASELINE;
   const baselineFile = args.tier
     ? `last-good-coverage.${args.tier}.json`
     : "last-good-coverage.json";
@@ -159,11 +153,9 @@ if (isMain) {
     : resolve(resolveGitDir(repoRoot), baselineFile);
 
   const noUpdateEnv =
-    process.env.COVERAGE_NO_UPDATE &&
-    process.env.COVERAGE_NO_UPDATE !== "0" &&
-    process.env.COVERAGE_NO_UPDATE !== "false";
-  // CI mode (baseline override or explicit --no-update) does not write the
-  // baseline back. The local pre-push / verify path does.
+    env.COVERAGE_NO_UPDATE &&
+    env.COVERAGE_NO_UPDATE !== "0" &&
+    env.COVERAGE_NO_UPDATE !== "false";
   const updateBaseline =
     args.updateBaseline === false
       ? false
@@ -178,8 +170,32 @@ if (isMain) {
     baselinePath,
     threshold,
     updateBaseline,
-    log: (...a) => console.log(...a),
-    error: (...a) => console.error(...a),
+    log,
+    error,
   });
-  process.exit(result.exitCode);
+  return result.exitCode;
 }
+
+// Only run the CLI when invoked directly (not when imported by tests).
+export function detectIsMain() {
+  try {
+    const me = fileURLToPath(import.meta.url);
+    return process.argv[1] && resolve(process.argv[1]) === me;
+  } catch {
+    /* v8 ignore next — fileURLToPath only throws on malformed URLs we can't synthesise. */
+    return false;
+  }
+}
+
+/* v8 ignore start — thin CLI shim; runCli covers the orchestration logic. */
+if (detectIsMain()) {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const repoRoot = resolve(here, "..");
+  const code = runCli({
+    argv: process.argv.slice(2),
+    env: process.env,
+    repoRoot,
+  });
+  process.exit(code);
+}
+/* v8 ignore stop */
