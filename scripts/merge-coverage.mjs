@@ -19,9 +19,9 @@
 // `file:///` URLs from the Node.js V8 dumps into repo-relative paths so the
 // same source file isn't double-counted under different paths across sources.
 
-import { readdirSync, statSync, existsSync } from "node:fs";
+import { readdirSync, statSync, existsSync, readFileSync } from "node:fs";
 import { resolve, dirname, relative } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { CoverageReport } from "monocart-coverage-reports";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -29,28 +29,68 @@ const repoRoot = resolve(here, "..");
 const rawRoot = resolve(repoRoot, "coverage", "raw");
 const outputDir = resolve(repoRoot, "coverage", "report");
 
-function discoverRawSources(root) {
-  if (!existsSync(root)) return [];
-  const sources = [];
-  for (const entry of readdirSync(root)) {
-    const abs = resolve(root, entry);
-    let st;
-    try {
-      st = statSync(abs);
-    } catch {
-      continue;
-    }
-    if (!st.isDirectory()) continue;
-    const files = readdirSync(abs);
-    if (files.some((f) => /^coverage-.+\.json$/.test(f))) {
-      sources.push(abs);
-    }
+// Two ingestion paths:
+//   - Monocart-formatted raw (Vitest + Playwright via monocart-reporter): keys
+//     include `id`, `type`, `data`. Loaded via the constructor's `inputDir`.
+//   - Node.js NODE_V8_COVERAGE raw (the e2e Express server dump): keys are
+//     `{ result: [...] }`. Loaded via `addFromDir(dir)` so Monocart hydrates
+//     each entry with its source text before merging.
+function classifyRawDir(dir) {
+  let files;
+  try {
+    files = readdirSync(dir).filter((f) => /^coverage-.+\.json$/.test(f));
+  } catch {
+    return null;
   }
-  return sources;
+  if (files.length === 0) return null;
+  try {
+    const sample = JSON.parse(readFileSync(resolve(dir, files[0]), "utf8"));
+    if (Array.isArray(sample?.result)) return "node-v8";
+    return "monocart-raw";
+  } catch {
+    return null;
+  }
 }
 
-const inputDir = discoverRawSources(rawRoot);
-if (inputDir.length === 0) {
+function discoverRawSources(root) {
+  if (!existsSync(root)) return { monocart: [], nodeV8: [] };
+  const monocart = [];
+  const nodeV8 = [];
+  // Walk up to two levels deep — monocart-reporter writes its raw under
+  // <outputDir>/raw/ when configured with `reports: [['raw']]`, so the path
+  // ends up like coverage/raw/playwright/raw/.
+  const walk = (dir, depth) => {
+    let st;
+    try {
+      st = statSync(dir);
+    } catch {
+      return;
+    }
+    if (!st.isDirectory()) return;
+    const kind = classifyRawDir(dir);
+    if (kind === "monocart-raw") {
+      monocart.push(dir);
+      return;
+    }
+    if (kind === "node-v8") {
+      nodeV8.push(dir);
+      return;
+    }
+    if (depth <= 0) return;
+    for (const entry of readdirSync(dir)) {
+      walk(resolve(dir, entry), depth - 1);
+    }
+  };
+  for (const entry of readdirSync(root)) {
+    walk(resolve(root, entry), 2);
+  }
+  return { monocart, nodeV8 };
+}
+
+const sources = discoverRawSources(rawRoot);
+const inputDir = sources.monocart;
+const nodeV8Dirs = sources.nodeV8;
+if (inputDir.length === 0 && nodeV8Dirs.length === 0) {
   console.error(
     `[merge-coverage] no raw V8 coverage subdirs found under ${rawRoot}`,
   );
@@ -59,8 +99,6 @@ if (inputDir.length === 0) {
   );
   process.exit(2);
 }
-
-const repoRootUrl = pathToFileURL(repoRoot + "/").href;
 
 function normaliseSourcePath(filePath) {
   if (!filePath) return filePath;
@@ -105,28 +143,65 @@ const coverageOptions = {
     if (url.includes("/dist/")) return false;
     if (url.includes("/coverage/")) return false;
     if (/\.test\.[tj]sx?$|\.test\.mjs$/.test(url)) return false;
+    // Drop CSS bundles surfaced by Chromium's CSSCoverage (Tailwind output is
+    // not actionable in the unified coverage signal). JS bundles stay in so
+    // their sourcemaps unpack into src/ entries; they're then removed by
+    // Monocart automatically.
+    if (/\.css(\?.*)?$/.test(url)) return false;
     return true;
   },
   sourceFilter: (sourcePath) => {
     if (!sourcePath) return false;
-    if (sourcePath.includes("/node_modules/")) return false;
+    if (sourcePath.includes("node_modules/")) return false;
     if (sourcePath.includes("/dist/")) return false;
     if (sourcePath.includes("/coverage/")) return false;
+    // CSS surfaced from Chromium's CSSCoverage isn't useful for the unified
+    // signal — it's mostly Tailwind output and bundle-level concatenations.
+    if (/\.css(\?.*)?$/.test(sourcePath)) return false;
+    // Static assets imported by JS (svg, png, etc.) get registered as
+    // sourcemap entries by Vite. They have no executable code to cover.
+    if (
+      /\.(svg|png|jpe?g|gif|webp|ico|avif|woff2?|ttf|otf|eot|json)$/.test(
+        sourcePath,
+      )
+    ) {
+      return false;
+    }
+    // Bundle-named entries (e.g. localhost-4322/assets/index-*.js or
+    // assets/index-*.css) that didn't unpack into a real source path. Match
+    // both URL-style and stripped variants since Monocart rewrites path
+    // shapes during sourcemap unpacking.
+    if (/(^|\/)localhost[-:.]?\d*\//.test(sourcePath)) return false;
+    if (/(^|\/)assets\/[^/]+\.(m?js|css)$/.test(sourcePath)) return false;
     if (/\.test\.[tj]sx?$|\.test\.mjs$/.test(sourcePath)) return false;
-    return /(^|\/)(src|server|scripts)\//.test(sourcePath);
+    // Only first-party source files.
+    return /(^|\/)(src|server|scripts|infrastructure)\//.test(sourcePath);
   },
   sourcePath: (filePath) => normaliseSourcePath(filePath),
   cleanCache: true,
   clean: true,
 };
 
+const allDirs = [...inputDir, ...nodeV8Dirs];
 console.log(
-  `[merge-coverage] merging ${inputDir.length} source(s):\n  - ${inputDir
-    .map((p) => relative(repoRoot, p))
+  `[merge-coverage] merging ${allDirs.length} source(s):\n  - ${allDirs
+    .map(
+      (p) =>
+        `${relative(repoRoot, p)} (${
+          inputDir.includes(p) ? "monocart-raw" : "node-v8"
+        })`,
+    )
     .join("\n  - ")}`,
 );
 
-const result = await new CoverageReport(coverageOptions).generate();
+const report = new CoverageReport(coverageOptions);
+// Pull in NODE_V8_COVERAGE-style dirs first (Monocart hydrates source text
+// from the file:// URLs in the raw dump). The constructor's `inputDir`
+// already handles the monocart-raw subdirs declared above.
+for (const dir of nodeV8Dirs) {
+  await report.addFromDir(dir);
+}
+const result = await report.generate();
 
 // Mirror the merged json-summary up to coverage/coverage-summary.json so the
 // existing diff comparator (scripts/coverage-diff.mjs) sees the unified
