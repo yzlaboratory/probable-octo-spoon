@@ -196,4 +196,47 @@ describe("MediaUploader", () => {
     expect(input.accept).not.toContain("image/svg+xml");
     expect(input.accept).toContain("image/webp");
   });
+
+  it("opens the MediaLibraryPicker on 'Aus Bibliothek' click and surfaces it in the DOM", async () => {
+    // Stub the API used by the picker once it mounts so it doesn't hang.
+    vi.spyOn(api, "get").mockResolvedValue([] as never);
+
+    const onChange = vi.fn();
+    const { getByTestId, container } = render(
+      <MediaUploader kind="news" value={null} onChange={onChange} />,
+    );
+    expect(container.textContent).not.toContain("Mediathek");
+
+    fireEvent.click(getByTestId("media-uploader-pick-news"));
+    // Picker mounts when pickerOpen flips to true; dialog header lands in DOM.
+    await waitFor(() => {
+      expect(container.textContent).toContain("Mediathek");
+    });
+
+    // Close via the cancel button — covers the inline onClose arrow.
+    const cancel = getByTestId("media-picker-cancel");
+    fireEvent.click(cancel);
+    await waitFor(() => {
+      expect(container.textContent).not.toContain("Mediathek");
+    });
+  });
+
+  it("forwards the picker's onPick selection through MediaUploader's onChange (covers onPick arrow)", async () => {
+    const picked = media({ id: 99, sourceFilename: "picked.jpg" });
+    vi.spyOn(api, "get").mockResolvedValue([picked] as never);
+
+    const onChange = vi.fn();
+    const { getByTestId, container } = render(
+      <MediaUploader kind="news" value={null} onChange={onChange} />,
+    );
+    fireEvent.click(getByTestId("media-uploader-pick-news"));
+    await waitFor(() => {
+      expect(container.querySelector("[data-testid='media-picker-cell-99']")).not.toBeNull();
+    });
+    fireEvent.click(container.querySelector("[data-testid='media-picker-cell-99']")!);
+    fireEvent.click(getByTestId("media-picker-apply"));
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ id: 99 }));
+    });
+  });
 });

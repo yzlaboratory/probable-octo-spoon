@@ -90,15 +90,21 @@ describe("Footer", () => {
   it("renders no sponsor tiles when every sponsor falls back to the placeholder logo", async () => {
     // Sponsor with no logo → bestSponsorLogo returns the local logo asset, which
     // the Footer skips via `if (sponsor.ImageUrl !== logo)`.
+    // We explicitly wait until the resolved sponsor list has been mapped (i.e.
+    // the array prop has flushed through React) by mixing one real-logo sponsor
+    // into the response and waiting for that tile to mount, then asserting that
+    // the placeholder-logo entry produced zero additional tiles. This guarantees
+    // the `else` branch of the `ImageUrl !== logo` guard is exercised.
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
         jsonResponse([
+          serverSponsor(7),
           {
-            id: 1,
-            name: "S1",
+            id: 99,
+            name: "Placeholder",
             tagline: null,
-            linkUrl: "https://s1.test",
+            linkUrl: "https://placeholder.test",
             cardPalette: "transparent",
             logoHasOwnBackground: false,
             weight: 1,
@@ -112,11 +118,11 @@ describe("Footer", () => {
         <Footer />
       </MemoryRouter>,
     );
-    await waitFor(() =>
-      expect(container.textContent).toContain("Partner & Förderer"),
-    );
-    // The hook resolved (allSponsors !== null) but every entry is filtered out.
-    expect(container.querySelectorAll(".allsponsors > div").length).toBe(0);
+    // Wait for the fetch to resolve: real-logo sponsor produces 1 tile.
+    await waitFor(() => {
+      expect(container.querySelectorAll(".allsponsors > div").length).toBe(1);
+    });
+    // The placeholder entry hit the `else` branch and produced no tile.
   });
 
   it("falls back to no sponsors when the API rejects", async () => {
