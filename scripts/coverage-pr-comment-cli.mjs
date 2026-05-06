@@ -10,9 +10,10 @@
 // "no baseline available" informational notice.
 
 import { readFileSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { buildPrComment } from "./coverage-pr-comment.mjs";
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const out = {};
   for (const a of argv) {
     if (a.startsWith("--current=")) out.current = a.slice("--current=".length);
@@ -22,41 +23,53 @@ function parseArgs(argv) {
   return out;
 }
 
-function readJsonOrNull(path) {
+export function readJsonOrNull(path, { read = readFileSync, exists = existsSync } = {}) {
   if (!path) return null;
-  if (!existsSync(path)) return null;
+  if (!exists(path)) return null;
   try {
-    return JSON.parse(readFileSync(path, "utf8"));
+    return JSON.parse(read(path, "utf8"));
   } catch {
     return null;
   }
 }
 
-const args = parseArgs(process.argv.slice(2));
-if (!args.current) {
-  console.error(
-    "usage: coverage-pr-comment-cli.mjs --current=<path> [--baseline=<path>]",
-  );
-  process.exit(2);
-}
-
-const current = readJsonOrNull(args.current);
-if (current == null) {
-  console.error(`[coverage-pr-comment] missing or unreadable: ${args.current}`);
-  process.exit(2);
-}
-const baseline = readJsonOrNull(args.baseline);
-
 // Drop synthetic "total" entry — same convention as runVerify.
-function stripTotal(s) {
+export function stripTotal(s) {
   if (!s) return s;
   const { total, ...rest } = s;
   return rest;
 }
 
-process.stdout.write(
-  buildPrComment({
-    current: stripTotal(current),
-    baseline: stripTotal(baseline),
-  }) + "\n",
-);
+export function runCli({ argv, stdout, stderr, deps = {} } = {}) {
+  const args = parseArgs(argv);
+  if (!args.current) {
+    stderr.write(
+      "usage: coverage-pr-comment-cli.mjs --current=<path> [--baseline=<path>]\n",
+    );
+    return 2;
+  }
+  const current = readJsonOrNull(args.current, deps);
+  if (current == null) {
+    stderr.write(`[coverage-pr-comment] missing or unreadable: ${args.current}\n`);
+    return 2;
+  }
+  const baseline = readJsonOrNull(args.baseline, deps);
+  stdout.write(
+    buildPrComment({
+      current: stripTotal(current),
+      baseline: stripTotal(baseline),
+    }) + "\n",
+  );
+  return 0;
+}
+
+// Only auto-run when invoked as a script (so tests can import without side effects).
+if (import.meta.url === `file://${process.argv[1]}` ||
+    fileURLToPath(import.meta.url) === process.argv[1]) {
+  const code = runCli({
+    argv: process.argv.slice(2),
+    stdout: process.stdout,
+    stderr: process.stderr,
+  });
+  process.exit(code);
+}
