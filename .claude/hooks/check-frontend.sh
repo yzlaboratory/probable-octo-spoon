@@ -8,6 +8,11 @@ if [ -z "$FILE" ]; then
   exit 1
 fi
 
+# Skip test files — they don't render in the actual app.
+if echo "$FILE" | grep -qE '\.(test|spec)\.tsx?$'; then
+  exit 1
+fi
+
 # Match frontend file patterns
 if echo "$FILE" | grep -qE '(src/components/.*\.tsx|src/pages/.*\.tsx|src/styles/.*\.css|/index\.html)$'; then
   # Return JSON that injects the visual verification reminder
