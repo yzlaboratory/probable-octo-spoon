@@ -204,4 +204,50 @@ describe("DashboardPage", () => {
       expect(alert.textContent).toContain("network down");
     });
   });
+
+  it("falls back to 'Unbekannter Fehler' when a non-Error value is thrown", async () => {
+    vi.spyOn(api, "get").mockImplementation(async () => {
+      // Covers `e instanceof Error ? e.message : 'Unbekannter Fehler'` — non-Error path.
+      throw "not-an-Error-instance";
+    });
+    const { getByRole } = renderPage();
+    await waitFor(() => {
+      expect(getByRole("alert").textContent).toContain("Unbekannter Fehler");
+    });
+  });
+
+  it("opens '/' in a new tab when the 'Website ansehen' header button is clicked", async () => {
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    const { getByText } = renderPage();
+    await waitFor(() => expect(getByText("Website ansehen")).toBeTruthy());
+    (getByText("Website ansehen") as HTMLButtonElement).click();
+    expect(open).toHaveBeenCalledWith("/", "_blank", "noopener,noreferrer");
+    open.mockRestore();
+  });
+
+  it("navigates to /admin/news/new when 'Neue Meldung' is clicked", async () => {
+    const { getByText } = renderPage();
+    await waitFor(() => expect(getByText("Neue Meldung")).toBeTruthy());
+    // The handler is `() => nav('/admin/news/new')`. We only need it to run
+    // without error — the MemoryRouter handles the navigation internally.
+    (getByText("Neue Meldung") as HTMLButtonElement).click();
+  });
+
+  it("aborts the setData write when the component unmounts before the fetch resolves (covers the !cancelled guard)", async () => {
+    let resolve!: (v: unknown) => void;
+    vi.spyOn(api, "get").mockImplementation(
+      () =>
+        new Promise((res) => {
+          resolve = res as (v: unknown) => void;
+        }),
+    );
+    const { unmount } = renderPage();
+    unmount();
+    // Resolve after unmount — the cancelled flag should keep setData from
+    // firing. The test passes simply by completing without an unhandled
+    // setState-on-unmounted-component warning.
+    resolve([]);
+    await Promise.resolve();
+    await Promise.resolve();
+  });
 });

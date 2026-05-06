@@ -304,4 +304,65 @@ describe("SponsorEditPage", () => {
     fireEvent.click(getByText("Abbrechen"));
     await waitFor(() => expect(getByText("SPONSOR LIST")).toBeTruthy());
   });
+
+  it("renders the 'Kühl' (cool-neutral) palette swatch and persists it on save", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([s({ id: 1 })] as never);
+    const patch = vi.spyOn(api, "patch").mockResolvedValue({} as never);
+    const { getByText, container } = renderAt("/admin/sponsors/1");
+    await waitFor(() => {
+      expect(container.querySelectorAll("input.cs-input").length).toBeGreaterThan(0);
+    });
+    fireEvent.click(getByText("Kühl"));
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    const [, payload] = patch.mock.calls[0] as [string, Record<string, unknown>];
+    expect(payload.cardPalette).toBe("cool-neutral");
+  });
+
+  it("falls back to 'Speichern fehlgeschlagen.' when a non-ApiError is thrown by the save call", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([s({ id: 1 })] as never);
+    vi.spyOn(api, "patch").mockRejectedValue(new Error("network down"));
+    const { container, findByText } = renderAt("/admin/sponsors/1");
+    await waitFor(() => {
+      expect(container.querySelectorAll("input.cs-input").length).toBeGreaterThan(0);
+    });
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+    await findByText("Speichern fehlgeschlagen.");
+  });
+
+  it("toggles 'Logo hat einen eigenen Hintergrund' and persists it on save", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      s({ id: 1, logoHasOwnBackground: false }),
+    ] as never);
+    const patch = vi.spyOn(api, "patch").mockResolvedValue({} as never);
+    const { container } = renderAt("/admin/sponsors/1");
+    await waitFor(() => {
+      expect(container.querySelectorAll("input.cs-input").length).toBeGreaterThan(0);
+    });
+    const checkbox = container.querySelector(
+      "input[type='checkbox']",
+    ) as HTMLInputElement;
+    fireEvent.click(checkbox);
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    const [, payload] = patch.mock.calls[0] as [string, Record<string, unknown>];
+    expect(payload.logoHasOwnBackground).toBe(true);
+  });
+
+  it("updates the weight input and persists it on save", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([s({ id: 1, weight: 1 })] as never);
+    const patch = vi.spyOn(api, "patch").mockResolvedValue({} as never);
+    const { container } = renderAt("/admin/sponsors/1");
+    await waitFor(() => {
+      expect(container.querySelectorAll("input.cs-input").length).toBeGreaterThan(0);
+    });
+    const weightInput = container.querySelector(
+      "input[type='number']",
+    ) as HTMLInputElement;
+    fireEvent.change(weightInput, { target: { value: "42" } });
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    const [, payload] = patch.mock.calls[0] as [string, Record<string, unknown>];
+    expect(payload.weight).toBe(42);
+  });
 });

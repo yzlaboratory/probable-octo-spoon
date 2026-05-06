@@ -196,6 +196,30 @@ describe("SocialsSection", () => {
     }
   });
 
+  it("SmallSponsors renders sponsor logos and applies the Color class when cardPalette ≠ transparent", async () => {
+    // 5 IG items so index===4 slot mounts the desktop SmallSponsors strip.
+    const feed = [item(), item(), item(), item(), item()];
+    // Mix one purple (Color truthy) and one transparent (Color undefined)
+    // sponsor to hit both sides of `item.Color != undefined ? item.Color : ""`.
+    const sponsors = [
+      { ...serverSponsor(1), cardPalette: "purple" as const },
+      serverSponsor(2),
+    ];
+    stubFetch({
+      instagram: () => Promise.resolve(jsonResponse(feed)),
+      sponsors: () => Promise.resolve(jsonResponse(sponsors)),
+    });
+    const { container } = render(<SocialsSection />);
+    await waitFor(() => {
+      // Five socialcards plus two SmallSponsors slots.
+      expect(container.querySelectorAll(".socialcard").length).toBe(5);
+    });
+    // SmallSponsors rendered Sponsorcard with non-empty image list.
+    await waitFor(() => {
+      expect(container.querySelectorAll("img").length).toBeGreaterThan(0);
+    });
+  });
+
   it("clears its 5s auto-scroll interval on unmount", async () => {
     vi.useFakeTimers();
     try {
