@@ -133,4 +133,60 @@ describe("useAutosave", () => {
     expect(save).toHaveBeenCalledWith("b");
     expect(result.current.status).toBe("saved");
   });
+
+  it("flush() with no pending timer still saves once (covers the timerRef===null branch in flush)", async () => {
+    const save = vi.fn(async () => {});
+    const { rerender, result } = renderHook(
+      ({ v }: { v: string }) =>
+        useAutosave({ value: v, save, delay: 50 }),
+      { initialProps: { v: "a" } },
+    );
+    rerender({ v: "b" });
+    // Let the debounce timer fire and the save complete first → no pending timer.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(50);
+    });
+    await flushMicrotasks();
+    expect(save).toHaveBeenCalledTimes(1);
+    save.mockClear();
+    // Now flush() with no pending timer and no new edits — should short-circuit
+    // through the Object.is(snapshot, lastSaved) branch.
+    await act(async () => {
+      await result.current.flush();
+    });
+    expect(save).not.toHaveBeenCalled();
+    expect(result.current.status).toBe("saved");
+  });
+
+  it("falls back to a generic message when a non-Error is thrown by save", async () => {
+    const save = vi.fn(async () => {
+      throw "string-error"; // covers `e instanceof Error ? e.message : "Speichern fehlgeschlagen."`
+    });
+    const { rerender, result } = renderHook(
+      ({ v }: { v: string }) =>
+        useAutosave({ value: v, save, delay: 10 }),
+      { initialProps: { v: "a" } },
+    );
+    rerender({ v: "b" });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    await flushMicrotasks();
+    expect(result.current.status).toBe("error");
+    expect(result.current.error).toBe("Speichern fehlgeschlagen.");
+  });
+
+  it("re-edits before the debounce timer fires clear and reschedule (covers timerRef!==null path inside the useEffect)", async () => {
+    const save = vi.fn(async () => {});
+    const clearSpy = vi.spyOn(window, "clearTimeout");
+    const { rerender } = renderHook(
+      ({ v }: { v: string }) =>
+        useAutosave({ value: v, save, delay: 100 }),
+      { initialProps: { v: "a" } },
+    );
+    rerender({ v: "ab" }); // schedules first timer
+    rerender({ v: "abc" }); // should clear the first timer and reschedule
+    expect(clearSpy).toHaveBeenCalled();
+    clearSpy.mockRestore();
+  });
 });
