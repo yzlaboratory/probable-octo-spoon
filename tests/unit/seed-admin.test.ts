@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import Database from "better-sqlite3";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 // @ts-expect-error — sibling .mjs ships no .d.ts.
 import { runSeed } from "../../server/seed-admin.mjs";
 // @ts-expect-error — sibling .mjs ships no .d.ts.
@@ -112,5 +114,73 @@ describe("seed-admin runSeed", () => {
     });
     expect(code).toBe(3);
     expect(err.text).toContain("disk full");
+  });
+
+  it("falls back to process.stdout/stderr writes when log/error are not provided", async () => {
+    const stdoutSpy = vi
+      .spyOn(process.stdout, "write")
+      .mockImplementation(() => true);
+    const stderrSpy = vi
+      .spyOn(process.stderr, "write")
+      .mockImplementation(() => true);
+    try {
+      // Missing-arg path → goes through default `error` writer.
+      const missCode = await runSeed({
+        argv: [],
+        openDbFn: () => db,
+        dbPathFn: () => ":memory:",
+      });
+      expect(missCode).toBe(1);
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Usage: seed-admin"),
+      );
+
+      // Happy-path → goes through default `log` writer.
+      const okCode = await runSeed({
+        argv: ["default-writer@example.org", "correct horse battery staple ::"],
+        openDbFn: () => db,
+        dbPathFn: () => ":memory:",
+      });
+      expect(okCode).toBe(0);
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Created admin default-writer@example.org"),
+      );
+    } finally {
+      stdoutSpy.mockRestore();
+      stderrSpy.mockRestore();
+    }
+  });
+});
+
+describe("seed-admin script entrypoint (auto-run when invoked directly)", () => {
+  it("creates an admin row when run as `node server/seed-admin.mjs <email> <password>` and exits 0", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "seed-admin-test-"));
+    const dbFile = path.join(tmp, "app.db");
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [
+          path.resolve(__dirname, "../../server/seed-admin.mjs"),
+          "auto-run@example.org",
+          "correct horse battery staple !!",
+        ],
+        {
+          env: { ...process.env, DB_PATH: dbFile },
+          encoding: "utf8",
+        },
+      );
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain("Created admin auto-run@example.org");
+
+      // Confirm the row landed in the spawned DB.
+      const verify = new Database(dbFile);
+      const row = verify
+        .prepare("SELECT email FROM admins WHERE email = ?")
+        .get("auto-run@example.org") as { email: string } | undefined;
+      verify.close();
+      expect(row?.email).toBe("auto-run@example.org");
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
   });
 });
