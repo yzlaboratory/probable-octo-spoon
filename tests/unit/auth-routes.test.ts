@@ -145,6 +145,15 @@ describe("POST /api/auth/logout", () => {
     expect(res.status).toBe(403);
   });
 
+  it("returns 403 when the CSRF header has a different length than the cookie (covers timingSafeEq length-mismatch branch)", async () => {
+    const auth = await login(srv, ADMIN_EMAIL, STRONG_PW);
+    const res = await request(srv)
+      .post("/api/auth/logout")
+      .set("cookie", auth!.cookie)
+      .set("x-csrf-token", "shorty"); // different length than the 64-char cookie
+    expect(res.status).toBe(403);
+  });
+
   it("clears cookies and deletes the session row on success", async () => {
     const auth = await login(srv, ADMIN_EMAIL, STRONG_PW);
     const before = db.prepare("SELECT COUNT(*) as n FROM sessions").get();

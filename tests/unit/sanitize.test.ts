@@ -34,6 +34,14 @@ describe("sanitizeNewsHtml", () => {
     const out = sanitizeNewsHtml('<a href="javascript:alert(1)">nope</a>');
     expect(out).not.toMatch(/javascript:/i);
   });
+  it("preserves anchors with no href (covers the `attribs.href || ''` short-circuit on undefined)", () => {
+    // sanitize-html drops the empty-href attribute from the output but the
+    // transform fn still runs — covering the `||` falsy branch.
+    const out = sanitizeNewsHtml("<a>just text</a>");
+    expect(out).toMatch(/<a /);
+    expect(out).toContain("just text");
+    expect(out).toMatch(/rel="noopener/);
+  });
 });
 
 describe("sanitizeSvg", () => {

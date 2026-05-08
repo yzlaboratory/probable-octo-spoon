@@ -242,6 +242,46 @@ describe("NewsEditPage — gap coverage", () => {
     // — assert the autosave fired with the persisted draft body.
   });
 
+  it("clicking the block-remove handle on a row removes that block (covers the inline `() => onRemove(b.__key)` arrow)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [
+          { kind: "paragraph", text: "Keep me" },
+          { kind: "paragraph", text: "Remove me" },
+        ],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const removeButtons = container.querySelectorAll(
+      "[data-testid='block-remove']",
+    ) as NodeListOf<HTMLButtonElement>;
+    fireEvent.click(removeButtons[1]);
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll("textarea[data-testid=block-paragraph]")
+          .length,
+      ).toBe(1);
+    });
+  });
+
+  it("typing into a block textarea updates the block (covers the inline `(patch) => onUpdate(b.__key, patch)` arrow)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [{ kind: "paragraph", text: "before" }],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const ta = container.querySelector(
+      "textarea[data-testid=block-paragraph]",
+    ) as HTMLTextAreaElement;
+    fireEvent.change(ta, { target: { value: "after" } });
+    await waitFor(() => expect(ta.value).toBe("after"));
+  });
+
   it("Cmd+Shift+Enter is a no-op when activeKey is null (covers `if (!activeKey) return`)", async () => {
     vi.spyOn(api, "get").mockResolvedValue([
       n({ id: 1, blocks: [{ kind: "paragraph", text: "x" }] }),
