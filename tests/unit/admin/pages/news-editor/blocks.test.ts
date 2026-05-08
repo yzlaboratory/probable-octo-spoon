@@ -103,6 +103,10 @@ describe("moveBlock", () => {
     expect(moveBlock(start, start[0].__key, -1)).toEqual(start);
     expect(moveBlock(start, start[2].__key, 1)).toEqual(start);
   });
+
+  it("returns the original list when the key is missing (covers `if (i === -1)`)", () => {
+    expect(moveBlock(start, "no-such-key", 1)).toBe(start);
+  });
 });
 
 describe("removeBlock / updateBlock", () => {

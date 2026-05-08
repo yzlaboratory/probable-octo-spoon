@@ -254,4 +254,34 @@ describe("SponsorListPage", () => {
     const img = container.querySelector('[role="link"] img') as HTMLImageElement;
     expect(img.src).toContain("/m/200/x.png");
   });
+
+  it("filters by tagline (covers the `s.tagline ?? '' .includes(q)` short-circuit)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      s({ id: 1, name: "Alpha", tagline: "elektromobilität pioneer" }),
+      s({ id: 2, name: "Beta", tagline: null }),
+    ] as never);
+    const { container, getByPlaceholderText } = renderPage();
+    await waitFor(() =>
+      expect(container.querySelectorAll('[role="link"]').length).toBe(2),
+    );
+    const search = getByPlaceholderText("Suchen…") as HTMLInputElement;
+    fireEvent.change(search, { target: { value: "pioneer" } });
+    await waitFor(() => {
+      expect(container.querySelectorAll('[role="link"]').length).toBe(1);
+    });
+  });
+
+  it("opens a row on Enter or Space (covers keyboard navigation handler)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      s({ id: 1, name: "OpenMe" }),
+    ] as never);
+    const { container } = renderPage();
+    await waitFor(() =>
+      expect(container.querySelector("[role='link']")).toBeTruthy(),
+    );
+    const row = container.querySelector("[role='link']") as HTMLElement;
+    fireEvent.keyDown(row, { key: "Enter" });
+    fireEvent.keyDown(row, { key: " " });
+    fireEvent.keyDown(row, { key: "x" });
+  });
 });

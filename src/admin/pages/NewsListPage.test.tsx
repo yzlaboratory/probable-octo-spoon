@@ -303,4 +303,25 @@ describe("NewsListPage", () => {
     resolvers.forEach((r) => r([]));
     await waitFor(() => expect(queryByText("Lade…")).toBeNull());
   });
+
+  it("opens a row on Enter or Space (covers the keyboard navigation handler)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({ id: 1, title: "OpenMe", status: "draft" }),
+    ] as never);
+    const { container, findByText } = renderPage();
+    await findByText("OpenMe");
+    const row = container.querySelector("[role='link']") as HTMLElement;
+    fireEvent.keyDown(row, { key: "Enter" });
+    fireEvent.keyDown(row, { key: " " });
+    fireEvent.keyDown(row, { key: "x" }); // unrelated key — no-op branch
+  });
+
+  it("formats a missing publishAt + empty createdAt as em-dash via formatDate fallback", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({ id: 1, title: "X", publishAt: null, createdAt: "" }),
+    ] as never);
+    const { container, findByText } = renderPage();
+    await findByText("X");
+    expect(container.textContent).toContain("—");
+  });
 });

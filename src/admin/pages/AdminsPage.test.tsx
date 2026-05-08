@@ -179,4 +179,17 @@ describe("AdminsPage", () => {
       expect(getByRole("alert").textContent).toContain("Zu viele Versuche"),
     );
   });
+
+  it("falls back to 'Fehler' when reset-link rejects with a non-ApiError", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      admin({ id: 1, email: "alice@svt.de" }),
+    ] as never);
+    vi.spyOn(api, "post").mockRejectedValue(new Error("network down"));
+    const { getByText, getByRole } = renderPage();
+    await waitFor(() => expect(getByText("alice@svt.de")).toBeTruthy());
+    fireEvent.click(getByText("Reset-Link ausstellen"));
+    await waitFor(() =>
+      expect(getByRole("alert").textContent).toContain("Fehler"),
+    );
+  });
 });
