@@ -349,6 +349,15 @@ describe("SponsorEditPage", () => {
     expect(payload.logoHasOwnBackground).toBe(true);
   });
 
+  it("guards against saving without a logo — surfaces 'Bitte ein Logo hochladen.' on the create form", async () => {
+    const post = vi.spyOn(api, "post").mockResolvedValue({} as never);
+    const { container, findByText } = renderAt("/admin/sponsors/new");
+    await findByText("Neuer Sponsor");
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+    await findByText("Bitte ein Logo hochladen.");
+    expect(post).not.toHaveBeenCalled();
+  });
+
   it("updates the weight input and persists it on save", async () => {
     vi.spyOn(api, "get").mockResolvedValue([s({ id: 1, weight: 1 })] as never);
     const patch = vi.spyOn(api, "patch").mockResolvedValue({} as never);
