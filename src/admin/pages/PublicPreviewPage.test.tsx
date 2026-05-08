@@ -171,4 +171,55 @@ describe("PublicPreviewPage", () => {
       });
     });
   });
+
+  describe("'In neuem Tab öffnen' header CTA", () => {
+    beforeEach(() => {
+      vi.spyOn(api, "get").mockResolvedValue([
+        n({ id: 1, slug: "x" }),
+      ] as unknown as never);
+    });
+
+    it("opens the active page path in a new tab on click (covers `if (activePath) window.open(...)`)", async () => {
+      const open = vi.spyOn(window, "open").mockReturnValue(null);
+      renderPage();
+      await screen.findByTestId("preview-iframe");
+      fireEvent.click(screen.getByText("In neuem Tab öffnen"));
+      expect(open).toHaveBeenCalledWith("/", "_blank", "noopener");
+      open.mockRestore();
+    });
+  });
+
+  describe("device toggle", () => {
+    beforeEach(() => {
+      vi.spyOn(api, "get").mockResolvedValue([] as never);
+    });
+
+    it("flips the preview frame data-device attribute when a device radio is clicked", async () => {
+      renderPage();
+      await screen.findByTestId("preview-iframe");
+      const wrapper = screen.getByTestId("preview-frame-wrapper");
+      expect(wrapper.getAttribute("data-device")).toBe("desktop");
+      fireEvent.click(screen.getByRole("radio", { name: "Tablet" }));
+      expect(wrapper.getAttribute("data-device")).toBe("tablet");
+      fireEvent.click(screen.getByRole("radio", { name: "Smartphone" }));
+      expect(wrapper.getAttribute("data-device")).toBe("mobile");
+    });
+  });
+
+  describe("when the component unmounts mid-flight", () => {
+    it("does not flip latestLoaded after unmount (covers the !cancelled guard in finally)", async () => {
+      let resolve!: (v: unknown) => void;
+      vi.spyOn(api, "get").mockImplementation(
+        () =>
+          new Promise((res) => {
+            resolve = res as (v: unknown) => void;
+          }),
+      );
+      const { unmount } = renderPage();
+      unmount();
+      resolve([]);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  });
 });

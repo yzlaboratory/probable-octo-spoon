@@ -418,4 +418,92 @@ describe("TrainingPage > BannerEditor", () => {
       expect(getByRole("alert").textContent).toContain("Banner zu lang"),
     );
   });
+
+  it("falls back to 'Speichern fehlgeschlagen.' when the banner endpoint throws a non-Error", async () => {
+    mockGet([], { message: "x", updatedAt: null });
+    vi.spyOn(api, "patch").mockImplementation(async () => {
+      throw "string";
+    });
+    const { getByText, getByRole } = renderPage();
+    await waitFor(() => expect(getByText("Banner ausblenden")).toBeTruthy());
+    fireEvent.click(getByText("Banner ausblenden"));
+    await waitFor(() =>
+      expect(getByRole("alert").textContent).toContain("Speichern fehlgeschlagen."),
+    );
+  });
+});
+
+describe("TrainingPage — slot row actions", () => {
+  it("shows 'Anzeigen' on a hidden slot and re-activates it via PATCH", async () => {
+    mockGet([slot({ id: 1, status: "hidden" })]);
+    const patch = vi
+      .spyOn(api, "patch")
+      .mockResolvedValue(slot({ id: 1, status: "active" }) as never);
+    const { getByText } = renderPage();
+    // Filter defaults to "active" — switch to the "hidden" tab so the slot is visible.
+    await waitFor(() => expect(getByText("Verborgen")).toBeTruthy());
+    fireEvent.click(getByText("Verborgen"));
+    await waitFor(() => expect(getByText("Anzeigen")).toBeTruthy());
+    fireEvent.click(getByText("Anzeigen"));
+    await waitFor(() =>
+      expect(patch).toHaveBeenCalledWith("/api/training/1", {
+        status: "active",
+      }),
+    );
+  });
+});
+
+describe("TrainingPage — edit dialog interactions", () => {
+  it("flips visibility via the radio group and persists it on save", async () => {
+    mockGet([slot({ id: 1 })]);
+    const patch = vi.spyOn(api, "patch").mockResolvedValue(
+      slot({ id: 1 }) as never,
+    );
+    const { getByText, queryByText } = renderPage();
+    await waitFor(() => expect(getByText("Bearbeiten")).toBeTruthy());
+    fireEvent.click(getByText("Bearbeiten"));
+    await waitFor(() =>
+      expect(queryByText("Trainingseintrag bearbeiten")).toBeTruthy(),
+    );
+    // Visibility radios live in the dialog (rendered via createPortal); query body-wide.
+    const radios = document.querySelectorAll(
+      "input[type='radio'][name='visibility']",
+    );
+    expect(radios.length).toBeGreaterThan(1);
+    fireEvent.click(radios[radios.length - 1]);
+    fireEvent.submit(document.querySelector("form")!);
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+  });
+
+  it("closes on Escape AND ignores other keys (covers the keydown listener)", async () => {
+    mockGet([slot({ id: 1 })]);
+    const { getByText, queryByText } = renderPage();
+    await waitFor(() => expect(getByText("Bearbeiten")).toBeTruthy());
+    fireEvent.click(getByText("Bearbeiten"));
+    expect(queryByText("Trainingseintrag bearbeiten")).toBeTruthy();
+    // Non-Escape key — should NOT close.
+    fireEvent.keyDown(window, { key: "a" });
+    expect(queryByText("Trainingseintrag bearbeiten")).toBeTruthy();
+    // Escape — closes.
+    fireEvent.keyDown(window, { key: "Escape" });
+    await waitFor(() =>
+      expect(queryByText("Trainingseintrag bearbeiten")).toBeFalsy(),
+    );
+  });
+
+  it("closes when the backdrop is clicked but stays open when a child of the form is clicked", async () => {
+    mockGet([slot({ id: 1 })]);
+    const { getByText, queryByText } = renderPage();
+    await waitFor(() => expect(getByText("Bearbeiten")).toBeTruthy());
+    fireEvent.click(getByText("Bearbeiten"));
+    expect(queryByText("Trainingseintrag bearbeiten")).toBeTruthy();
+    // Click on the form (child) — modal stays open.
+    fireEvent.click(document.querySelector("form")!);
+    expect(queryByText("Trainingseintrag bearbeiten")).toBeTruthy();
+    // Click on the backdrop (target === currentTarget) — modal closes.
+    fireEvent.click(document.querySelector("[role='dialog']")!);
+    await waitFor(() =>
+      expect(queryByText("Trainingseintrag bearbeiten")).toBeFalsy(),
+    );
+  });
 });
