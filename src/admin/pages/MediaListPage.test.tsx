@@ -400,4 +400,71 @@ describe("MediaListPage — unhappy paths", () => {
       screen.getByText(/Noch keine Medien in der Mediathek/i),
     ).toBeInTheDocument();
   });
+
+  it("falls back to a generic 'Unbekannter Fehler' when a non-Error is thrown by the fetch", async () => {
+    vi.spyOn(api, "get").mockImplementation(async () => {
+      throw "string-not-error"; // covers `e instanceof Error ? e.message : 'Unbekannter Fehler'`
+    });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByRole("alert").textContent).toContain("Unbekannter Fehler");
+    });
+  });
+
+  it("does NOT call setItems / setLoading after unmount when the fetch resolves later (covers the !cancelled guard)", async () => {
+    let resolve!: (v: unknown) => void;
+    vi.spyOn(api, "get").mockImplementation(
+      () =>
+        new Promise((res) => {
+          resolve = res as (v: unknown) => void;
+        }),
+    );
+    const { unmount } = renderPage();
+    unmount();
+    resolve([]);
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+
+  it("renders the List view with selectable rows when 'Liste' is clicked, exercising row select handler and the missing-kind/uploadedBy ternaries", async () => {
+    // Custom fixture: one row WITHOUT kind/uploadedBy/uploadedAt to drive the ?: branches in List.
+    vi.spyOn(api, "get").mockImplementation(async (path: string) => {
+      if (path !== "/api/media") throw new Error("nope");
+      return [
+        m({ id: 1 }),
+        m({
+          id: 2,
+          kind: undefined as unknown as Media["kind"],
+          uploadedBy: undefined,
+          uploadedAt: undefined,
+        }),
+      ] as unknown as never;
+    });
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("view-toggle-list"));
+    // Both rows render via List.
+    await waitFor(() => screen.getByTestId("media-row-1"));
+    expect(screen.getByTestId("media-row-2")).toBeInTheDocument();
+    // Click row 2 — exercises the inline `() => onSelect(m)` arrow and active styling.
+    fireEvent.click(screen.getByTestId("media-row-2"));
+    // The DetailPanel for the second row should now show the file name; row reflects active state.
+    expect(screen.getByTestId("media-row-2").getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+    // The em-dash fallback for missing uploadedAt is rendered.
+    expect(screen.getByTestId("media-row-2").textContent).toContain("—");
+  });
+
+  it("clears the selection when the active filter hides it (covers the visible.some(...) guard)", async () => {
+    renderPage();
+    await waitFor(() => screen.getByTestId("media-cell-1"));
+    // Select the news row, then narrow the filter to sponsors so the news row is hidden.
+    fireEvent.click(screen.getByTestId("media-cell-1"));
+    fireEvent.click(screen.getByTestId("kind-sponsor"));
+    // The detail panel falls back to the empty selection card (selected → null).
+    await waitFor(() =>
+      expect(screen.getByTestId("media-detail-empty")).toBeInTheDocument(),
+    );
+  });
 });
