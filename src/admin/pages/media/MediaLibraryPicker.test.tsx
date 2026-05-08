@@ -254,6 +254,32 @@ describe("MediaLibraryPicker — unhappy + edge paths", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("displays 'Unbekannter Fehler' when the load rejects with a non-Error value", async () => {
+    vi.spyOn(api, "get").mockRejectedValue("string-error");
+    render(
+      <MediaLibraryPicker
+        open
+        kind="news"
+        onClose={() => {}}
+        onPick={() => {}}
+      />,
+    );
+    await screen.findByText("Unbekannter Fehler");
+  });
+
+  it("displays the error message from an Error during load", async () => {
+    vi.spyOn(api, "get").mockRejectedValue(new Error("Boom"));
+    render(
+      <MediaLibraryPicker
+        open
+        kind="news"
+        onClose={() => {}}
+        onPick={() => {}}
+      />,
+    );
+    await screen.findByText(/Boom/);
+  });
+
   it("re-fetches when the kind prop changes", async () => {
     const spy = vi.spyOn(api, "get");
     const { rerender } = render(

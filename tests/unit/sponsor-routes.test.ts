@@ -234,6 +234,52 @@ describe("sponsors admin CRUD", () => {
     expect(res.body.weight).toBe(5);
   });
 
+  it("POST persists logoHasOwnBackground=true (covers the truthy branch of the boolean serialization)", async () => {
+    const res = await request(srv)
+      .post("/api/sponsors")
+      .set("cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send(validBody(mediaId, { logoHasOwnBackground: true }));
+    expect(res.status).toBe(201);
+    expect(res.body.logoHasOwnBackground).toBe(true);
+  });
+
+  it("PATCH lets the editor flip logoHasOwnBackground (covers the d.logoHasOwnBackground side of the ?? short-circuit)", async () => {
+    const created = await request(srv)
+      .post("/api/sponsors")
+      .set("cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send(validBody(mediaId, { logoHasOwnBackground: false }));
+    const res = await request(srv)
+      .patch(`/api/sponsors/${created.body.id}`)
+      .set("cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({ logoHasOwnBackground: true });
+    expect(res.status).toBe(200);
+    expect(res.body.logoHasOwnBackground).toBe(true);
+  });
+
+  it("PATCH lets the editor explicitly set activeFrom / activeUntil / notes (covers the `'X' in d` true branches)", async () => {
+    const created = await request(srv)
+      .post("/api/sponsors")
+      .set("cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send(validBody(mediaId, { activeFrom: null, activeUntil: null, notes: null }));
+    const res = await request(srv)
+      .patch(`/api/sponsors/${created.body.id}`)
+      .set("cookie", auth.cookie)
+      .set("x-csrf-token", auth.csrf)
+      .send({
+        activeFrom: "2026-01-01T00:00:00.000Z",
+        activeUntil: "2026-12-31T00:00:00.000Z",
+        notes: "rebrand",
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.activeFrom).toBe("2026-01-01T00:00:00.000Z");
+    expect(res.body.activeUntil).toBe("2026-12-31T00:00:00.000Z");
+    expect(res.body.notes).toBe("rebrand");
+  });
+
   it("DELETE /:id 404s for unknown id", async () => {
     const res = await request(srv)
       .delete("/api/sponsors/9999")
