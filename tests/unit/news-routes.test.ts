@@ -554,6 +554,18 @@ describe("news edge cases", () => {
     expect(res.body.blocks).toEqual([]);
   });
 
+  it("toPublic treats a NULL blocks_json as an empty array (covers `if (!raw)` branch)", async () => {
+    const request = (await import("supertest")).default;
+    const now = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO news (slug, title, tag, short, long_html, blocks_json, status, created_at, updated_at)
+       VALUES ('nullblocks', 'Null Blocks', 't', 's', '<p>x</p>', NULL, 'published', ?, ?)`,
+    ).run(now, now);
+    const res = await request(srv).get("/api/news/public/nullblocks");
+    expect(res.status).toBe(200);
+    expect(res.body.blocks).toEqual([]);
+  });
+
   it("toPublic treats blocks_json='\"string\"' (valid JSON, not array) as an empty array", async () => {
     const request = (await import("supertest")).default;
     const now = new Date().toISOString();

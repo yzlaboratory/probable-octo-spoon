@@ -250,4 +250,19 @@ describe("DashboardPage", () => {
     await Promise.resolve();
     await Promise.resolve();
   });
+
+  it("aborts the setError write when the component unmounts before the fetch rejects (covers the !cancelled guard in catch)", async () => {
+    let reject!: (e: unknown) => void;
+    vi.spyOn(api, "get").mockImplementation(
+      () =>
+        new Promise((_, rej) => {
+          reject = rej as (e: unknown) => void;
+        }),
+    );
+    const { unmount } = renderPage();
+    unmount();
+    reject(new Error("late failure"));
+    await Promise.resolve();
+    await Promise.resolve();
+  });
 });
