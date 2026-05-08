@@ -315,4 +315,178 @@ describe("backfillNewsBlocks — data migration", () => {
     expect(backfillNewsBlocks(db)).toBe(1);
     expect(backfillNewsBlocks(db)).toBe(0);
   });
+
+  it("treats a row with empty long_html as empty when backfilling (covers `r.long_html || ''`)", () => {
+    const db = freshDb();
+    const now = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO news (slug, title, tag, short, long_html, status, created_at, updated_at, blocks_json)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run("emptyhtml", "N", "tag", "s", "", "draft", now, now, null);
+    expect(backfillNewsBlocks(db)).toBe(1);
+    const row = db
+      .prepare("SELECT blocks_json FROM news WHERE slug='emptyhtml'")
+      .get() as { blocks_json: string };
+    expect(JSON.parse(row.blocks_json)).toEqual([]);
+  });
+});
+
+describe("compileBlocksToHtml + blockToHtml — defensive edge cases", () => {
+  it("returns empty string when called with a non-array", () => {
+    expect(compileBlocksToHtml(null as never)).toBe("");
+    expect(compileBlocksToHtml(undefined as never)).toBe("");
+    expect(compileBlocksToHtml("not-an-array" as never)).toBe("");
+  });
+
+  it("renders an unknown kind as empty string (default branch)", () => {
+    expect(compileBlocksToHtml([{ kind: "weird" } as never])).toBe("");
+  });
+
+  it("renders a heading with default level 2 when level is unrecognised", () => {
+    const html = compileBlocksToHtml([
+      { kind: "heading", level: 99 as never, text: "x" },
+    ]);
+    expect(html).toMatch(/<h2>x<\/h2>/);
+  });
+
+  it("renders a quote with no attr (covers `b.attr ? ... : ''`)", () => {
+    const html = compileBlocksToHtml([
+      { kind: "quote", text: "Wer rastet, der rostet.", attr: "" },
+    ]);
+    expect(html).toMatch(/<blockquote>Wer rastet, der rostet\.<\/blockquote>/);
+    expect(html).not.toMatch(/<cite>/);
+  });
+
+  it("renders a callout with an unknown tone falling back to 'primary'", () => {
+    const html = compileBlocksToHtml([
+      { kind: "callout", tone: "weird" as never, text: "Achtung" },
+    ]);
+    expect(html).toMatch(/class="callout callout-primary"/);
+  });
+
+  it("returns empty for an image block with no mediaId", () => {
+    expect(
+      compileBlocksToHtml([
+        { kind: "image", mediaId: null, caption: "", credit: "" },
+      ]),
+    ).toBe("");
+  });
+
+  it("returns empty for an image block whose mediaId is not in mediaById", () => {
+    expect(
+      compileBlocksToHtml([
+        { kind: "image", mediaId: 999, caption: "", credit: "" },
+      ]),
+    ).toBe("");
+  });
+
+  it("returns empty for an image whose media has no usable variants (covers `if (!src) return ''`)", () => {
+    const mediaById = new Map([[1, { id: 1, variants: {} }]]);
+    expect(
+      compileBlocksToHtml(
+        [{ kind: "image", mediaId: 1, caption: "", credit: "" }],
+        mediaById as never,
+      ),
+    ).toBe("");
+  });
+
+  it("renders an image without caption/credit as <figure><img></figure> (no figcaption)", () => {
+    const mediaById = new Map([
+      [1, { id: 1, variants: { "1600w": "/m/1.webp" } }],
+    ]);
+    const html = compileBlocksToHtml(
+      [{ kind: "image", mediaId: 1, caption: "", credit: "" }],
+      mediaById as never,
+    );
+    expect(html).toMatch(/<figure><img/);
+    expect(html).not.toMatch(/<figcaption>/);
+  });
+
+  it("renders an image with credit only — figcaption shows just the credit span", () => {
+    const mediaById = new Map([
+      [1, { id: 1, variants: { "800w": "/m/1.webp" } }],
+    ]);
+    const html = compileBlocksToHtml(
+      [{ kind: "image", mediaId: 1, caption: "", credit: "Foto: A" }],
+      mediaById as never,
+    );
+    expect(html).toMatch(/<figure>/);
+    expect(html).toMatch(/Foto: A/);
+  });
+
+  it("falls back through 1600w → 800w → 400w → fallbackJpg variants", () => {
+    const html = compileBlocksToHtml(
+      [{ kind: "image", mediaId: 1, caption: "x", credit: "" }],
+      new Map([
+        [1, { id: 1, variants: { fallbackJpg: "/m/fallback.jpg" } }],
+      ]) as never,
+    );
+    expect(html).toMatch(/\/m\/fallback\.jpg/);
+  });
+});
+
+describe("htmlToBlocks — defensive edge cases", () => {
+  it("returns [] for empty / null / undefined input", () => {
+    expect(htmlToBlocks("")).toEqual([]);
+    expect(htmlToBlocks(null as never)).toEqual([]);
+    expect(htmlToBlocks(undefined as never)).toEqual([]);
+  });
+
+  it("treats plain text without any block tags as a single paragraph block", () => {
+    expect(htmlToBlocks("Just some text without tags")).toEqual([
+      { kind: "paragraph", text: "Just some text without tags" },
+    ]);
+  });
+
+  it("parses an <img> tag (extracts src + alt) into an image block with srcHint", () => {
+    const blocks = htmlToBlocks(
+      '<img src="/legacy/x.jpg" alt="Beschreibung">',
+    );
+    expect(blocks).toEqual([
+      {
+        kind: "image",
+        mediaId: null,
+        caption: "Beschreibung",
+        credit: "",
+        srcHint: "/legacy/x.jpg",
+      },
+    ]);
+  });
+
+  it("parses <h1>, <h2>, <h3> into heading blocks with the matching level", () => {
+    const blocks = htmlToBlocks("<h1>One</h1><h2>Two</h2><h3>Three</h3>");
+    expect(blocks).toEqual([
+      { kind: "heading", level: 1, text: "One" },
+      { kind: "heading", level: 2, text: "Two" },
+      { kind: "heading", level: 3, text: "Three" },
+    ]);
+  });
+
+  it("parses <ul> and <ol> into bullet- / number-prefixed paragraph blocks", () => {
+    const blocks = htmlToBlocks(
+      "<ul><li>one</li><li>two</li></ul><ol><li>first</li><li>second</li></ol>",
+    );
+    expect(blocks[0]).toEqual({
+      kind: "paragraph",
+      text: "• one\n• two",
+    });
+    expect(blocks[1]).toEqual({
+      kind: "paragraph",
+      text: "1. first\n2. second",
+    });
+  });
+
+  it("emits no block when a paired tag's inner is whitespace-only (covers `if (!text.trim()) continue`)", () => {
+    expect(htmlToBlocks("<p>   </p>")).toEqual([]);
+  });
+
+  it("skips empty list elements (no items → no paragraph)", () => {
+    expect(htmlToBlocks("<ul></ul>")).toEqual([]);
+  });
+
+  it("converts <blockquote> into a quote block with empty attr", () => {
+    expect(htmlToBlocks("<blockquote>zitat</blockquote>")).toEqual([
+      { kind: "quote", text: "zitat", attr: "" },
+    ]);
+  });
 });
