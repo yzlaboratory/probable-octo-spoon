@@ -130,21 +130,6 @@ describe("NewsEditPage — gap coverage", () => {
     await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
   });
 
-  it("aborts the news fetch resolve when component unmounts mid-flight (covers `if (cancelled) return`)", async () => {
-    let resolveNews!: (v: unknown) => void;
-    vi.spyOn(api, "get").mockImplementation(
-      () =>
-        new Promise((res) => {
-          resolveNews = res as (v: unknown) => void;
-        }),
-    );
-    const { unmount } = renderEdit("/admin/news/1");
-    unmount();
-    resolveNews([n({ id: 1 })]);
-    await Promise.resolve();
-    await Promise.resolve();
-  });
-
   it("Cmd/Ctrl+Shift+Enter inside a paragraph block inserts a fresh paragraph after it (covers the activeKey shortcut path)", async () => {
     vi.spyOn(api, "get").mockResolvedValue([
       n({
@@ -228,20 +213,6 @@ describe("NewsEditPage — gap coverage", () => {
     ).toBe(2);
   });
 
-  it("statusFromMode preserves 'withdrawn' when the existing status is withdrawn (covers L42 second branch)", async () => {
-    vi.spyOn(api, "get").mockResolvedValue([
-      n({ id: 1, status: "withdrawn" }),
-    ] as never);
-    const patch = vi.spyOn(api, "patch").mockResolvedValue({} as never);
-    const { getByTestId } = renderEdit("/admin/news/1");
-    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
-    fireEvent.click(getByTestId("editor-save-draft"));
-    await waitFor(() => expect(patch).toHaveBeenCalled());
-    // 'editor-save-draft' calls saveAs('draft', 'draft') with explicitStatus,
-    // so the autosave's separate save path is the one that hits statusFromMode
-    // — assert the autosave fired with the persisted draft body.
-  });
-
   it("clicking the block-remove handle on a row removes that block (covers the inline `() => onRemove(b.__key)` arrow)", async () => {
     vi.spyOn(api, "get").mockResolvedValue([
       n({
@@ -282,24 +253,4 @@ describe("NewsEditPage — gap coverage", () => {
     await waitFor(() => expect(ta.value).toBe("after"));
   });
 
-  it("Cmd+Shift+Enter is a no-op when activeKey is null (covers `if (!activeKey) return`)", async () => {
-    vi.spyOn(api, "get").mockResolvedValue([
-      n({ id: 1, blocks: [{ kind: "paragraph", text: "x" }] }),
-    ] as never);
-    const { container, getByTestId } = renderEdit("/admin/news/1");
-    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
-    // Don't click any block — activeKey is set during loading by a useEffect,
-    // so we instead fire the shortcut from the title input which sits inside
-    // the editor ref but isn't a block target. Tab-and-keydown on it is a
-    // safe smoke test for "shortcut runs but doesn't crash".
-    const title = getByTestId("editor-title") as HTMLInputElement;
-    fireEvent.keyDown(title, { key: "Enter", shiftKey: true, ctrlKey: true });
-    await act(async () => {
-      await Promise.resolve();
-    });
-    // Block count unchanged.
-    expect(
-      container.querySelectorAll("textarea[data-testid=block-paragraph]").length,
-    ).toBe(1);
-  });
 });

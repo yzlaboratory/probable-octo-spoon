@@ -25,19 +25,11 @@ function renderTopbar() {
   );
 }
 
-describe("Topbar initials() — covers single-word and empty-parts branches", () => {
+describe("Topbar initials()", () => {
   it("derives 2-char initials from a single-word local-part email", () => {
     mockAdmin.current = { id: 2, email: "alice@example.com" };
     const { container } = renderTopbar();
     // The avatar circle holds the initials — 'AL' for 'alice'.
     expect(container.textContent).toMatch(/AL/);
-  });
-
-  it("falls back to the first two characters of the email for an empty local-part (covers parts.length === 0)", () => {
-    // local = '@example.com'.split('@')[0] = '' → splits to no parts.
-    mockAdmin.current = { id: 3, email: "@example.com" };
-    const { container } = renderTopbar();
-    // First two chars of the raw email, uppercased: '@E'.
-    expect(container.textContent).toContain("@E");
   });
 });

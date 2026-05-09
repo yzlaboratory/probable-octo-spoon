@@ -110,11 +110,22 @@ describe("session lifecycle", () => {
     expect(db.prepare("SELECT id FROM sessions WHERE id = ?").get(login.session.id)).toBeUndefined();
   });
 
-  it("destroySession is a no-op when sessionId is missing", () => {
+  it("destroySession is a no-op when sessionId is missing — leaves existing rows untouched", async () => {
     const db = bootstrap();
-    expect(() => destroySession(db, undefined)).not.toThrow();
-    expect(() => destroySession(db, null)).not.toThrow();
-    expect(() => destroySession(db, "")).not.toThrow();
+    await seedAdmin(db, "a@example.org", "correct horse battery staple !!");
+    const login = await attemptLogin(
+      db,
+      "a@example.org",
+      "correct horse battery staple !!",
+    );
+    const before = db.prepare("SELECT COUNT(*) AS c FROM sessions").get().c;
+    destroySession(db, undefined);
+    destroySession(db, null);
+    destroySession(db, "");
+    const after = db.prepare("SELECT COUNT(*) AS c FROM sessions").get().c;
+    expect(after).toBe(before);
+    // The seeded session is still loadable.
+    expect(loadSession(db, login.session.id)).toBeTruthy();
   });
 
   it("loadSession returns null when sessionId is falsy without touching the DB", () => {
