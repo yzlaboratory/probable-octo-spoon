@@ -200,6 +200,10 @@ const result = await runE2eServer({
     MEDIA_ROOT: resolve(dataDir, "media"),
     // Disable IG fetch in tests by leaving token unset / placeholder.
     IG_ACCESS_TOKEN: "placeholder",
+    // Admin specs run one login per test → ~60 logins per suite, well over
+    // the 10/15min cap. The bypass only activates when this env var is set
+    // explicitly, so production keeps the real limiter.
+    DISABLE_LOGIN_RATE_LIMIT: "1",
   },
   dumpDir,
   timeoutMs: 5_000,

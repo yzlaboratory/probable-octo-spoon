@@ -51,13 +51,29 @@ export function helmetMiddleware() {
   });
 }
 
-export const loginRateLimiter = rateLimit({
+const _baseLoginRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { code: "rate_limited", message: "Zu viele Anmeldeversuche. Bitte später erneut versuchen." },
 });
+
+// E2E-only escape hatch. The admin-flow specs hammer /api/auth/login (one
+// login per test → 60+ in a single run) which trips the 10/15min cap and
+// turns the suite red on a clean server. Honoured only when the env var is
+// explicitly set, so production / dev keep the real limiter. Properties like
+// `resetKey` are forwarded so unit tests that reset the limiter between
+// cases (vorstand-routes, news-routes) keep working.
+export const loginRateLimiter = Object.assign(
+  (req, res, next) => {
+    if (process.env.DISABLE_LOGIN_RATE_LIMIT === "1") return next();
+    return _baseLoginRateLimiter(req, res, next);
+  },
+  {
+    resetKey: _baseLoginRateLimiter.resetKey?.bind(_baseLoginRateLimiter),
+  },
+);
 
 export function sessionMiddleware(db) {
   return (req, _res, next) => {
