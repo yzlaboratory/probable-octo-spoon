@@ -19,15 +19,22 @@ const newsItem = (i: number) => ({
   imageurl: `/img${i}.jpg`,
 });
 
-const serverSponsor = (i: number, weight = i) => ({
+const serverSponsor = (
+  i: number,
+  weight = i,
+  palette: "transparent" | "purple" | "warm-neutral" | "cool-neutral" = "purple",
+  logo:
+    | null
+    | { id: number; variants: Record<string, string>; mimeType: string } = null,
+) => ({
   id: i,
   name: `S${i}`,
   tagline: null,
   linkUrl: `https://s${i}.test`,
-  cardPalette: "purple" as const,
+  cardPalette: palette,
   logoHasOwnBackground: false,
   weight,
-  logo: null,
+  logo,
 });
 
 afterEach(() => {
@@ -91,5 +98,48 @@ describe("NewsSection", () => {
     );
     expect(container.querySelectorAll(".newscardcontainer").length).toBe(0);
     expect(container.textContent).toContain("ALEMANNIA NEWS");
+  });
+
+  it("renders both interleaved Sponsorcards with one anchor per loaded sponsor (mixed palettes)", async () => {
+    // Concrete logos so bestSponsorLogo returns deterministic URLs and the
+    // Sponsorcard <a><img src> chain renders deterministically.
+    const withLogo = (i: number) => ({
+      id: 100 + i,
+      variants: { svg: `/sponsor-${i}.svg` },
+      mimeType: "image/svg+xml",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        jsonResponse([
+          serverSponsor(1, 5, "purple", withLogo(1)),
+          // 'transparent' produces a Color === undefined, exercising the
+          // Color != undefined ? Color : "" branch in NewsSection.
+          serverSponsor(2, 4, "transparent", withLogo(2)),
+          serverSponsor(3, 3, "warm-neutral", withLogo(3)),
+        ]),
+      ),
+    );
+    const items = [newsItem(1), newsItem(2), newsItem(3), newsItem(4)];
+    const { container } = render(
+      <MemoryRouter>
+        <NewsSection newsItems={items} />
+      </MemoryRouter>,
+    );
+
+    // Sponsorcard renders one <a> per imageUrl. Two Sponsorcards × 3 sponsors = 6 anchors.
+    await waitFor(() => {
+      const sponsorAnchors = Array.from(
+        container.querySelectorAll<HTMLAnchorElement>("a[target='_blank']"),
+      ).filter((a) => /^https:\/\/s\d/.test(a.getAttribute("href") ?? ""));
+      expect(sponsorAnchors.length).toBe(6);
+    });
+    const allHrefs = Array.from(
+      container.querySelectorAll<HTMLAnchorElement>("a"),
+    )
+      .map((a) => a.getAttribute("href") ?? "")
+      .filter((h) => /^https:\/\/s\d/.test(h));
+    expect(allHrefs.filter((h) => h === "https://s1.test").length).toBe(2);
+    expect(allHrefs.filter((h) => h === "https://s2.test").length).toBe(2);
   });
 });

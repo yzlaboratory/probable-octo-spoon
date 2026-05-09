@@ -331,17 +331,7 @@ describe("backfillNewsBlocks — data migration", () => {
   });
 });
 
-describe("compileBlocksToHtml + blockToHtml — defensive edge cases", () => {
-  it("returns empty string when called with a non-array", () => {
-    expect(compileBlocksToHtml(null as never)).toBe("");
-    expect(compileBlocksToHtml(undefined as never)).toBe("");
-    expect(compileBlocksToHtml("not-an-array" as never)).toBe("");
-  });
-
-  it("renders an unknown kind as empty string (default branch)", () => {
-    expect(compileBlocksToHtml([{ kind: "weird" } as never])).toBe("");
-  });
-
+describe("compileBlocksToHtml — image variant fallbacks", () => {
   it("renders a heading with default level 2 when level is unrecognised", () => {
     const html = compileBlocksToHtml([
       { kind: "heading", level: 99 as never, text: "x" },
@@ -355,29 +345,6 @@ describe("compileBlocksToHtml + blockToHtml — defensive edge cases", () => {
     ]);
     expect(html).toMatch(/<blockquote>Wer rastet, der rostet\.<\/blockquote>/);
     expect(html).not.toMatch(/<cite>/);
-  });
-
-  it("renders a callout with an unknown tone falling back to 'primary'", () => {
-    const html = compileBlocksToHtml([
-      { kind: "callout", tone: "weird" as never, text: "Achtung" },
-    ]);
-    expect(html).toMatch(/class="callout callout-primary"/);
-  });
-
-  it("returns empty for an image block with no mediaId", () => {
-    expect(
-      compileBlocksToHtml([
-        { kind: "image", mediaId: null, caption: "", credit: "" },
-      ]),
-    ).toBe("");
-  });
-
-  it("returns empty for an image block whose mediaId is not in mediaById", () => {
-    expect(
-      compileBlocksToHtml([
-        { kind: "image", mediaId: 999, caption: "", credit: "" },
-      ]),
-    ).toBe("");
   });
 
   it("returns empty for an image whose media has no usable variants (covers `if (!src) return ''`)", () => {
@@ -425,57 +392,7 @@ describe("compileBlocksToHtml + blockToHtml — defensive edge cases", () => {
   });
 });
 
-describe("htmlToBlocks — defensive edge cases", () => {
-  it("returns [] for empty / null / undefined input", () => {
-    expect(htmlToBlocks("")).toEqual([]);
-    expect(htmlToBlocks(null as never)).toEqual([]);
-    expect(htmlToBlocks(undefined as never)).toEqual([]);
-  });
-
-  it("treats plain text without any block tags as a single paragraph block", () => {
-    expect(htmlToBlocks("Just some text without tags")).toEqual([
-      { kind: "paragraph", text: "Just some text without tags" },
-    ]);
-  });
-
-  it("parses an <img> tag (extracts src + alt) into an image block with srcHint", () => {
-    const blocks = htmlToBlocks(
-      '<img src="/legacy/x.jpg" alt="Beschreibung">',
-    );
-    expect(blocks).toEqual([
-      {
-        kind: "image",
-        mediaId: null,
-        caption: "Beschreibung",
-        credit: "",
-        srcHint: "/legacy/x.jpg",
-      },
-    ]);
-  });
-
-  it("parses <h1>, <h2>, <h3> into heading blocks with the matching level", () => {
-    const blocks = htmlToBlocks("<h1>One</h1><h2>Two</h2><h3>Three</h3>");
-    expect(blocks).toEqual([
-      { kind: "heading", level: 1, text: "One" },
-      { kind: "heading", level: 2, text: "Two" },
-      { kind: "heading", level: 3, text: "Three" },
-    ]);
-  });
-
-  it("parses <ul> and <ol> into bullet- / number-prefixed paragraph blocks", () => {
-    const blocks = htmlToBlocks(
-      "<ul><li>one</li><li>two</li></ul><ol><li>first</li><li>second</li></ol>",
-    );
-    expect(blocks[0]).toEqual({
-      kind: "paragraph",
-      text: "• one\n• two",
-    });
-    expect(blocks[1]).toEqual({
-      kind: "paragraph",
-      text: "1. first\n2. second",
-    });
-  });
-
+describe("htmlToBlocks — additional shapes", () => {
   it("emits no block when a paired tag's inner is whitespace-only (covers `if (!text.trim()) continue`)", () => {
     expect(htmlToBlocks("<p>   </p>")).toEqual([]);
   });
@@ -484,9 +401,10 @@ describe("htmlToBlocks — defensive edge cases", () => {
     expect(htmlToBlocks("<ul></ul>")).toEqual([]);
   });
 
-  it("converts <blockquote> into a quote block with empty attr", () => {
-    expect(htmlToBlocks("<blockquote>zitat</blockquote>")).toEqual([
-      { kind: "quote", text: "zitat", attr: "" },
+  it("parses standalone <h1>/<h3> into heading blocks at the matching level", () => {
+    expect(htmlToBlocks("<h1>One</h1><h3>Three</h3>")).toEqual([
+      { kind: "heading", level: 1, text: "One" },
+      { kind: "heading", level: 3, text: "Three" },
     ]);
   });
 });

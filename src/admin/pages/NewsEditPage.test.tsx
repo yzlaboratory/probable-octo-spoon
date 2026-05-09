@@ -436,3 +436,208 @@ describe("NewsEditPage — keyboard shortcuts", () => {
     ).toBe(1);
   });
 });
+
+describe("NewsEditPage — preview, save fallbacks, block interactions", () => {
+  it("opens /news/<slug> in a new tab when 'Vorschau' is clicked on a published item", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({ id: 1, status: "published", slug: "hero-piece" }),
+    ] as never);
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    const { getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    fireEvent.click(getByTestId("editor-preview"));
+    expect(open).toHaveBeenCalledWith("/news/hero-piece", "_blank", "noopener");
+    open.mockRestore();
+  });
+
+  it("preview button is disabled while the article is still a draft and does NOT open a window", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({ id: 1, status: "draft" }),
+    ] as never);
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    const { getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const btn = getByTestId("editor-preview") as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    fireEvent.click(btn);
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+  });
+
+  it("falls back to 'Speichern fehlgeschlagen.' on a non-ApiError save (covers saveAs catch fallback)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([n({ id: 1 })] as never);
+    vi.spyOn(api, "patch").mockRejectedValue(new Error("network"));
+    const { getByTestId, findByText } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    fireEvent.click(getByTestId("editor-save-draft"));
+    await findByText("Speichern fehlgeschlagen.");
+  });
+
+  it("shows 'Beitrag nicht gefunden.' when /api/news returns a list missing :id", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([] as never);
+    const { findByText } = renderEdit("/admin/news/999");
+    await findByText("Beitrag nicht gefunden.");
+  });
+
+  it("guards a blank title — surfaces 'Titel darf nicht leer sein.' and skips the save call", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({ id: 1, title: "" }),
+    ] as never);
+    const patch = vi.spyOn(api, "patch").mockResolvedValue({} as never);
+    const { getByTestId, findByText } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    fireEvent.click(getByTestId("editor-save-draft"));
+    await findByText("Titel darf nicht leer sein.");
+    expect(patch).not.toHaveBeenCalled();
+  });
+
+  it("ignores a media fetch that resolves to null (covers `if (m)` filter inside setMediaById)", async () => {
+    vi.spyOn(api, "get").mockImplementation(async (path: string) => {
+      if (path === "/api/news") {
+        return [
+          n({
+            id: 1,
+            blocks: [
+              {
+                kind: "image",
+                mediaId: 7,
+                caption: "",
+                credit: "",
+              } as News["blocks"][number],
+            ],
+          }),
+        ] as unknown as never;
+      }
+      if (path === "/api/media/7") {
+        // The component does .catch(() => null); throw to drive that path.
+        throw new Error("not found");
+      }
+      throw new Error(`unexpected fetch: ${path}`);
+    });
+    const { getByTestId } = renderEdit("/admin/news/1");
+    // Editor still mounts — the missing media is silently ignored.
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+  });
+
+  it("Cmd/Ctrl+Shift+Enter inside a paragraph block inserts a fresh paragraph after it", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [{ kind: "paragraph", text: "Hello" }],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const ta = container.querySelector(
+      "textarea[data-testid=block-paragraph]",
+    ) as HTMLTextAreaElement;
+    fireEvent.click(
+      container.querySelector("[data-testid='block-row']") as HTMLDivElement,
+    );
+    fireEvent.keyDown(ta, {
+      key: "Enter",
+      shiftKey: true,
+      ctrlKey: true,
+    });
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll("textarea[data-testid=block-paragraph]").length,
+      ).toBe(2);
+    });
+  });
+
+  it("Delete key (rather than Backspace) on an empty active block also removes it", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [
+          { kind: "paragraph", text: "" },
+          { kind: "paragraph", text: "second" },
+        ],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const ta = container.querySelectorAll(
+      "textarea[data-testid=block-paragraph]",
+    )[0] as HTMLTextAreaElement;
+    fireEvent.click(
+      container.querySelector("[data-testid='block-row']") as HTMLDivElement,
+    );
+    fireEvent.keyDown(ta, { key: "Delete" });
+    await waitFor(() =>
+      expect(
+        container.querySelectorAll("textarea[data-testid=block-paragraph]")
+          .length,
+      ).toBe(1),
+    );
+  });
+
+  it("Backspace with a non-empty target value is a no-op (covers `if (target.value !== '') return`)", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [
+          { kind: "paragraph", text: "still typing here" },
+          { kind: "paragraph", text: "x" },
+        ],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const ta = container.querySelectorAll(
+      "textarea[data-testid=block-paragraph]",
+    )[0] as HTMLTextAreaElement;
+    fireEvent.click(
+      container.querySelector("[data-testid='block-row']") as HTMLDivElement,
+    );
+    fireEvent.keyDown(ta, { key: "Backspace" });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(
+      container.querySelectorAll("textarea[data-testid=block-paragraph]")
+        .length,
+    ).toBe(2);
+  });
+
+  it("clicking the block-remove handle on a row removes that block", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [
+          { kind: "paragraph", text: "Keep me" },
+          { kind: "paragraph", text: "Remove me" },
+        ],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const removeButtons = container.querySelectorAll(
+      "[data-testid='block-remove']",
+    ) as NodeListOf<HTMLButtonElement>;
+    fireEvent.click(removeButtons[1]);
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll("textarea[data-testid=block-paragraph]")
+          .length,
+      ).toBe(1);
+    });
+  });
+
+  it("typing into a block textarea updates the block", async () => {
+    vi.spyOn(api, "get").mockResolvedValue([
+      n({
+        id: 1,
+        blocks: [{ kind: "paragraph", text: "before" }],
+      }),
+    ] as never);
+    const { container, getByTestId } = renderEdit("/admin/news/1");
+    await waitFor(() => expect(getByTestId("editor-title")).toBeTruthy());
+    const ta = container.querySelector(
+      "textarea[data-testid=block-paragraph]",
+    ) as HTMLTextAreaElement;
+    fireEvent.change(ta, { target: { value: "after" } });
+    await waitFor(() => expect(ta.value).toBe("after"));
+  });
+});
