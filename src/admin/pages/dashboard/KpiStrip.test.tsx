@@ -9,12 +9,10 @@ const baseProps = {
 };
 
 describe("KpiStrip", () => {
-  it("renders all four cards in a 4-col grid", () => {
-    const { container } = render(<KpiStrip {...baseProps} />);
-    const grid = container.querySelector(".grid.grid-cols-4");
-    expect(grid).not.toBeNull();
-    // Each child is a Card.
-    expect(grid!.childElementCount).toBe(4);
+  it("renders all four KPI cards", () => {
+    const { getByTestId, getAllByTestId } = render(<KpiStrip {...baseProps} />);
+    expect(getByTestId("kpi-strip")).toBeTruthy();
+    expect(getAllByTestId("kpi-card")).toHaveLength(4);
   });
 
   it("shows the news published count and composed subline", () => {

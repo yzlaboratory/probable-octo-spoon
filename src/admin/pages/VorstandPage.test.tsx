@@ -179,7 +179,7 @@ describe("VorstandPage", () => {
 
   it("opens the new-member dialog from the page header CTA", async () => {
     vi.spyOn(api, "get").mockResolvedValue([] as never);
-    const { container, getByText, getAllByText } = renderPage();
+    const { getByRole, getByText, getAllByText } = renderPage();
     await waitFor(() =>
       expect(getByText("Mitglied hinzufügen")).toBeTruthy(),
     );
@@ -187,7 +187,7 @@ describe("VorstandPage", () => {
     // After click, "Neues Mitglied" appears twice — header button + dialog title.
     expect(getAllByText("Neues Mitglied").length).toBe(2);
     expect(getByText("Speichern")).toBeTruthy();
-    expect(container.querySelector(".admin-shell.fixed")).toBeTruthy();
+    expect(getByRole("dialog")).toBeTruthy();
   });
 
   it("creates a new member via POST and reloads on success", async () => {
@@ -304,7 +304,9 @@ describe("VorstandPage", () => {
     // Reopen + close via backdrop.
     fireEvent.click(getByText("Neues Mitglied"));
     expect(getByText("Speichern")).toBeTruthy();
-    const backdrop = container.querySelector(".admin-shell.fixed") as HTMLElement;
+    const backdrop = container.querySelector(
+      "[role='dialog']",
+    ) as HTMLElement;
     fireEvent.click(backdrop);
     expect(queryByText("Speichern")).toBeNull();
   });

@@ -36,7 +36,7 @@ describe("VorstandPage — new-member dialog field handlers", () => {
     // Header CTA + dialog title both read "Neues Mitglied" — assert exactly
     // two so we know the dialog actually opened.
     expect(getAllByText("Neues Mitglied").length).toBe(2);
-    expect(container.querySelector(".admin-shell.fixed")).toBeTruthy();
+    expect(container.querySelector("[role='dialog']")).toBeTruthy();
     expect(getByText("Speichern")).toBeTruthy();
   });
 

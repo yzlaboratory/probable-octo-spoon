@@ -23,7 +23,7 @@ const TONE_VARS: Record<Tone, { color: string; glow: string }> = {
 function KpiCard({ label, value, sub, tone, muted = false }: KpiCardProps) {
   const t = TONE_VARS[tone];
   return (
-    <Card padded={false} className="relative overflow-hidden p-5">
+    <Card padded={false} className="relative overflow-hidden p-5" data-testid="kpi-card">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"
@@ -44,6 +44,7 @@ function KpiCard({ label, value, sub, tone, muted = false }: KpiCardProps) {
       </div>
       <div
         className={`font-display relative mt-2 text-[40px] leading-none ${muted ? "opacity-60" : ""}`}
+        data-testid="kpi-value"
       >
         {value}
       </div>
@@ -65,7 +66,7 @@ export interface KpiStripProps {
 
 export function KpiStrip({ news, sponsors, vorstand }: KpiStripProps) {
   return (
-    <div className="mb-8 grid grid-cols-4 gap-4">
+    <div className="mb-8 grid grid-cols-4 gap-4" data-testid="kpi-strip">
       <KpiCard
         label="Meldungen"
         value={news.published}

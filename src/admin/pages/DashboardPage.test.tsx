@@ -150,12 +150,10 @@ describe("DashboardPage", () => {
   });
 
   it("shows the KPI strip with derived counts after data loads", async () => {
-    const { getByText, container } = renderPage();
+    const { getByText, getAllByTestId } = renderPage();
     await waitFor(() => expect(getByText("Aktive Sponsoren")).toBeTruthy());
-    // 4 KPI cards: News=2 published, Sponsoren=2 active, Vorstand=2 active, Page-views=—.
-    const values = Array.from(
-      container.querySelectorAll(".grid-cols-4 .font-display"),
-    ).map((el) => el.textContent);
+    // 4 KPI cards: News=2 published, Page-views=—, Sponsoren=2 active, Vorstand=2 active.
+    const values = getAllByTestId("kpi-value").map((el) => el.textContent);
     expect(values).toEqual(["2", "—", "2", "2"]);
   });
 
