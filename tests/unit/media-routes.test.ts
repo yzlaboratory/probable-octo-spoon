@@ -1,18 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import express from "express";
-import cookieParser from "cookie-parser";
-import Database from "better-sqlite3";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 // @ts-expect-error — .mjs with no types
-import authRoutes from "../../server/routes/auth.mjs";
-// @ts-expect-error — .mjs with no types
 import mediaRoutes from "../../server/routes/media.mjs";
-// @ts-expect-error — .mjs with no types
-import { sessionMiddleware } from "../../server/middleware.mjs";
-// @ts-expect-error — .mjs with no types
-import { hashPassword, createSession } from "../../server/auth.mjs";
+import {
+  bootstrap,
+  makeApp,
+  seedAdmin,
+  seedMedia as seedMediaShared,
+  sessionFor,
+  type SeedMediaOpts,
+} from "../helpers/integration";
 
 // Redirect mediaRoot to a per-process temp dir so POST/DELETE don't touch the
 // host filesystem. Must be set before importing media.mjs, which captures the
@@ -21,78 +20,20 @@ const mediaTmp = fs.mkdtempSync(path.join(os.tmpdir(), "clubsoft-media-test-"));
 process.env.MEDIA_ROOT = mediaTmp;
 
 function app(db: any) {
-  const a = express();
-  a.use(express.json());
-  a.use(cookieParser());
-  a.use(sessionMiddleware(db));
-  a.use("/api/auth", authRoutes(db));
-  a.use("/api/media", mediaRoutes(db));
-  return a;
+  return makeApp(db, { "/api/media": mediaRoutes });
 }
 
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  // Apply both the init schema and the Phase 3 filename migration, since the
-  // list endpoint SELECTs original_filename.
-  const schemaDir = path.resolve(__dirname, "../../server/schema");
-  for (const file of fs.readdirSync(schemaDir).sort()) {
-    if (!file.endsWith(".sql")) continue;
-    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
-  }
-  return db;
-}
-
-async function seedAdmin(db: any, email: string, password: string) {
-  const hash = await hashPassword(password);
-  const now = new Date().toISOString();
-  const info = db
-    .prepare(
-      "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-    )
-    .run(email, hash, now, now);
-  return Number(info.lastInsertRowid);
-}
-
-function seedMedia(
-  db: any,
-  opts: {
-    kind?: "news" | "sponsor" | "vorstand";
-    filename?: string | null;
-    uploadedBy?: number | null;
-    uploadedAt?: string;
-    originalPath?: string;
-  } = {},
-) {
+function seedMedia(db: any, opts: SeedMediaOpts = {}) {
   const kind = opts.kind ?? "news";
   const now = opts.uploadedAt ?? new Date().toISOString();
-  const original =
-    opts.originalPath ??
-    path.join(mediaTmp, kind, `seed-${now}`, "original.webp");
-  const info = db
-    .prepare(
-      `INSERT INTO media (kind, original_path, variants_json, mime_type, original_filename, uploaded_at, uploaded_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(
-      kind,
-      original,
-      JSON.stringify({ "400w": `/media/${kind}/seed/400w.webp` }),
-      "image/webp",
-      opts.filename ?? null,
-      now,
-      opts.uploadedBy ?? null,
-    );
-  return Number(info.lastInsertRowid);
-}
-
-// Skip the HTTP login flow — express-rate-limit is a module-level singleton
-// (10/15min) and would start rejecting around the 11th test. Directly forge a
-// session row and craft matching cookies.
-function sessionFor(db: any, adminId: number) {
-  const { id, csrf } = createSession(db, adminId);
-  const cookie = `clubsoft_sid=${id}; clubsoft_csrf=${csrf}`;
-  return { cookie, csrf };
+  return seedMediaShared(db, {
+    ...opts,
+    kind,
+    uploadedAt: now,
+    originalPath:
+      opts.originalPath ?? path.join(mediaTmp, kind, `seed-${now}`, "original.webp"),
+    variants: { "400w": `/media/${kind}/seed/400w.webp` },
+  });
 }
 
 describe("media list + get", () => {

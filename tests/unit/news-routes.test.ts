@@ -1,81 +1,37 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import express from "express";
-import cookieParser from "cookie-parser";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
-// @ts-expect-error — .mjs with no types
-import authRoutes from "../../server/routes/auth.mjs";
 // @ts-expect-error — .mjs with no types
 import newsRoutes, { runPublishTick } from "../../server/routes/news.mjs";
 // @ts-expect-error — .mjs with no types
 import sponsorRoutes from "../../server/routes/sponsors.mjs";
 // @ts-expect-error — .mjs with no types
 import vorstandRoutes from "../../server/routes/vorstand.mjs";
-// @ts-expect-error — .mjs with no types
-import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
-// @ts-expect-error — .mjs with no types
-import { hashPassword } from "../../server/auth.mjs";
+import {
+  bootstrap,
+  login,
+  makeApp,
+  resetLoginRateLimiter,
+  seedAdmin,
+  seedMedia as seedMediaShared,
+} from "../helpers/integration";
 
-// The login rate limiter is a module-level singleton (10/15min) and would
-// start rejecting around the 11th login if not reset between tests.
-beforeEach(() => {
-  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
-  loginRateLimiter.resetKey?.("127.0.0.1");
-  loginRateLimiter.resetKey?.("::1");
-});
+beforeEach(resetLoginRateLimiter);
 
 function app(db: any) {
-  const a = express();
-  a.use(express.json());
-  a.use(cookieParser());
-  a.use(sessionMiddleware(db));
-  a.use("/api/auth", authRoutes(db));
-  a.use("/api/news", newsRoutes(db));
-  a.use("/api/sponsors", sponsorRoutes(db));
-  a.use("/api/vorstand", vorstandRoutes(db));
-  return a;
+  return makeApp(db, {
+    "/api/news": newsRoutes,
+    "/api/sponsors": sponsorRoutes,
+    "/api/vorstand": vorstandRoutes,
+  });
 }
 
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  // Apply every migration in lexical order so the schema here matches prod.
-  const schemaDir = path.resolve(__dirname, "../../server/schema");
-  for (const file of fs.readdirSync(schemaDir).sort()) {
-    if (!file.endsWith(".sql")) continue;
-    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
-  }
-  return db;
-}
-
-async function seedAdmin(db: any, email: string, password: string) {
-  const hash = await hashPassword(password);
-  const now = new Date().toISOString();
-  db.prepare(
-    "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-  ).run(email, hash, now, now);
-}
-
-function seedMedia(db: any, kind: "news" | "sponsor" | "vorstand" = "news") {
-  const now = new Date().toISOString();
-  const info = db
-    .prepare(
-      `INSERT INTO media (kind, original_path, variants_json, mime_type, uploaded_at)
-       VALUES (?, ?, ?, ?, ?)`,
-    )
-    .run(kind, "/tmp/x.webp", JSON.stringify({ "400w": "/media/x/400w.webp" }), "image/webp", now);
-  return Number(info.lastInsertRowid);
-}
-
-async function login(app: any, email: string, password: string) {
-  const request = (await import("supertest")).default;
-  const res = await request(app).post("/api/auth/login").send({ email, password });
-  const setCookie = res.headers["set-cookie"] as unknown as string[];
-  const sid = setCookie.find((c) => c.startsWith("clubsoft_sid"))!.split(";")[0];
-  const csrfCookie = setCookie.find((c) => c.startsWith("clubsoft_csrf"))!.split(";")[0];
-  const cookie = `${sid}; ${csrfCookie}`;
-  return { cookie, csrf: res.body.csrfToken };
+function seedMedia(
+  db: any,
+  kind: "news" | "sponsor" | "vorstand" = "news",
+) {
+  return seedMediaShared(db, {
+    kind,
+    variants: { "400w": "/media/x/400w.webp" },
+  });
 }
 
 describe("news crud", () => {
@@ -87,7 +43,7 @@ describe("news crud", () => {
     db = bootstrap();
     srv = app(db);
     await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
-    auth = await login(srv, "admin@example.org", "correct horse battery staple !!");
+    auth = (await login(srv, "admin@example.org", "correct horse battery staple !!"))!;
   });
 
   it("creates, lists, patches, soft-deletes, hard-deletes", async () => {
@@ -280,7 +236,7 @@ describe("sponsor crud", () => {
     db = bootstrap();
     srv = app(db);
     await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
-    auth = await login(srv, "admin@example.org", "correct horse battery staple !!");
+    auth = (await login(srv, "admin@example.org", "correct horse battery staple !!"))!;
   });
 
   it("creates with palette + active flag, blocks unarchived hard delete", async () => {
@@ -329,7 +285,7 @@ describe("news edge cases", () => {
     db = bootstrap();
     srv = app(db);
     await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
-    auth = await login(srv, "admin@example.org", "correct horse battery staple !!");
+    auth = (await login(srv, "admin@example.org", "correct horse battery staple !!"))!;
   });
 
   it("GET / filters by status when ?status=draft is provided", async () => {
@@ -606,7 +562,7 @@ describe("vorstand reorder", () => {
     const db = bootstrap();
     const srv = app(db);
     await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
-    const auth = await login(srv, "admin@example.org", "correct horse battery staple !!");
+    const auth = (await login(srv, "admin@example.org", "correct horse battery staple !!"))!;
     const request = (await import("supertest")).default;
 
     const mk = async (name: string) => {

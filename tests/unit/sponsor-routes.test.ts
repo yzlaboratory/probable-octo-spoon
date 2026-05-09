@@ -1,78 +1,27 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import express from "express";
-import cookieParser from "cookie-parser";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
 import request from "supertest";
 // @ts-expect-error — .mjs with no types
-import authRoutes from "../../server/routes/auth.mjs";
-// @ts-expect-error — .mjs with no types
 import sponsorRoutes from "../../server/routes/sponsors.mjs";
-// @ts-expect-error — .mjs with no types
-import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
-// @ts-expect-error — .mjs with no types
-import { hashPassword } from "../../server/auth.mjs";
+import {
+  bootstrap,
+  login,
+  makeApp,
+  resetLoginRateLimiter,
+  seedAdmin,
+  seedMedia as seedMediaShared,
+} from "../helpers/integration";
 
-beforeEach(() => {
-  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
-  loginRateLimiter.resetKey?.("127.0.0.1");
-  loginRateLimiter.resetKey?.("::1");
-});
-
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  const schemaDir = path.resolve(__dirname, "../../server/schema");
-  for (const file of fs.readdirSync(schemaDir).sort()) {
-    if (!file.endsWith(".sql")) continue;
-    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
-  }
-  return db;
-}
+beforeEach(resetLoginRateLimiter);
 
 function app(db: any) {
-  const a = express();
-  a.use(express.json());
-  a.use(cookieParser());
-  a.use(sessionMiddleware(db));
-  a.use("/api/auth", authRoutes(db));
-  a.use("/api/sponsors", sponsorRoutes(db));
-  return a;
-}
-
-const STRONG_PW = "correct horse battery staple !!";
-
-async function seedAdmin(db: any) {
-  const hash = await hashPassword(STRONG_PW);
-  const now = new Date().toISOString();
-  db.prepare(
-    "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-  ).run("admin@example.org", hash, now, now);
+  return makeApp(db, { "/api/sponsors": sponsorRoutes });
 }
 
 function seedMedia(db: any) {
-  const now = new Date().toISOString();
-  const info = db
-    .prepare(
-      `INSERT INTO media (kind, original_path, variants_json, mime_type, uploaded_at)
-       VALUES (?, ?, ?, ?, ?)`,
-    )
-    .run("sponsor", "/tmp/x.webp", JSON.stringify({ "400w": "/m/x.webp" }), "image/webp", now);
-  return Number(info.lastInsertRowid);
-}
-
-async function login(srv: any) {
-  const res = await request(srv)
-    .post("/api/auth/login")
-    .send({ email: "admin@example.org", password: STRONG_PW });
-  const setCookie = res.headers["set-cookie"] as unknown as string[];
-  const sid = setCookie.find((c) => c.startsWith("clubsoft_sid"))!.split(";")[0];
-  const csrfCookie = setCookie.find((c) => c.startsWith("clubsoft_csrf"))!.split(";")[0];
-  return {
-    cookie: `${sid}; ${csrfCookie}`,
-    csrf: res.body.csrfToken,
-  };
+  return seedMediaShared(db, {
+    kind: "sponsor",
+    variants: { "400w": "/m/x.webp" },
+  });
 }
 
 function validBody(mediaId: number, over: Record<string, unknown> = {}) {
@@ -99,7 +48,7 @@ describe("sponsors admin CRUD", () => {
     db = bootstrap();
     srv = app(db);
     await seedAdmin(db);
-    auth = await login(srv);
+    auth = (await login(srv))!;
     mediaId = seedMedia(db);
   });
 

@@ -1,74 +1,30 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import express from "express";
-import cookieParser from "cookie-parser";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
-// @ts-expect-error — .mjs with no types
-import authRoutes from "../../server/routes/auth.mjs";
 // @ts-expect-error — .mjs with no types
 import vorstandRoutes from "../../server/routes/vorstand.mjs";
-// @ts-expect-error — .mjs with no types
-import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
-// @ts-expect-error — .mjs with no types
-import { hashPassword, createSession } from "../../server/auth.mjs";
+import {
+  bootstrap,
+  makeApp,
+  resetLoginRateLimiter,
+  seedAdmin,
+  seedMedia as seedMediaShared,
+  sessionFor,
+} from "../helpers/integration";
 
-beforeEach(() => {
-  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
-  loginRateLimiter.resetKey?.("127.0.0.1");
-  loginRateLimiter.resetKey?.("::1");
-});
-
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  const schemaDir = path.resolve(__dirname, "../../server/schema");
-  for (const file of fs.readdirSync(schemaDir).sort()) {
-    if (!file.endsWith(".sql")) continue;
-    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
-  }
-  return db;
-}
+beforeEach(resetLoginRateLimiter);
 
 function app(db: any) {
-  const a = express();
-  a.use(express.json());
-  a.use(cookieParser());
-  a.use(sessionMiddleware(db));
-  a.use("/api/auth", authRoutes(db));
-  a.use("/api/vorstand", vorstandRoutes(db));
-  return a;
-}
-
-async function seedAdmin(db: any) {
-  const hash = await hashPassword("correct horse battery staple !!");
-  const now = new Date().toISOString();
-  const info = db
-    .prepare(
-      "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-    )
-    .run("admin@example.org", hash, now, now);
-  return Number(info.lastInsertRowid);
-}
-
-function sessionFor(db: any, adminId: number) {
-  const { id, csrf } = createSession(db, adminId);
-  const cookie = `clubsoft_sid=${id}; clubsoft_csrf=${csrf}`;
-  return { cookie, csrf };
+  return makeApp(db, { "/api/vorstand": vorstandRoutes });
 }
 
 function seedMedia(
   db: any,
   variants: Record<string, string> = { "320w": "/m/x/320w.webp" },
 ) {
-  const now = new Date().toISOString();
-  const info = db
-    .prepare(
-      `INSERT INTO media (kind, original_path, variants_json, mime_type, original_filename, uploaded_at)
-       VALUES ('vorstand', '/tmp/x.webp', ?, 'image/webp', 'p.webp', ?)`,
-    )
-    .run(JSON.stringify(variants), now);
-  return Number(info.lastInsertRowid);
+  return seedMediaShared(db, {
+    kind: "vorstand",
+    variants,
+    filename: "p.webp",
+  });
 }
 
 const VALID = {

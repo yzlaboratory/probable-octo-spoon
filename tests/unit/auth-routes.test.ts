@@ -1,72 +1,23 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import express from "express";
-import cookieParser from "cookie-parser";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
 import request from "supertest";
 // @ts-expect-error — .mjs with no types
-import authRoutes from "../../server/routes/auth.mjs";
-// @ts-expect-error — .mjs with no types
-import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
-// @ts-expect-error — .mjs with no types
 import {
-  hashPassword,
   createPasswordResetToken,
   consumePasswordResetToken,
 } from "../../server/auth.mjs";
+import {
+  STRONG_PW,
+  bootstrap,
+  login,
+  makeApp,
+  resetLoginRateLimiter,
+  seedAdmin,
+} from "../helpers/integration";
 
-// The login rate limiter is a module-level singleton — its counter persists
-// between `beforeEach` runs, so we must reset its store per test or later
-// logins start coming back as 429.
-beforeEach(() => {
-  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
-  loginRateLimiter.resetKey?.("127.0.0.1");
-  loginRateLimiter.resetKey?.("::1");
-});
+beforeEach(resetLoginRateLimiter);
 
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  const schemaDir = path.resolve(__dirname, "../../server/schema");
-  for (const file of fs.readdirSync(schemaDir).sort()) {
-    if (!file.endsWith(".sql")) continue;
-    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
-  }
-  return db;
-}
+const app = makeApp;
 
-function app(db: any) {
-  const a = express();
-  a.use(express.json());
-  a.use(cookieParser());
-  a.use(sessionMiddleware(db));
-  a.use("/api/auth", authRoutes(db));
-  return a;
-}
-
-async function seedAdmin(db: any, email: string, password: string) {
-  const hash = await hashPassword(password);
-  const now = new Date().toISOString();
-  const info = db
-    .prepare(
-      "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-    )
-    .run(email, hash, now, now);
-  return Number(info.lastInsertRowid);
-}
-
-async function login(srv: any, email: string, password: string) {
-  const res = await request(srv).post("/api/auth/login").send({ email, password });
-  if (res.status !== 200) return null;
-  const setCookie = res.headers["set-cookie"] as unknown as string[];
-  const sid = setCookie.find((c) => c.startsWith("clubsoft_sid"))!.split(";")[0];
-  const csrfCookie = setCookie.find((c) => c.startsWith("clubsoft_csrf"))!.split(";")[0];
-  const cookie = `${sid}; ${csrfCookie}`;
-  return { cookie, csrf: res.body.csrfToken, body: res.body };
-}
-
-const STRONG_PW = "correct horse battery staple !!";
 const ADMIN_EMAIL = "geschaeftsfuehrer@example.org";
 
 describe("POST /api/auth/login", () => {

@@ -1,70 +1,18 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import express from "express";
-import cookieParser from "cookie-parser";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
-// @ts-expect-error — .mjs with no types
-import authRoutes from "../../server/routes/auth.mjs";
 // @ts-expect-error — .mjs with no types
 import trainingRoutes from "../../server/routes/training.mjs";
-// @ts-expect-error — .mjs with no types
-import { sessionMiddleware, loginRateLimiter } from "../../server/middleware.mjs";
-// @ts-expect-error — .mjs with no types
-import { hashPassword } from "../../server/auth.mjs";
+import {
+  bootstrap,
+  login,
+  makeApp,
+  resetLoginRateLimiter,
+  seedAdmin,
+} from "../helpers/integration";
 
-// The login rate limiter is a module-level singleton — its counter persists
-// between `beforeEach` runs, so we reset its store per test or later logins
-// start coming back as 429.
-import { beforeEach as _beforeEach } from "vitest";
-_beforeEach(() => {
-  loginRateLimiter.resetKey?.("::ffff:127.0.0.1");
-  loginRateLimiter.resetKey?.("127.0.0.1");
-  loginRateLimiter.resetKey?.("::1");
-});
+beforeEach(resetLoginRateLimiter);
 
 function app(db: any) {
-  const a = express();
-  a.use(express.json());
-  a.use(cookieParser());
-  a.use(sessionMiddleware(db));
-  a.use("/api/auth", authRoutes(db));
-  a.use("/api/training", trainingRoutes(db));
-  return a;
-}
-
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  const schemaDir = path.resolve(__dirname, "../../server/schema");
-  for (const file of fs.readdirSync(schemaDir).sort()) {
-    if (!file.endsWith(".sql")) continue;
-    db.exec(fs.readFileSync(path.join(schemaDir, file), "utf8"));
-  }
-  return db;
-}
-
-async function seedAdmin(db: any, email: string, password: string) {
-  const hash = await hashPassword(password);
-  const now = new Date().toISOString();
-  db.prepare(
-    "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-  ).run(email, hash, now, now);
-}
-
-async function login(srv: any, email: string, password: string) {
-  const request = (await import("supertest")).default;
-  const res = await request(srv)
-    .post("/api/auth/login")
-    .send({ email, password });
-  const setCookie = res.headers["set-cookie"] as unknown as string[];
-  const sid = setCookie
-    .find((c) => c.startsWith("clubsoft_sid"))!
-    .split(";")[0];
-  const csrfCookie = setCookie
-    .find((c) => c.startsWith("clubsoft_csrf"))!
-    .split(";")[0];
-  return { cookie: `${sid}; ${csrfCookie}`, csrf: res.body.csrfToken };
+  return makeApp(db, { "/api/training": trainingRoutes });
 }
 
 const VALID_SLOT = {
@@ -87,11 +35,11 @@ describe("training routes", () => {
     db = bootstrap();
     srv = app(db);
     await seedAdmin(db, "admin@example.org", "correct horse battery staple !!");
-    auth = await login(
+    auth = (await login(
       srv,
       "admin@example.org",
       "correct horse battery staple !!",
-    );
+    ))!;
   });
 
   it("GET /public returns seeded slots and a banner shape", async () => {

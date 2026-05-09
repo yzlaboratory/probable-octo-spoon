@@ -1,7 +1,4 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
 // @ts-expect-error — .mjs with no types
 import {
   validatePassword,
@@ -17,25 +14,7 @@ import {
   markResetUsed,
   TIMINGS,
 } from "../../server/auth.mjs";
-
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  const sql = fs.readFileSync(
-    path.resolve(__dirname, "../../server/schema/001_init.sql"),
-    "utf8",
-  );
-  db.exec(sql);
-  return db;
-}
-
-async function seedAdmin(db: any, email: string, password: string) {
-  const hash = await hashPassword(password);
-  const now = new Date().toISOString();
-  db.prepare(
-    "INSERT INTO admins (email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?)",
-  ).run(email, hash, now, now);
-}
+import { bootstrapInitOnly as bootstrap, seedAdmin } from "../helpers/integration";
 
 describe("validatePassword", () => {
   it("rejects short passwords", () => {

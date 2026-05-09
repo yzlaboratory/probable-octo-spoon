@@ -8,17 +8,7 @@ import { spawnSync } from "node:child_process";
 import { runSeed } from "../../server/seed-admin.mjs";
 // @ts-expect-error — sibling .mjs ships no .d.ts.
 import { verifyPassword } from "../../server/auth.mjs";
-
-function bootstrap() {
-  const db = new Database(":memory:");
-  db.pragma("foreign_keys = ON");
-  const sql = fs.readFileSync(
-    path.resolve(__dirname, "../../server/schema/001_init.sql"),
-    "utf8",
-  );
-  db.exec(sql);
-  return db;
-}
+import { bootstrapInitOnly as bootstrap } from "../helpers/integration";
 
 class Buf {
   chunks: string[] = [];
