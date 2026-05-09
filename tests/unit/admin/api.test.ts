@@ -1,9 +1,9 @@
-// `api.test.tsx` (not `.ts`) so vitest's `browser` project picks it up — the
-// `node` project only globs `tests/unit/**`. The .tsx extension is purely a
-// project-routing concern; this file does not actually render React.
+// Pure-logic tests for the admin API client (no React render). Per ADR 0014
+// they live in the node project; the wrapper is environment-agnostic and only
+// touches `fetch`.
 
-import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { api, ApiError, setCsrfToken, getCsrfToken } from "./api";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { api, ApiError, setCsrfToken, getCsrfToken } from "../../../src/admin/api";
 
 afterEach(() => {
   vi.restoreAllMocks();
