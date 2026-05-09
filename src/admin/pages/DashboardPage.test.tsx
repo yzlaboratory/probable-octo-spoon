@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { render, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import DashboardPage from "./DashboardPage";
 import { api } from "../api";
 import type { News, Sponsor, Vorstand } from "../types";
@@ -223,4 +223,17 @@ describe("DashboardPage", () => {
     open.mockRestore();
   });
 
+  it("navigates to /admin/news/new when 'Neue Meldung' is clicked", async () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/admin"]}>
+        <Routes>
+          <Route path="/admin" element={<DashboardPage />} />
+          <Route path="/admin/news/new" element={<div>NEW NEWS PAGE</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await waitFor(() => expect(getByText("Neue Meldung")).toBeTruthy());
+    (getByText("Neue Meldung") as HTMLButtonElement).click();
+    await waitFor(() => expect(getByText("NEW NEWS PAGE")).toBeTruthy());
+  });
 });
