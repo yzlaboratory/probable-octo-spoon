@@ -33,11 +33,21 @@ import { readBaseline, writeBaseline } from "./coverage-baseline.mjs";
 // Resolve the real .git directory. In worktrees, ".git" at the repo root is a
 // pointer file (e.g. "gitdir: /path/to/.git/worktrees/<name>"); writing under
 // that path requires resolving to the actual directory.
+//
+// Strip git's own env vars from the child so a parent that already exported
+// GIT_DIR (e.g. the pre-push hook) doesn't override the cwd-driven lookup —
+// otherwise rev-parse echoes back GIT_DIR and we write the cache into the
+// wrong worktree.
 export function resolveGitDir(cwd) {
+  const childEnv = { ...process.env };
+  for (const key of Object.keys(childEnv)) {
+    if (key.startsWith("GIT_")) delete childEnv[key];
+  }
   try {
     const out = execSync("git rev-parse --git-dir", {
       cwd,
       encoding: "utf8",
+      env: childEnv,
     }).trim();
     return resolve(cwd, out);
   } catch {

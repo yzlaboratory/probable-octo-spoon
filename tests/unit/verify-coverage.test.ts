@@ -27,6 +27,15 @@ let baselinePath: string;
 
 const noopLog = () => {};
 
+// Strip git's own env vars so `git rev-parse --git-dir` honours `cwd`
+// instead of echoing back GIT_DIR. Pre-push hooks export GIT_DIR pointing
+// at the worktree's git dir, which would otherwise mask the test's tmpdir.
+function gitEnv(): NodeJS.ProcessEnv {
+  const out = { ...process.env };
+  for (const key of Object.keys(out)) if (key.startsWith("GIT_")) delete out[key];
+  return out;
+}
+
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "verify-coverage-"));
   summaryPath = join(dir, "coverage-summary.json");
@@ -251,7 +260,7 @@ describe("verify-coverage CLI subprocess smoke", () => {
       mkdtempSync(join(tmpdir(), "verify-coverage-cli-")),
     );
     try {
-      execSync("git init -q", { cwd: workdir });
+      execSync("git init -q", { cwd: workdir, env: gitEnv() });
       const realScripts = resolve(__dirname, "../../scripts");
       const fakeScripts = join(workdir, "scripts");
       mkdirSync(fakeScripts, { recursive: true });
@@ -336,7 +345,7 @@ describe("resolveGitDir", () => {
   it("returns the resolved git-dir for a real repo", () => {
     const repo = realpathSync(mkdtempSync(join(tmpdir(), "vc-rgd-")));
     try {
-      execSync("git init -q", { cwd: repo });
+      execSync("git init -q", { cwd: repo, env: gitEnv() });
       const got = resolveGitDir(repo);
       // Either ".git" or absolute path — both should exist as a directory.
       expect(existsSync(got)).toBe(true);
@@ -366,7 +375,7 @@ describe("runCli", () => {
 
   beforeEach(() => {
     workdir = realpathSync(mkdtempSync(join(tmpdir(), "vc-cli-")));
-    execSync("git init -q", { cwd: workdir });
+    execSync("git init -q", { cwd: workdir, env: gitEnv() });
   });
 
   afterEach(() => {
@@ -397,6 +406,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     expect(existsSync(join(workdir, gitDir, "last-good-coverage.json"))).toBe(true);
   });
@@ -414,6 +424,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     expect(
       existsSync(join(workdir, gitDir, "last-good-coverage.full.json")),
@@ -438,6 +449,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     expect(existsSync(join(workdir, gitDir, "last-good-coverage.json"))).toBe(false);
   });
@@ -470,6 +482,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     expect(existsSync(join(workdir, gitDir, "last-good-coverage.json"))).toBe(false);
   });
@@ -482,6 +495,7 @@ describe("runCli", () => {
       const gitDir = execSync("git rev-parse --git-dir", {
         cwd: workdir,
         encoding: "utf8",
+        env: gitEnv(),
       }).trim();
       const cache = join(workdir, gitDir, "last-good-coverage.json");
       if (existsSync(cache)) rmSync(cache);
@@ -509,6 +523,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     expect(existsSync(join(workdir, gitDir, "last-good-coverage.json"))).toBe(false);
   });
@@ -532,6 +547,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     mkdirSync(join(workdir, gitDir), { recursive: true });
     writeFileSync(
@@ -569,6 +585,7 @@ describe("runCli", () => {
     const gitDir = execSync("git rev-parse --git-dir", {
       cwd: workdir,
       encoding: "utf8",
+      env: gitEnv(),
     }).trim();
     mkdirSync(join(workdir, gitDir), { recursive: true });
     writeFileSync(
